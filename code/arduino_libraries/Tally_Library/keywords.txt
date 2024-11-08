@@ -1,0 +1,27 @@
+#######################################
+# Syntax Coloring Map Logger
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Tally_I2C	KEYWORD1	Tally_I2C
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+GetString		KEYWORD2
+GetHeader		KEYWORD2
+ReadCap 		KEYWORD2
+Reset			KEYWORD2
+Clear			KEYWORD2
+Peek			KEYWORD2
+begin			KEYWORD2
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+

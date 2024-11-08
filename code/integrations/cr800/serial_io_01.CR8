@@ -1,0 +1,374 @@
+'CR800 Series Datalogger
+
+' 13 Sep 2024  Larry and Braedon
+
+' Implements serial coms with a Mayfly datalogger. Receives a serial string, assigns values to
+'   variables and stores those values to one or more final storage tables.
+'   There is no handshaking between the Mayfly and CSI dataloggers. The Mayfly sends serial
+'   strings at its own unprompted output rate.
+'
+' Definitions
+'   variable string: a serial string of the format "@variablename=value;"
+'   station string: one or more variable strings concatenated together, from one station ending with "@endofstation=1;"
+'
+' Within the serial stream, case is ignored and extra white space is ignored.
+
+
+
+
+Const Mayfly_max_str_len = 500    ' This needs to be updated with the burst string length from the Mayfly
+                                  '   That length is counted by Max_Burst_len (plus some white space and "@" and ";" per string)
+Const Rcv_str_buffer_len=Mayfly_max_str_len*2  ' doubled for asynchronicity
+
+Public Rcv_str As String * Rcv_str_buffer_len    
+Dim Rcv_str_len As Long
+
+Dim Total_Burst_Len As Long
+Public Max_Burst_Len As Long
+
+Dim SplitRes (3) As String * 25    ' used to parse the string based on the '=' character
+
+
+
+' Declare variables from Mayfly
+' As variables are added, three sections of code must modified
+'   This section to declare variables
+'   The variables to be stored in the output table
+'   The string parsing to store values into datalogger variables
+
+Public PTemp
+Units PTemp=egC
+Public BattVolt
+Units BattVolt=V
+Public station As String * 20
+Public mayfly_ts As String * 20
+Public sampNum As Long 
+Public boardTemp As Float
+Units boardTemp=degC
+Public sonarRange As Float
+Units sonarRange=mm
+Public snowDepth As Float
+Units snowDepth=mm
+Public sp510thermopileVolt As Float
+Units sp510thermopileVolt=V
+Public inShortRad As Float
+Units inShortRad=W/m^2
+Public sp610thermopileVolt As Float
+Units sp610thermopileVolt=V
+Public outShortRad As Float
+Units outShortRad=W/m^2
+Public sl510thermistorVolt As Float
+Units sl510thermistorVolt=V
+Public sl510thermopileVolt As Float
+Units sl510thermopileVolt=V
+Public inLongRad As Float
+Units inLongRad=W/m^2
+Public sl610thermistorVolt As Float
+Units sl610thermistorVolt=V
+Public sl610thermopileVolt As Float
+Units sl610thermopileVolt=V
+Public outLongRad As Float
+Units outLongRad=W/m^2
+Public rawCounts_2in As Float
+Public soilTemp_2in As Float
+Units soilTemp_2in=deg C
+Public soilEa_2in As Float
+Public soilVWC_2in As Float
+Public soilEC_2in As Float
+Public rawCounts_8in As Float
+Public soilTemp_8in As Float
+Units soilTemp_8in=deg C
+Public soilEa_8in As Float
+Public soilVWC_8in As Float
+Public soilEC_8in As Float
+Public rawCounts_20in As Float
+Public soilTemp_20in As Float
+Units soilTemp_20in=deg C
+Public soilEa_20in As Float
+Public soilVWC_20in As Float
+Public soilEC_20in As Float
+Public airTemp As Float
+Units airTemp=deg C
+
+
+
+
+Dim endofstation As Boolean
+
+
+' Add code as variables are added
+DataTable (Marshes, True, -1)
+  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
+  Sample (1, station, String) 
+  Sample (1, mayfly_ts, String)
+  Sample (1, sampNum, Long)
+  Sample (1, boardTemp, Float)
+  Sample (1, sonarRange, Float)
+  Sample (1, snowDepth, Float)
+  Sample (1, sp510thermopileVolt, Float)
+  Sample (1, inShortRad, Float)
+  Sample (1, sp610thermopileVolt, Float)
+  Sample (1, outShortRad, Float)
+  Sample (1, sl510thermistorVolt, Float)
+  Sample (1, sl510thermopileVolt, Float)
+  Sample (1, inLongRad, Float)
+  Sample (1, sl610thermistorVolt, Float)
+  Sample (1, sl610thermopileVolt, Float)
+  Sample (1, outLongRad, Float)
+  Sample (1, rawCounts_2in, Float)
+  Sample (1, soilTemp_2in, Float)
+  Sample (1, soilEa_2in, Float)
+  Sample (1, soilVWC_2in, Float)
+  Sample (1, soilEC_2in, Float)
+  Sample (1, rawCounts_8in, Float)
+  Sample (1, soilTemp_8in, Float)
+  Sample (1, soilEa_8in, Float)
+  Sample (1, soilVWC_8in, Float)
+  Sample (1, soilEC_8in, Float)
+  Sample (1, rawCounts_20in, Float)
+  Sample (1, soilTemp_20in, Float)
+  Sample (1, soilEa_20in, Float)
+  Sample (1, soilVWC_20in, Float)
+  Sample (1, soilEC_20in, Float)
+  Sample (1, airTemp, Float)
+EndTable
+
+DataTable (Sunny, True, -1)
+  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
+  Sample (1, station, String) 
+  Sample (1, mayfly_ts, String)
+  Sample (1, sampNum, Long)
+  Sample (1, boardTemp, Float)
+  Sample (1, sonarRange, Float)
+  Sample (1, snowDepth, Float)
+  Sample (1, sp510thermopileVolt, Float)
+  Sample (1, inShortRad, Float)
+  Sample (1, sp610thermopileVolt, Float)
+  Sample (1, outShortRad, Float)
+  Sample (1, sl510thermistorVolt, Float)
+  Sample (1, sl510thermopileVolt, Float)
+  Sample (1, inLongRad, Float)
+  Sample (1, sl610thermistorVolt, Float)
+  Sample (1, sl610thermopileVolt, Float)
+  Sample (1, outLongRad, Float)
+  Sample (1, rawCounts_2in, Float)
+  Sample (1, soilTemp_2in, Float)
+  Sample (1, soilEa_2in, Float)
+  Sample (1, soilVWC_2in, Float)
+  Sample (1, soilEC_2in, Float)
+  Sample (1, rawCounts_8in, Float)
+  Sample (1, soilTemp_8in, Float)
+  Sample (1, soilEa_8in, Float)
+  Sample (1, soilVWC_8in, Float)
+  Sample (1, soilEC_8in, Float)
+  Sample (1, rawCounts_20in, Float)
+  Sample (1, soilTemp_20in, Float)
+  Sample (1, soilEa_20in, Float)
+  Sample (1, soilVWC_20in, Float)
+  Sample (1, soilEC_20in, Float)
+  Sample (1, airTemp, Float)
+EndTable
+
+DataTable (Aspens, True, -1)
+  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
+  Sample (1, station, String) 
+  Sample (1, mayfly_ts, String)
+  Sample (1, sampNum, Long)
+  Sample (1, boardTemp, Float)
+  Sample (1, sonarRange, Float)
+  Sample (1, snowDepth, Float)
+  Sample (1, sp510thermopileVolt, Float)
+  Sample (1, inShortRad, Float)
+  Sample (1, sp610thermopileVolt, Float)
+  Sample (1, outShortRad, Float)
+  Sample (1, sl510thermistorVolt, Float)
+  Sample (1, sl510thermopileVolt, Float)
+  Sample (1, inLongRad, Float)
+  Sample (1, sl610thermistorVolt, Float)
+  Sample (1, sl610thermopileVolt, Float)
+  Sample (1, outLongRad, Float)
+  Sample (1, rawCounts_2in, Float)
+  Sample (1, soilTemp_2in, Float)
+  Sample (1, soilEa_2in, Float)
+  Sample (1, soilVWC_2in, Float)
+  Sample (1, soilEC_2in, Float)
+  Sample (1, rawCounts_8in, Float)
+  Sample (1, soilTemp_8in, Float)
+  Sample (1, soilEa_8in, Float)
+  Sample (1, soilVWC_8in, Float)
+  Sample (1, soilEC_8in, Float)
+  Sample (1, rawCounts_20in, Float)
+  Sample (1, soilTemp_20in, Float)
+  Sample (1, soilEa_20in, Float)
+  Sample (1, soilVWC_20in, Float)
+  Sample (1, soilEC_20in, Float)
+  Sample (1, airTemp, Float)
+EndTable
+
+DataTable (Conifers, True, -1)
+  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
+  Sample (1, station, String) 
+  Sample (1, mayfly_ts, String)
+  Sample (1, sampNum, Long)
+  Sample (1, boardTemp, Float)
+  Sample (1, sonarRange, Float)
+  Sample (1, snowDepth, Float)
+  Sample (1, sp510thermopileVolt, Float)
+  Sample (1, inShortRad, Float)
+  Sample (1, sp610thermopileVolt, Float)
+  Sample (1, outShortRad, Float)
+  Sample (1, sl510thermistorVolt, Float)
+  Sample (1, sl510thermopileVolt, Float)
+  Sample (1, inLongRad, Float)
+  Sample (1, sl610thermistorVolt, Float)
+  Sample (1, sl610thermopileVolt, Float)
+  Sample (1, outLongRad, Float)
+  Sample (1, rawCounts_2in, Float)
+  Sample (1, soilTemp_2in, Float)
+  Sample (1, soilEa_2in, Float)
+  Sample (1, soilVWC_2in, Float)
+  Sample (1, soilEC_2in, Float)
+  Sample (1, rawCounts_8in, Float)
+  Sample (1, soilTemp_8in, Float)
+  Sample (1, soilEa_8in, Float)
+  Sample (1, soilVWC_8in, Float)
+  Sample (1, soilEC_8in, Float)
+  Sample (1, rawCounts_20in, Float)
+  Sample (1, soilTemp_20in, Float)
+  Sample (1, soilEa_20in, Float)
+  Sample (1, soilVWC_20in, Float)
+  Sample (1, soilEC_20in, Float)
+  Sample (1, airTemp, Float)
+EndTable
+
+DataTable (Roadside, True, -1)
+  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
+  Sample (1, station, String) 
+  Sample (1, mayfly_ts, String)
+  Sample (1, sampNum, Long)
+  Sample (1, boardTemp, Float)
+  Sample (1, sonarRange, Float)
+  Sample (1, snowDepth, Float)
+  Sample (1, sp510thermopileVolt, Float)
+  Sample (1, inShortRad, Float)
+  Sample (1, sp610thermopileVolt, Float)
+  Sample (1, outShortRad, Float)
+  Sample (1, sl510thermistorVolt, Float)
+  Sample (1, sl510thermopileVolt, Float)
+  Sample (1, inLongRad, Float)
+  Sample (1, sl610thermistorVolt, Float)
+  Sample (1, sl610thermopileVolt, Float)
+  Sample (1, outLongRad, Float)
+  Sample (1, rawCounts_2in, Float)
+  Sample (1, soilTemp_2in, Float)
+  Sample (1, soilEa_2in, Float)
+  Sample (1, soilVWC_2in, Float)
+  Sample (1, soilEC_2in, Float)
+  Sample (1, rawCounts_8in, Float)
+  Sample (1, soilTemp_8in, Float)
+  Sample (1, soilEa_8in, Float)
+  Sample (1, soilVWC_8in, Float)
+  Sample (1, soilEC_8in, Float)
+  Sample (1, rawCounts_20in, Float)
+  Sample (1, soilTemp_20in, Float)
+  Sample (1, soilEa_20in, Float)
+  Sample (1, soilVWC_20in, Float)
+  Sample (1, soilEC_20in, Float)
+  Sample (1, airTemp, Float)
+EndTable
+
+
+
+SequentialMode
+
+BeginProg
+
+  
+' Receiver, C4 screw terminal
+' SerialOpen (ComPort, BaudRate, Format, TXDelay, BufferSize,)
+  SerialOpen (Com2,    9600,     16,     0,       Rcv_str_buffer_len)    ' doubled for asynchronicity
+
+
+  Total_Burst_Len = 0
+ 
+	Scan (1, Sec, 0, 0)
+	  
+    ' read a number of variable strings. keep readinging until rcv buffer is empty
+    
+    Do
+  '   SerialInRecord (COMPort, Dest,    BeginWord, NBytes, EndWord, NBytesReturned, SerialInRecOption )
+      SerialInRecord (Com2,    Rcv_str, 64,        0,      59,      Rcv_str_len,    10)
+            ' 64 is ascii @, 59 is ascii ;
+        
+      If (Rcv_str_len > 0) 
+        Total_Burst_Len = Total_Burst_Len + Rcv_str_len
+        
+        SplitStr (SplitRes, Rcv_str, "=", 3, 7)         ' right and left of "="
+        SplitRes (1) = Trim (LowerCase (SplitRes (1)))  ' get rid of white space and make lower case
+      
+        
+        ' search for serial stream varable names that match logger variable names
+        ' add code as variables are added      
+        If StrComp (SplitRes (1), "station") = 0 Then station = SplitRes(2)
+        If StrComp (SplitRes (1), "timestamp") = 0 Then mayfly_ts = SplitRes(2)
+        If StrComp (SplitRes (1), "SampNum") = 0 Then sampNum = SplitRes(2)
+        If StrComp (SplitRes (1), "BoardTemp") = 0 Then boardTemp = SplitRes(2)
+        If StrComp (SplitRes (1), "sonarRange") = 0 Then sonarRange = SplitRes(2)
+        If StrComp (SplitRes (1), "snowDepth") = 0 Then snowDepth = SplitRes(2)
+        If StrComp (SplitRes (1), "sp510thermopileVolt") = 0 Then sp510thermopileVolt = SplitRes(2)
+        If StrComp (SplitRes (1), "inShortRad") = 0 Then inShortRad = SplitRes(2)
+        If StrComp (SplitRes (1), "sp610thermopileVolt") = 0 Then sp610thermopileVolt = SplitRes(2)
+        If StrComp (SplitRes (1), "outShortRad") = 0 Then outShortRad = SplitRes(2)
+        If StrComp (SplitRes (1), "sl510thermistorVolt") = 0 Then sl510thermistorVolt = SplitRes(2)
+        If StrComp (SplitRes (1), "sl510thermopileVolt") = 0 Then sl510thermopileVolt = SplitRes(2)
+        If StrComp (SplitRes (1), "inLongRad") = 0 Then inLongRad = SplitRes(2)
+        If StrComp (SplitRes (1), "sl610thermistorVolt") = 0 Then sl610thermistorVolt = SplitRes(2)
+        If StrComp (SplitRes (1), "sl610thermopileVolt") = 0 Then sl610thermopileVolt = SplitRes(2)
+        If StrComp (SplitRes (1), "outLongRad") = 0 Then outLongRad = SplitRes(2)
+        If StrComp (SplitRes (1), "rawCounts_2in") = 0 Then rawCounts_2in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilTemp_2in") = 0 Then soilTemp_2in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilEa_2in") = 0 Then soilEa_2in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilVWC_2in") = 0 Then soilVWC_2in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilEC_2in") = 0 Then soilEC_2in = SplitRes(2)
+        If StrComp (SplitRes (1), "rawCounts_8in") = 0 Then rawCounts_8in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilTemp_8in") = 0 Then soilTemp_8in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilEa_8in") = 0 Then soilEa_8in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilVWC_8in") = 0 Then soilVWC_8in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilEC_8in") = 0 Then soilEC_8in = SplitRes(2)
+        If StrComp (SplitRes (1), "rawCounts_20in") = 0 Then rawCounts_20in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilTemp_20in") = 0 Then soilTemp_20in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilEa_20in") = 0 Then soilEa_20in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilVWC_20in") = 0 Then soilVWC_20in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilEC_20in") = 0 Then soilEC_20in = SplitRes(2)
+
+        If StrComp (SplitRes (1), "endofstation") = 0 Then endofstation = SplitRes(2)        
+     
+      Else
+        ExitDo      ' rcv_str_len was 0
+      EndIf
+      
+      If endofstation 
+        endofstation=false
+	If StrComp (station, "Marshes") = 0 Then CallTable Marshes
+	If StrComp (station, "Sunny") = 0 Then CallTable Sunny
+	If StrComp (station, "Aspens") = 0 Then CallTable Aspens
+	If StrComp (station, "Conifers") = 0 Then CallTable Conifers
+	If StrComp (station, "Roadside") = 0 Then CallTable Roadside
+        If (Total_Burst_Len > Max_Burst_Len) Then Max_Burst_Len = Total_Burst_Len
+        Total_Burst_Len = 0        
+      EndIf
+      
+      'Delay (0, 150, msec)    ' testing (only!) when the entire burst is not read on one scan
+      
+    Loop      ' end of looping until input buffer is empty
+
+	NextScan
+	
+  SlowSequence
+    Scan (10, sec, 0, 0)
+      PanelTemp (PTemp, 60)
+      Battery (BattVolt)
+    Next Scan
+    
+EndProg
+
