@@ -1,5 +1,5 @@
 /*
-This sketch logs the amperage measured across the Adafruit INA260 sensor and logs it to an SD card
+This sketch logs the amperage measured across the Adafruit INA260 sensor and logs it to a microSD card
 on the EnvrioDIY's Mayfly datalogger.
 
 Sensor Wiring (Adafruit INA260 Sensor):
@@ -8,17 +8,27 @@ GND    --> GND (Arduino)
 SCL    --> SCL (Arduino)
 SDA    --> SDA (Arduino)
 
-The wiring is fairly intuitive. You'll need to solder the header pins to the sensor and then likely connect
+The wiring is fairly intuitive and follows I2C. You'll need to solder the header pins to the sensor and then likely connect
 these with a breadboard and jumper wires. The Mayfly has a Grove connector that is meant for I2C integration.
 You'll just need to use a screw terminal to Grove adapter in order to use a Grove cable. This may be more
-secure than just jumpering the wires into the Mayfly headers. 
+secure than just finding and jumpering the wires into the Mayfly headers. 
 
 Station wiring:
 The current of electricity needs to flow through the screw terminal on the INA260 sensor, going in the
 V+ gate and out out the V- gate. If logging current draw for the entire set up, you will want this sensor
-on a wire coming right off the battery powering the station. You'll need a wire going from the positive node
+on a wire coming right off the positive terminal on your battery powering the station. You'll need a wire going from the positive node
 of your battery to the V+ gate of the INA260 and then a wire going from the V- gate of the INA260 to the
 station setup like you would normally have.
+
+This SD library only allows short file names, so sticking with "amp.csv" should be fine. 
+
+This will record everything in CSV format.
+
+There is some functionality where you can use the Arduino IDE serial monitor to see what is being read, however, it is not necessary to connect your laptop for this program to run after uploading the sketch.
+
+The only thing you should worry about changing are the scanInterval and recordInterval variable declarations.
+scanInterval is how often you would like to see the amperage measurement if you are watching your serial monitor.
+recordInterval is how often you would like for the Mayfly to make an amperage measurement and record that the microSD card.
 */
 
 // Include the SD library
@@ -38,7 +48,7 @@ Adafruit_INA260 ina260 = Adafruit_INA260();
 
 // Declare some needed variables making measurements
 unsigned long scanInterval = 1;     // Time between scans within the main loop in seconds
-unsigned long recordInterval = 1;  // Time between recorded values in seconds
+unsigned long recordInterval = 1;   // Time between recorded values in seconds
 unsigned long currMillis = 0;       // Timing variable
 unsigned long prevMillis = 0;       // Timing variable
 unsigned long prevRecordMillis = 0; // Timing variable

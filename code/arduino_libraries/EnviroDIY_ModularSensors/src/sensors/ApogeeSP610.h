@@ -2,15 +2,20 @@
  * @file ApogeeSP610.h
  * @copyright 2017-2022 Stroud Water Research Center
  * Part of the EnviroDIY ModularSensors library for Arduino
+ * This specific sensor's code was created by Braedon Dority based on the Apogee
+ * SQ-212 code already made for Modular Sensors by the EnviroDIY team.
+ *
+ * The original authorship and editorial credits are listed below from the
+ * Apogee SQ-212 code that this is all based on:
  * @author Written By: Anthony Aufdenkampe <aaufdenkampe@limno.com>
  * Edited by Sara Geleskie Damiano <sdamiano@stroudcenter.org>
  * Adapted from CampbellOBS3.h by Sara Geleskie Damiano
  * <sdamiano@stroudcenter.org>
  *
  * @brief Contains the ApogeeSP610 sensor subclass and the variable subclasses
- * ApogeeSP610_PAR and ApogeeSP610_Voltage.
+ * ApogeeSP610_OSWR and ApogeeSP610_Voltage.
  *
- * These are used for the Apogee SP-510 incoming shortwave radiation sensor.
+ * These are used for the Apogee SP-610 outgoing shortwave radiation sensor.
  *
  * This depends on the soligen2010 fork of the Adafruit ADS1015 library.
  */
@@ -24,50 +29,41 @@
  * @tableofcontents
  * @m_footernavigation
  *
- * @section sensor_sq212_intro Introduction
- * The [Apogee SQ-212 quantum light
- * sensor](https://www.apogeeinstruments.com/sq-212-amplified-0-2-5-volt-sun-calibration-quantum-sensor/)
- * measures [photosynthetically active radiation
- * (PAR)](https://en.wikipedia.org/wiki/Photosynthetically_active_radiation) -
- * typically defined as total radiation across a range of 400 to 700 nm.  PAR is
- * often expressed as photosynthetic photon flux density (PPFD): photon flux in
- * units of micromoles per square meter per second (μmol m-2 s-1, equal to
- * microEinsteins per square meter per second) summed from 400 to 700 nm.  The
- * raw output from the sensor is a simple analog signal which must be converted
+ * @section sensor_sp610_intro Introduction
+ * The [Apogee SP-610 downward-looking thermopile pyranometer
+ * sensor](https://www.apogeeinstruments.com/sp-610-ss-downward-looking-thermopile-pyranometer/)
+ * measures [outgoing shortwave radiation
+ * (OSWR)](https://en.wikipedia.org/wiki/Shortwave_radiation_(optics)) -
+ * typically defined as total elctronmagnetic radiation from the sun reflected off the ground.
+ * The raw output from the sensor is a differential analog signal which must be converted
  * to a digital signal and then multiplied by a calibration factor to get the
- * final PAR value.  The PAR sensor requires a 5-24 V DC power source with a
- * nominal current draw of 300 μA.  The power supply to the sensor can be
- * stopped between measurements.
+ * final OSWR value.
  *
  * To convert the sensor's analog signal to a high resolution digital signal,
  * the sensor must be attached to an analog-to-digital converter.  See the
  * [ADS1115](@ref analog_group) for details on the conversion.
  *
- * The calibration factor this library uses to convert from raw voltage to PAR
- * is that specified by Apogee for the SQ-212: 1 µmol mˉ² sˉ¹ per mV (reciprocal
- * of sensitivity).  If needed, this calibration factor can be modified by
- * compiling with the build flag ```-D SQ212_CALIBRATION_FACTOR=x``` where x is
- * the calibration factor.  This allows you to adjust the calibration or change
- * to another Apogee sensor (e.g. SQ-215 or SQ225) as needed.
+ * The calibration factor needs to be adjusted to what you received from Apogee your sensor's certicate of calibration.
+ * The line where that calibration factor is found just before the SP610 class is declared.
  *
- * @section sensor_sq212_datasheet Sensor Datasheet
- * [Datasheet](https://github.com/EnviroDIY/ModularSensors/wiki/Sensor-Datasheets/Apogee
- * SQ-212-215 Manual.pdf)
+ * @section sensor_sp610_datasheet Sensor Datasheet
+ * [Datasheet](https://www.apogeeinstruments.com/content/SP-510-610-manual.pdf)
  *
- * @section sensor_sq212_flags Build flags
+ * @section sensor_sp610_flags Build flags
  * - ```-D MS_USE_ADS1015```
  *      - switches from the 16-bit ADS1115 to the 12 bit ADS1015
- * - ```-D SQ212_CALIBRATION_FACTOR=x```
+ * - ```-D SP610_CALIBRATION_FACTOR=x```
  *      - Changes the calibration factor from 1 to x
  *
- * @section sensor_sq212_ctor Sensor Constructor
- * {{ @ref ApogeeSQ212::ApogeeSQ212 }}
+ * @section sensor_sp610_ctor Sensor Constructor
+ * {{ @ref ApogeeSP610::ApogeeSP610 }}
  *
+ * This section just below may need to just be deleted
  * ___
  * @section sensor_sq212_examples Example Code
  * The SQ-212 is used in the @menulink{apogee_sq212} example.
  *
- * @menusnip{apogee_sq212}
+ * @menusnip{apogee_sp610}
  */
 /* clang-format on */
 
@@ -93,30 +89,28 @@
 
 // Sensor Specific Defines
 /// @brief Sensor::_numReturnedValues; the SP610 can report 2 values, raw
-/// voltage and calculated incoming shortwave radiation.
+/// voltage and calculated outgoing shortwave radiation.
 #define SP610_NUM_VARIABLES 2
-/// @brief Sensor::_incCalcValues; PAR is calculated from the raw voltage.
+/// @brief Sensor::_incCalcValues; OSWR is calculated from the raw voltage.
 #define SP610_INC_CALC_VARIABLES 1
 
 /**
  * @anchor sensor_sp610_timing
  * @name Sensor Timing
- * The sensor timing for an Apogee SP-510
+ * The sensor timing for an Apogee SP-610
  */
 /**@{*/
 /**
- * @brief Sensor::_warmUpTime_ms; the warm up time is unknown; using the 2ms for
- * the TI ADS1x15 to warm up
- *
- * @todo Measure warm-up time of the SQ-212
+ * @brief Sensor::_warmUpTime_ms; the warm up time is unnecessary for this
+ * analog sensor; using the 2ms for the TI ADS1x15 to warm up
  */
 #define SP610_WARM_UP_TIME_MS 2
 /**
  * @brief Sensor::_stabilizationTime_ms; the ADS1115 is stable after 2ms.
  *
- * The stabilization time of the SQ-212 itself is not known!
+ * The stabilization time of the SP-510 is not really a set value because it is self-powered
  *
- * @todo Measure stabilization time of the SQ-212
+ * @todo Measure stabilization time of the SP-610
  */
 #define SP610_STABILIZATION_TIME_MS 500
 /// @brief Sensor::_measurementTime_ms; ADS1115 takes almost 2ms to complete a
@@ -130,7 +124,7 @@
  * The OSWR variable from an Apogee SP-510
  * - Range is 0 to 2000 W m-2
  * - Accuracy is ± 0.5%
- * - Resolution:
+ * - Resolution (this needs to be updated for the SP-610):
  *   - 16-bit ADC (ADS1115): 0.3125 µmol m-2 s-1 (ADS1115)
  *   - 12-bit ADC (ADS1015, using build flag ```MS_USE_ADS1015```): 5 µmol m-2
  * s-1 (ADS1015)
@@ -153,11 +147,11 @@
 /// @brief Default variable short code; "outgoingShortwaveRadiation"
 #define SP610_OSWR_DEFAULT_CODE "outShortRad"
 #ifdef MS_USE_ADS1015
-/// @brief Decimals places in string representation; PAR should have 0 when
+/// @brief Decimals places in string representation; OSWR should have 0 when
 /// using an ADS1015.
-#define SP610_PAR_RESOLUTION 0
+#define SP610_OSWR_RESOLUTION 0
 #else
-/// @brief Decimals places in string representation; PAR should have 4 when
+/// @brief Decimals places in string representation; OSWR should have 4 when
 /// using an ADS1115.
 #define SP610_OSWR_RESOLUTION 4
 #endif
@@ -166,8 +160,8 @@
 /**
  * @anchor sensor_sp610_voltage
  * @name Voltage
- * The voltage variable from an Apogee SQ-212
- * - Range is 0 to 3.6V [when ADC is powered at 3.3V]
+ * The voltage variable from an Apogee SP-610
+ * - Range is 0 to 70 mV
  * - Accuracy is ± 0.5%
  *   - 16-bit ADC (ADS1115): < 0.25% (gain error), <0.25 LSB (offset error)
  *   - 12-bit ADC (ADS1015, using build flag ```MS_USE_ADS1015```): < 0.15%
@@ -203,9 +197,8 @@
 /**@}*/
 
 /**
- * @brief The calibration factor between output in volts and PAR
- * (microeinsteinPerSquareMeterPerSecond) 1 µmol mˉ² sˉ¹ per mV (reciprocal of
- * sensitivity)
+ * @brief The calibration factor between output in volts and W m-2
+ * (wattspermetersquared)
  */
 #ifndef SP610_CALIBRATION_FACTOR
 #define SP610_CALIBRATION_FACTOR 30.50
@@ -215,7 +208,7 @@
 #define ADS1115_ADDRESS 0x48
 
 /**
- * @brief The Sensor sub-class for the [Apogee SP-510](@ref sensor_sp610) sensor
+ * @brief The Sensor sub-class for the [Apogee SP-610](@ref sensor_sp610) sensor
  *
  * @ingroup sensor_sp610
  */
@@ -229,9 +222,10 @@ class ApogeeSP610 : public Sensor {
      * hardware I2C instance defined in the Arduino core. Connecting the ADS to
      * a secondary hardware or software I2C instance is *not* supported!
      *
-     * @param powerPin The pin on the mcu controlling power to the Apogee
-     * SQ-212.  Use -1 if it is continuously powered.
-     * - The SQ-212 requires 3.3 to 24 V DC; current draw 10 µA
+     * @param powerPin The SP-510 does not need any powering up to make a
+     * measurement. The only power requirements are if you run the heaters. This
+     * power pin parameter could potentially be deleted, as it doesn't effect
+     * functionality.
      * - The ADS1115 requires 2.0-5.5V but is assumed to be powered at 3.3V
      * @param i2cAddress The I2C address of the ADS 1x15, default is 0x48 (ADDR
      * = GND)
@@ -271,8 +265,8 @@ class ApogeeSP610 : public Sensor {
 /* clang-format off */
 /**
  * @brief The Variable sub-class used for the
- * [incoming shortwave radiation (OSWR) output](@ref sensor_sp610_oswr)
- * from an [Apogee SQ-212](@ref sensor_sp610).
+ * [outgoing shortwave radiation (OSWR) output](@ref sensor_sp610_oswr)
+ * from an [Apogee SP-610](@ref sensor_sp610).
  *
  * @ingroup sensor_sp610
  */
@@ -287,7 +281,7 @@ class ApogeeSP610_OSWR : public Variable {
      * @param uuid A universally unique identifier (UUID or GUID) for the
      * variable; optional with the default value of an empty string.
      * @param varCode A short code to help identify the variable in files;
-     * optional with a default value of "radiationIncomingPAR".
+     * optional with a default value of "radiationOutgoingShortwave".
      */
     explicit ApogeeSP610_OSWR(ApogeeSP610* parentSense, const char* uuid = "",
                              const char* varCode = SP610_OSWR_DEFAULT_CODE)
@@ -314,7 +308,7 @@ class ApogeeSP610_OSWR : public Variable {
 /**
  * @brief The Variable sub-class used for the
  * [raw voltage output](@ref sensor_sp610_voltage) from an
- * [Apogee SQ-212](@ref sensor_sp610).
+ * [Apogee SP-610](@ref sensor_sp610).
  *
  * @ingroup sensor_sp610
  */

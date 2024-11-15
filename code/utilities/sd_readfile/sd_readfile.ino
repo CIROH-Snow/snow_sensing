@@ -1,3 +1,24 @@
+/*
+This sketch is meant to be used with your laptop and Arduino IDE's serial monitor.
+
+This sketch allows a user to know all the files listed on a microSD card through a Mayfly,
+tell the Mayfly which file it wants to open, and read the contents of that file in the serial
+monitor. This data can then be copied out of the serial monitor into another file of your choosing
+on your computer, effectively downloading the data from the microSD card without altering the file.
+
+This should hopefully help you download data from your microSD cards if you do not have a laptop
+that has built-in SD ports.
+
+There is a lot going on in this sketch. All you really need to know in order to successfully use it
+is the baud rate that your serial port needs to be set to.
+
+The baud rate is found in the setup() function, and it is whatever the Serial.begin() parameter is set to,
+which is likely 9600.
+
+This sketch has not been tested with other boards besides the Mayfly, and you will likely need to make adjustments
+if you are not using the Mayfly.
+*/
+
 #include "SdFat.h"
 
 // SD_FAT_TYPE = 0 for SdFat/File as defined in SdFatConfig.h,
@@ -130,7 +151,7 @@ void setup() {
   sd.ls(LS_R);
 
   // Get the filename
-  Serial.println("Enter the desired filename:");
+  Serial.println("Enter the desired filename exactly as it is listed, including the file extension:");
   while (Serial.available() == 0) {
     ;
   }

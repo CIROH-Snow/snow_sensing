@@ -8,7 +8,7 @@ This folder contains designs and specifications for sensors, dataloggers, commun
 
 ## Code
 
-This folder contains the code used to operate the snow sensing stations, including data collection, data storage, and data communication.
+This folder contains the code used to operate the snow sensing stations, including data collection, data storage, and data communication. It also includes some useful sketches (Mayfly/Arduino code) for testing sensors and reading SD cards.
 
 ## Funding and Acknowledgments
 
