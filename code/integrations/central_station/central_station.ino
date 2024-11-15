@@ -42,10 +42,12 @@ const int8_t greenLED = 8;
 // ==========================================================================
 //  Radio Communications
 // ==========================================================================
-// This is the setup for a the central radio station with the XBee Pro S3B
-// using the Digimesh protocol. In this context, satellite stations refer to
-// the snow data collection stations surrounding a central data hub station 
-// where data is communicated from those sites via radio frequency.
+/*
+This is the setup for a the central radio station with the XBee Pro S3B
+using the Digimesh protocol. In this context, satellite stations refer to
+the snow data collection stations surrounding a central data hub station 
+where data is communicated from those sites via radio frequency.
+*/
 
 // Pins for power supply and sleep control of the XBee
 #define xbeeRegulatorPin 18
@@ -73,14 +75,16 @@ const int xbeeBaud = 9600;
 // The number of satellite stations you will have set up
 const int numStations = 5;
 
-// An array of all the station names as Strings (not to be confused with strings or character arrays)
-// Make sure to put these in an order that will not disable communication in your network.
-// For example, if you have a satellite station that cannot directly talk to your central station,
-// but it can talk to another satellite station that does have contact with the central station,
-// then you do not want to get data from the in-between station first because it will power down
-// after it's finished sending data, which will then no longer help communicate data from your far
-// station to your central station. Collect the data from the farthest station first (i.e. most
-// remote to least remote). 
+/*
+An array of all the station names as Strings (not to be confused with strings or character arrays)
+Make sure to put these in an order that will not disable communication in your network.
+For example, if you have a satellite station that cannot directly talk to your central station,
+but it can talk to another satellite station that does have contact with the central station,
+then you do not want to get data from the in-between station first because it will power down
+after it's finished sending data, which will then no longer help communicate data from your far
+station to your central station. Collect the data from the farthest station first (i.e. most
+remote to least remote). 
+*/
 String stationNames[numStations] = {"Roadside", "Marshes", "Conifers", "Aspens", "Sunny"};
 
 // The length of each of the XBee addresses
