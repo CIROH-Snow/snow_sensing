@@ -4,11 +4,11 @@ This repository contains hardware and software designs for low(er) cost snow sen
 
 ## Hardware
 
-This folder contains designs and specifications for sensors, dataloggers, communication peripherals, and components required for building a snow sensing station.
+This folder contains designs and specifications for sensors, dataloggers, communication peripherals, and components required for building a snow sensing station. It is suggested that you follow the guides in the hardware directory first, effectively constructing a station before programming it using the information found in the code directory.
 
 ## Code
 
-This folder contains the code used to operate the snow sensing stations, including data collection, data storage, and data communication. It also includes some useful sketches (Mayfly/Arduino code) for testing sensors and reading SD cards.
+This folder contains the code used to operate the snow sensing stations, including data collection, data storage, and data communication. It also includes necessary libraries, guidance on programming XBee modules, helpful sketches, and more. Programming the snow stations is done after the hardware has been set up, so go through the hardware directory before attempting to program your dataloggers, unless a step specifically tells you to program something as part of the hardware implementation (such as programming the soil sensors before burying them). In that case, the instructions will explicitly tell you where to find the code necessary and what steps to take before continuing the hardware setup.
 
 ## Funding and Acknowledgments
 
