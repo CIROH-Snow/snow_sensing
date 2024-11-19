@@ -103,8 +103,8 @@ include the sampling interval, sonar height, etc. These are noted in the sketch.
 7. Attach the MicroSD card
 	1. There are two options for attaching the MicroSD card. You may use the socket found on the left-hand side
 	2. You may also use the adapter that likely came with your purchase of the Mayfly. Simply insert the 8 prongs of this adapter into the 8-pin header above the SD socket, matching the white outline on the Mayfly
-8. There are some optional and some required soldering configurations that need to take place for setting up a station. Please consult the soldering documentation found in the "hardware" folder of this repository
-9. All you need is to assemble the mounting hardware and wire the station. Constructing the station and wiring can be an intensive process and is difficult to describe without visual aids. Consult the construction and wiring guides found in the "hardware" folder of this repository.
+8. There are some optional and some required soldering configurations that need to take place for setting up a station. Please consult the [soldering documentation](https://github.com/CIROH-Snow/snow_sensing/blob/main/hardware/soldering_guide.md) found in the "hardware" folder of this repository
+9. All you need is to assemble the mounting hardware and wire the station. Constructing the station and wiring can be an intensive process and is difficult to describe without visual aids. Consult the [construction](https://github.com/CIROH-Snow/snow_sensing/blob/main/hardware/construction_guide.md) and [wiring](https://github.com/CIROH-Snow/snow_sensing/blob/main/hardware/wiring_guide.md) guides found in the "hardware" folder of this repository.
 
 ### Uploading the Final Mayfly Sketch for Logging Data
 
