@@ -3,7 +3,7 @@
 This folder contains various software that will help in the troubleshooting and deployment of these snow sensing stations.  
 Summary of each folder:
 
-- **[mayflydriver](mayflydriver)**: this folder contains the driver for your computer to talk to the Mayfly datalogger board. Most likely you will not need this code, as your computer should automatically download the driver itself, but in case you need it, it is here. The driver in this folder is for Windows. If you need the driver for another platform, consult the EnviroDIY website.
+- **[mayflydriver](mayflydriver)**: this folder contains the driver for your computer to talk to the Mayfly datalogger board. Most likely you will not need this code, as your computer should automatically download the driver itself, but in case you need it, it is here. If the drivers in this folder are not compatible with the architecture of your computer, consult the EnviroDIY website to find the correct driver for your machine.
 - **[measure_amps](measure_amps)**: this folder contains an Arduino sketch that can be used to log electrical current demands across a power supply line using an Adafruit INA260 sensor. This can be useful for precise measurement of power demand and in sizing of batteries.
 - **[sd_readfile](sd_readfile)**: this folder contains an Arduino sketch that will allow a user to read data to the Arduino IDE serial monitor from a microSD card.
 - **[test_modular_sensors](test_modular_sensors)**: this folder contains multiple sketches that show how each sensor is used individually in modular sensors and is mostly here for troubleshooting the modular sensors library.
