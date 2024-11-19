@@ -2,7 +2,7 @@
 
 This folder contains the code required to operate, troubleshoot, and maintain a snow sensing station for stand alone data collection as well as for communication of collected data over radio and cellular telemetry networks.  
 
-Before you proceed, you will need to download the Arduino Interactive Development Environment (IDE). You can do so by using this page: https://docs.arduino.cc/software/ide/
+Before you proceed, you will need to download the Arduino Interactive Development Environment (IDE). You can do so by using this page: [https://docs.arduino.cc/software/ide/](https://www.arduino.cc/en/software).
 
 There are multiple folders in this directory, each with different purposes and types of code inside them. They are as follows:
 - arduino_libraries: this folder contains all the source code you will need for programming your Mayfly (which is an Arduino board). There is no README for that folder, so how to use it is explained further down in this markdown file.
