@@ -1,10 +1,10 @@
-### Mayfly Datalogger Code
+## Mayfly Datalogger Code
 
 This folder contains the final code that needs to be uploaded to a Mayfly datalogger upon deployment.  
 Note that there are lines of code that you will need to edit for your specific implementation. This will likely  
 include the sampling interval, sonar height, etc. These are noted in the sketch.
 
-##### Hardware needed to successfully program the hardware for a snow sensing station (i.e., Mayfly Datalogger, XBee radios, soil sensors, etc.):
+#### Hardware needed to successfully program the hardware for a snow sensing station (i.e., Mayfly Datalogger, XBee radios, soil sensors, etc.):
 - Mayfly datalogger: [EnviroDIY Link](https://www.envirodiy.org/product/envirodiy-mayfly-data-logger/)
 - CR1220 battery: [DigiKey Link](https://www.digikey.com/en/products/detail/panasonic-bsg/CR1220/269740?s=N4IgTCBcDaIA4AYDMSC0A7AJiAugXyA)
 - USB to USB-C cable (make sure it has a data line on it and that it isn't just a charging cable): [Amazon Link](https://www.amazon.com/Anker-2-Pack-Premium-Samsung-Galaxy/dp/B07DD5YHMH/ref=sr_1_1?crid=OCEUG0LMDYLP&dib=eyJ2IjoiMSJ9.IcOZhxxaDPccd7D_9PJSez4TC7ZeslNm1EJdKPeQneHBEF-uoIV7LasPMxWyuM_Vya40K-iyPyMg6v_H45wy6mzKXxt6s3OYqWP5zhy1B9J-1LUpHezs29_rckwloWXBiXYf8MJ05P_svLPunlYzUe7gQfveNh-Zn7VBKaGt_9iWLG-n9virw4ACfWX6lJk2vqfw9e2OuA637VG6T4SehBXUF63MhLmMbi_0Qzeq_wo.LhyREBSKszocFqOQPSyZ6cSP8CXedu0OlJd6lyo4osc&dib_tag=se&keywords=usb+to+usb+c+cable&qid=1731527951&sprefix=usb+to%2Caps%2C163&sr=8-1)
@@ -14,7 +14,9 @@ include the sampling interval, sonar height, etc. These are noted in the sketch.
 - MicroSD card: [Amazon Link](https://www.amazon.com/PNY-Elite-X-microSDXC-Memory-3-Pack/dp/B08T6QSBPJ/ref=sxts_b2b_sx_reorder_acb_customer?content-id=amzn1.sym.f63a3b0b-3a29-4a8e-8430-073528fe007f%3Aamzn1.sym.f63a3b0b-3a29-4a8e-8430-073528fe007f&crid=3FKIWN7XO0G1T&cv_ct_cx=microsd&dib=eyJ2IjoiMSJ9.CDXdRBTTK5D7gOhcosDwDLRO1-udc6y3OmsZ_IS6n-M._me_VA9t2B5s1D-KL36yualKHhDRDZhm8OcrubA44I4&dib_tag=se&keywords=microsd&pd_rd_i=B08T6QSBPJ&pd_rd_r=899f26f9-a4e7-49c0-8751-6ac8cb32a7d3&pd_rd_w=V2sb6&pd_rd_wg=wIW2M&pf_rd_p=f63a3b0b-3a29-4a8e-8430-073528fe007f&pf_rd_r=2MNHMDSCGZH55X2MG5D5&qid=1731528178&sbo=RZvfv%2F%2FHxDF%2BO5021pAnSA%3D%3D&sprefix=microsd%2Caps%2C237&sr=1-1-9f062ed5-8905-4cb9-ad7c-6ce62808241a)
 - EnviroDIY microSD vertical card adapter (optional and comes with Mayfly datalogger purchase): [EnviroDIY Link](https://www.envirodiy.org/product/envirodiy-vertical-microsd-card-adapter-pack-of-5/)
 
-**There are other steps you will want to make sure you have completed before addressing the edits in this code.** These include:  
+### Hardware Setup Steps
+**IMPORTANT: You need to complete the following steps to set up the hardware before you edit and upload the Arduino Mayfly sketch found in this folder for logging data.**   
+
 1. Set the real-time clock (RTC) on the Mayfly
 	1. Insert your coin battery with the positive side up into the battery slot found on the right side of the board below the two white LiPo connectors.
 	2. Open the Arduino IDE and connect your Mayfly to your laptop.
@@ -104,9 +106,8 @@ include the sampling interval, sonar height, etc. These are noted in the sketch.
 8. There are some optional and some required soldering configurations that need to take place for setting up a station. Please consult the soldering documentation found in the "hardware" folder of this repository
 9. All you need is to assemble the mounting hardware and wire the station. Constructing the station and wiring can be an intensive process and is difficult to describe without visual aids. Consult the construction and wiring guides found in the "hardware" folder of this repository.
 
-Once your station is constructed and you have completed the above steps, you are ready to upload the sketch found in this folder titled "satellite_station."  
-It is titled that way because this sketch's programming allows for it to be setup in a network of sites that "orbit" a central or host station that aggregates all the satellite snow sites' data and  
-communicates it to a CR800 datalogger from Campbell Scientific. If you are just doing a stand-alone site that will not be using this feature, you can still use this sketch, just follow comments in the 
-code to properly disable radio communications.
+### Uploading the Final Mayfly Sketch for Logging Data
+
+Once your station is constructed and you have completed the above steps, you are ready to upload the sketch found in this folder titled "satellite_station."  It is titled that way because this sketch's programming allows for it to be setup in a network of sites that "orbit" a central or host station that aggregates all the satellite snow sites' data. In our application, we then use the host station to communicates data from all sites to a CR800 datalogger from Campbell Scientific. If you are just doing a stand-alone site that will not be using this feature, you can still use this sketch, just follow comments in the code to properly disable radio communications.
 
 The code is well-commented, and will walk you through what everything means and where you may need to make adjustments.
