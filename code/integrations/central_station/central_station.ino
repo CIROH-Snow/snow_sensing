@@ -71,7 +71,7 @@ void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
 const int xbeeBaud = 9600;
 
 // The number of satellite stations you will have set up
-const int numStations = 5;
+const int numStations = 6;
 
 // An array of all the station names as Strings (not to be confused with strings or character arrays)
 // Make sure to put these in an order that will not disable communication in your network.
@@ -81,7 +81,7 @@ const int numStations = 5;
 // after it's finished sending data, which will then no longer help communicate data from your far
 // station to your central station. Collect the data from the farthest station first (i.e. most
 // remote to least remote). 
-String stationNames[numStations] = {"Roadside", "Marshes", "Conifers", "Aspens", "Sunny"};
+String stationNames[numStations] = {"Roadside", "Marshes", "Conifers", "Aspens", "Sunny", "UWRL"};
 
 // The length of each of the XBee addresses
 // It consists of the serial number found on each XBee and an optional 2-byte
@@ -92,7 +92,7 @@ const int sizeAddress = 10;
 // An array of all the satellite station addresses
 // The first 8 bytes are the serial number
 // Make sure the order of these addresses matches the order of the stationNames array 
-byte satellites[numStations][sizeAddress] = {{0x00, 0x13, 0xA2, 0x00, 0x42, 0x2B, 0x1E, 0xA2, 0xFF, 0xFE}, {0x00, 0x13, 0xA2, 0x00, 0x42, 0x33, 0x67, 0xDD, 0xFF, 0xFE}, {0x00, 0x13, 0xA2, 0x00, 0x42, 0x2F, 0xDB, 0xA7, 0xFF, 0xFE}, {0x00, 0x13, 0xA2, 0x00, 0x42, 0x33, 0x67, 0xB0}, {0x00, 0x13, 0xA2, 0x00, 0x42, 0x33, 0x67, 0xCC, 0xFF, 0xFE}};
+byte satellites[numStations][sizeAddress] = {{0x00, 0x13, 0xA2, 0x00, 0x42, 0x2B, 0x1E, 0xA2, 0xFF, 0xFE}, {0x00, 0x13, 0xA2, 0x00, 0x42, 0x33, 0x67, 0xDD, 0xFF, 0xFE}, {0x00, 0x13, 0xA2, 0x00, 0x42, 0x2F, 0xDB, 0xA7, 0xFF, 0xFE}, {0x00, 0x13, 0xA2, 0x00, 0x42, 0x33, 0x67, 0xB0}, {0x00, 0x13, 0xA2, 0x00, 0x42, 0x33, 0x67, 0xCC, 0xFF, 0xFE}, {0x00, 0x13, 0xA2, 0x00, 0x42, 0x2F, 0xDD, 0xE7, 0xFF, 0xFE}};
 
 // A boolean array used in the loop function to determine if all the data has been sent from each station
 // Each slot in the array corresponds to the stations listed in the stationNames array
@@ -475,10 +475,18 @@ void loop() {
             }
           } else {  // If we received something other than an 'R'
             memset(rx, 0x00, sizeof(rx));  // then get rid of it
+            stringToSend += "@station=";  // Add the variable name "station" to the String, properly framed
+            stringToSend += stationNames[i];  // Add the station's name to the String
+            stringToSend += ";@endofstation=1;";  // Properly end the String
+            Serial.println(stringToSend);  // Send over to CR800
           }
         }
-        if (tries == totalTries) {  // If we've tried as much as we'd like
+        if (tries == totalTries && didTotalTries[i] != true) {  // If we've tried as much as we'd like and we haven't successfully made contact
           didTotalTries[i] = true;  // then take note of it for this station so it doesn't try again
+          stringToSend += "@station=";  // Add the variable name "station" to the String, properly framed
+          stringToSend += stationNames[i];  // Add the station's name to the String
+          stringToSend += ";@endofstation=1;";  // Properly end the String
+          Serial.println(stringToSend);  // Send over to CR800
         }
       }
     }

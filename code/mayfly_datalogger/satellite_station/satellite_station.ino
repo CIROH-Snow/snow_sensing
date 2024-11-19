@@ -161,14 +161,14 @@ const int32_t sonarHeight = 2896;
 // so set the sensor's power pin to the switched pin which we already defined
 const int8_t sonarPower = sensorPowerPin;
 
-// We don't have a sonar trigger (so set to -1)
+// Trigger should be a *unique* negative number if unconnected
 const int8_t sonarTrigger = -1;
 
 // How many readings do you want to average? 
-const uint8_t sonarNumReadings = 3;
+const uint8_t sonarNumReadings = 50;
 
 // Construct the sensor
-MaxBotixSonar sonar(sonarSerial, sonarPower, sonarTrigger, sonarNumReadings);
+MaxBotixSonar sonar(sonarSerial, sonarHeight, sonarPower, sonarTrigger, sonarNumReadings);
 
 // Each variable that we want to report needs to be "constructed" as well.
 // For this sensor it will include the range the sonar detected (in millimeters)
@@ -303,9 +303,9 @@ Variable* sp610rad =
 #include <sensors/ApogeeSL510.h>
 
 /* WIRING FOR *SL-510* UPWARD SENSOR
-  WHITE   -> A0  (0x4A)
-  BLACK   -> A1  (0x4A)
-  GREEN   -> A1  (0x49)
+  WHITE   -> A0   (0x4A)
+  BLACK   -> A1   (0x4A)
+  GREEN   -> A1   (0x49)
   YELLOW  -> V12+ (POWER RELAY COM)
   BLUE    -> V12- (BATTERY GROUND)
   RED     -> SW3  (3.3V SWITCHED POWER PIN)
@@ -459,8 +459,6 @@ Variable* variableList[] = {
     //new ProcessorStats_FreeRam(&mcuBoard),
     //new ProcessorStats_Battery(&mcuBoard), 
     new MaximDS3231_Temp(&ds3231),
-    sonarRange,
-    calculatedSnowDepth,
     sp510volts,
     sp510rad,
     sp610volts,
@@ -487,7 +485,9 @@ Variable* variableList[] = {
     vwc3,
     ec3,
     st110thermistorVolts,
-    st110airTemp
+    st110airTemp,
+    sonarRange,
+    calculatedSnowDepth
     // Additional sensor variables can be added here, by copying the syntax
     //   for creating the variable pointer (FORM1) from the
     //   `menu_a_la_carte.ino` example
