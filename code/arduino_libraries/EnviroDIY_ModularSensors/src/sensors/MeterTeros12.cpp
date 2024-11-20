@@ -109,7 +109,7 @@ bool MeterTeros12::getResults(void) {
     float VWC = -9999;
 
     // Calculate the dielectric EA from the raw count value.
-    // Equation 8 from the Teros 12 user manual:
+    // Equation 8 from the Teros 11-12 user manual:
     // http://publications.metergroup.com/Manuals/20587_TEROS11-12_Manual_Web.pdf
     if (raw < 0 || raw > 5000) {
         MS_DBG(

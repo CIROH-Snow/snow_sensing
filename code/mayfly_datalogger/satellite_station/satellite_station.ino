@@ -218,45 +218,48 @@ Variable* calculatedSnowDepth = new Variable(
 
 
 
-// ** IMPORTANT ** 
-// ApogeeSP510, ApogeeSP610, ApogeeSL510, and ApogeeSL610 modular sensors source codes
-// only function on certain pins and certain hardware. Make sure you follow the wiring,
-// or you may otherwise damage your sensors or hardware.
+/* ** IMPORTANT ** 
+ApogeeSP510, ApogeeSP610, ApogeeSL510, and ApogeeSL610 modular sensors source codes
+only function on certain pins and certain hardware. Make sure you follow the wiring,
+or you may otherwise damage your sensors or hardware.
 
-// Very brief wiring instructions are included in the sketch for reference, but make sure
-// you wire according to the directions in the hardware folder of the GitHub repository.
-// In this sketch, the hexidecimal (0x...) listed in parenthesis after a wiring instruction is
-// the address of the ADC you need to connect to:
-// 0x48 on the Mayfly: pins noted with two As (AA0, AA1, etc.)
-// 0x49 ADDR jumpered to VIN
-// 0x4A ADDR jumpered to SDA
+Very brief wiring instructions are included in the sketch for reference, but make sure
+you wire according to the directions in the hardware folder of the GitHub repository.
+In this sketch, the hexidecimal (0x...) listed in parenthesis after a wiring instruction is
+the address of the ADC you need to connect to:
+0x48 on the Mayfly: pins noted with two As (AA0, AA1, etc.)
+0x49 ADDR jumpered to VIN
+0x4A ADDR jumpered to SDA
+*/
 
 // ==========================================================================
 //    Apogee SP-510-SS for incoming shortwave radiation
 // ==========================================================================
 // There is wiring listed in this section for both an SP-710 implementation, 
 // which has both the upward and downward pyranometers together, and the stand-
-// alone SP-510 and SP-610 implementation. Just make sure you follow whichever
+// alone SP-510-SS and SP-610-SS implementation. Just make sure you follow whichever
 // one you are doing for your implementation. The coding itself will not change.
 #include <sensors/ApogeeSP510.h>
 
-/* WIRING FOR *SP-710* UPWARD SENSOR
-  YELLOW  -> AA2 (0x48)
-  BLUE    -> AA3 (0x48)
+/* WIRING FOR *SP-710-SS* SENSOR
+  YELLOW  -> AA2  (0x48)
+  BLUE    -> AA3  (0x48)
   RED     -> V12+ (POWER RELAY COM)
   GREEN   -> V12- (BATTERY GROUND)
   
-  WIRING FOR *SP-510* UPWARD SENSOR
-  WHITE	  -> AA2 (0x48)
-  BLACK   -> AA3 (0x48)
+  WIRING FOR *SP-510-SS* SENSOR
+  WHITE	  -> AA2  (0x48)
+  BLACK   -> AA3  (0x48)
   YELLOW  -> V12+ (POWER RELAY COM)
   BLUE    -> V12- (BATTERY GROUND)
   CLEAR   -> V12- (BATTERY GROUND)
   
 */
 
+float sp510calibFactor = 22.53;
+
 // Construct the Apogee SP-510-SS sensor object
-ApogeeSP510 sp510(-1, 0x48, 3);  // The -1 indicates that there is no powering up necessary for measurement 
+ApogeeSP510 sp510(-1, sp510calibFactor, 0x48, 3);  // The -1 indicates that there is no powering up necessary for measurement 
 
 // Construct the variable for the differential voltage measurement
 Variable* sp510volts =
@@ -272,12 +275,12 @@ Variable* sp510rad =
 // ==========================================================================
 #include <sensors/ApogeeSP610.h>
 
-/* WIRING FOR *SP-710* DOWNWARD SENSOR
+/* WIRING FOR *SP-710-SS* SENSOR
   WHITE   -> AA0  (0x48)
   BLACK   -> AA1  (0x48)
   CLEAR   -> V12- (BATTERY GROUND)
   
-  WIRING FOR *SP-610* DOWNWARD SENSOR
+  WIRING FOR *SP-610-SS* SENSOR
   WHITE	  -> AA0  (0x48)
   BLACK   -> AA1  (0x48)
   YELLOW  -> V12+ (POWER RELAY COM)
@@ -285,8 +288,10 @@ Variable* sp510rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
+float sp610calibFactor = 32.00;
+
 // Construct the Apogee SP-610-SS sensor object
-ApogeeSP610 sp610(-1, 0x48, 3);
+ApogeeSP610 sp610(-1, sp610calibFactor, 0x48, 3);
 
 // Construct the variable for the differential voltage measurement
 Variable* sp610volts =
@@ -312,9 +317,12 @@ Variable* sp610rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
+float sl510k1 = 9.120;
+float sl510k2 = 1.020;
+
 // Construct the Apogee SL-510-SS sensor object
 // The only parameter you should adjust is how many measurements you want to take (last parameter)
-ApogeeSL510 sl510(sensorPowerPin, 1, 0x49, 0x4A, 3);  // Note that this sensor is not attached to the Mayfly's ADC pins (0x48)
+ApogeeSL510 sl510(sensorPowerPin, sl510k1, sl510k2, 1, 0x49, 0x4A, 3);  // Note that this sensor is not attached to the Mayfly's ADC pins (0x48)
 
 // Construct the variable for the thermistor voltage
 Variable* sl510thermistorVolts =
@@ -335,18 +343,21 @@ Variable* sl510rad =
 #include <sensors/ApogeeSL610.h>
 
 /* WIRING FOR SL-610
-  WHITE   -> A2  (0x4A)
-  BLACK   -> A3  (0x4A)
-  GREEN   -> A2  (0x49)
+  WHITE   -> A2   (0x4A)
+  BLACK   -> A3   (0x4A)
+  GREEN   -> A2   (0x49)
   YELLOW  -> V12+ (POWER RELAY COM)
   BLUE    -> V12- (BATTERY GROUND)
   RED     -> SW3  (3.3V SWITCHED POWER PIN)
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
+float sl610k1 = 9.031;
+float sl610k2 = 1.020;
+
 // Construct the Apogee SL-610-SS sensor object
 // The only parameter you should adjust is how many measurements you want to take (last parameter)
-ApogeeSL610 sl610(sensorPowerPin, 2, 0x49, 0x4A, 3);  // Note that this sensor is not attached to the Mayfly's ADC pins (0x48)
+ApogeeSL610 sl610(sensorPowerPin, sl610k1, sl610k2, 2, 0x49, 0x4A, 3);  // Note that this sensor is not attached to the Mayfly's ADC pins (0x48)
 
 // Construct the variable for the thermistor voltage
 Variable* sl610thermistorVolts =

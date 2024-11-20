@@ -16,11 +16,12 @@
 
 
 // The constructor - need the power pin
-ApogeeSP610::ApogeeSP610(int8_t powerPin,
+ApogeeSP610::ApogeeSP610(int8_t powerPin, float calibrationFactor,
                          uint8_t i2cAddress, uint8_t measurementsToAverage)
     : Sensor("ApogeeSP610", SP610_NUM_VARIABLES, SP610_WARM_UP_TIME_MS,
              SP610_STABILIZATION_TIME_MS, SP610_MEASUREMENT_TIME_MS, powerPin,
              -1, measurementsToAverage, SP610_INC_CALC_VARIABLES),
+      _calibrationFactor(calibrationFactor),
       _i2cAddress(i2cAddress) {}
 
 // Destructor
@@ -83,10 +84,10 @@ bool ApogeeSP610::addSingleMeasurementResult(void) {
         MS_DBG(F("  ads.readADC_Differential_0_1_V():"),
                adcVoltage);
 
-        if (adcVoltage * 1000 < 70 && adcVoltage * 1000 > -70) {
+        if (adcVoltage * 1000 < 70 && adcVoltage * 1000 > -5) {
             // Skip results out of range
             // Apogee SP-610-SS output range 0 to 70 mV
-            calibResult = 1000 * adcVoltage * SP610_CALIBRATION_FACTOR;
+            calibResult = 1000 * adcVoltage * _calibrationFactor;
             MS_DBG(F("  calibResult:"), calibResult);
         } else {
             // set invalid voltages back to -9999

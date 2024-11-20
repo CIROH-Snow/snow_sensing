@@ -190,12 +190,12 @@ class MaxBotixSonar : public Sensor {
      * average before giving a "final" result from the sensor; optional with a
      * default value of 1.
      */
-    MaxBotixSonar(Stream* stream, int8_t powerPin, int8_t triggerPin = -1,
+    MaxBotixSonar(Stream* stream, int32_t sonarHeight, int8_t powerPin, int8_t triggerPin = -1,
                   uint8_t measurementsToAverage = 1);
     /**
      * @copydoc MaxBotixSonar::MaxBotixSonar
      */
-    MaxBotixSonar(Stream& stream, int8_t powerPin, int8_t triggerPin = -1,
+    MaxBotixSonar(Stream& stream, int32_t sonarHeight, int8_t powerPin, int8_t triggerPin = -1,
                   uint8_t measurementsToAverage = 1);
     /**
      * @brief Destroy the MaxBotix Sonar object
@@ -240,6 +240,7 @@ class MaxBotixSonar : public Sensor {
     bool addSingleMeasurementResult(void) override;
 
  private:
+    int32_t _sonarHeight;
     int8_t  _triggerPin;
     Stream* _stream;
 };

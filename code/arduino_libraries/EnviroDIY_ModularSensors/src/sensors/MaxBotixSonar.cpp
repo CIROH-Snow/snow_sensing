@@ -10,18 +10,20 @@
 #include "MaxBotixSonar.h"
 
 
-MaxBotixSonar::MaxBotixSonar(Stream* stream, int8_t powerPin, int8_t triggerPin,
+MaxBotixSonar::MaxBotixSonar(Stream* stream, int32_t sonarHeight, int8_t powerPin, int8_t triggerPin,
                              uint8_t measurementsToAverage)
     : Sensor("MaxBotixMaxSonar", HRXL_NUM_VARIABLES, HRXL_WARM_UP_TIME_MS,
              HRXL_STABILIZATION_TIME_MS, HRXL_MEASUREMENT_TIME_MS, powerPin, -1,
              measurementsToAverage),
+      _sonarHeight(sonarHeight),
       _triggerPin(triggerPin),
       _stream(stream) {}
-MaxBotixSonar::MaxBotixSonar(Stream& stream, int8_t powerPin, int8_t triggerPin,
+MaxBotixSonar::MaxBotixSonar(Stream& stream, int32_t sonarHeight, int8_t powerPin, int8_t triggerPin,
                              uint8_t measurementsToAverage)
     : Sensor("MaxBotixMaxSonar", HRXL_NUM_VARIABLES, HRXL_WARM_UP_TIME_MS,
              HRXL_STABILIZATION_TIME_MS, HRXL_MEASUREMENT_TIME_MS, powerPin, -1,
              measurementsToAverage, HRXL_INC_CALC_VARIABLES),
+      _sonarHeight(sonarHeight),
       _triggerPin(triggerPin),
       _stream(&stream) {}
 // Destructor
@@ -135,6 +137,8 @@ bool MaxBotixSonar::addSingleMeasurementResult(void) {
                 digitalWrite(_triggerPin, LOW);
             }
 
+            delay(1000);
+
             // Immediately ask for a result and let the stream timeout be our
             // "wait" for the measurement.
             result = static_cast<uint16_t>(_stream->parseInt());
@@ -150,8 +154,8 @@ bool MaxBotixSonar::addSingleMeasurementResult(void) {
             // disconnected, the parseInt function returns 0.  Luckily, these
             // sensors are not capable of reading 0, so we also know the 0 value
             // is bad.
-            if (result <= 300 || result == 500 || result == 4999 ||
-                result == 9999 || result == 0) {
+            if (result <= 300 || result == 500 || result == 5000 ||
+                result == 9999 || result == 0 || result > _sonarHeight) {
                 MS_DBG(F("  Bad or Suspicious Result, Retry Attempt #"),
                        rangeAttempts);
                 result = -9999;

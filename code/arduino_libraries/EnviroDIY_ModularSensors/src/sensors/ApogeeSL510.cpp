@@ -16,12 +16,16 @@
 
 
 // The constructor - need the power pin and address pin of thermistor
-ApogeeSL510::ApogeeSL510(int8_t powerPin, uint8_t thermistorChannel,
+ApogeeSL510::ApogeeSL510(int8_t powerPin, float k1calib, float k2calib,
+                         uint8_t thermistorChannel,
                          uint8_t thermistori2cAddress,
-                         uint8_t thermopilei2cAddress, uint8_t measurementsToAverage)
+                         uint8_t thermopilei2cAddress,
+                         uint8_t measurementsToAverage)
     : Sensor("ApogeeSL510", SL510_NUM_VARIABLES, SL510_WARM_UP_TIME_MS,
              SL510_STABILIZATION_TIME_MS, SL510_MEASUREMENT_TIME_MS, powerPin,
              -1, measurementsToAverage, SL510_INC_CALC_VARIABLES),
+      _k1calib(k1calib),
+      _k2calib(k2calib),
       _thermistorChannel(thermistorChannel),  
       _thermistori2cAddress(thermistori2cAddress),
       _thermopilei2cAddress(thermopilei2cAddress) {}
@@ -108,8 +112,8 @@ bool ApogeeSL510::addSingleMeasurementResult(void) {
             } else {
                 sl510Temp = 1 / (A_MORE + B_MORE * log(Rt) + C_MORE * pow(log(Rt), 3));
             }
-            calibResult = SL510_CALIBRATION_FACTOR_K1 * 1000 * thermopileVoltage + 
-                          SL510_CALIBRATION_FACTOR_K2 * STEFAN_BOLTZMANN_CONST * pow(sl510Temp, 4);
+            calibResult = _k1calib * 1000 * thermopileVoltage + 
+                          _k2calib * STEFAN_BOLTZMANN_CONST * pow(sl510Temp, 4);
             MS_DBG(F("  calibResult:"), calibResult);
         } else {
             // set invalid voltages back to -9999

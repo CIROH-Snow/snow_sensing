@@ -240,13 +240,13 @@
 /**
  * @brief The calibration factors
  */
-#ifndef SL510_CALIBRATION_FACTOR_K1
-#define SL510_CALIBRATION_FACTOR_K1 9.229
-#endif
+//#ifndef SL510_CALIBRATION_FACTOR_K1
+//#define SL510_CALIBRATION_FACTOR_K1 9.229
+//#endif
 
-#ifndef SL510_CALIBRATION_FACTOR_K2
-#define SL510_CALIBRATION_FACTOR_K2 1.044
-#endif
+//#ifndef SL510_CALIBRATION_FACTOR_K2
+//#define SL510_CALIBRATION_FACTOR_K2 1.044
+//#endif
 
 #ifndef STEFAN_BOLTZMANN_CONST
 #define STEFAN_BOLTZMANN_CONST 0.000000056704
@@ -309,7 +309,8 @@ class ApogeeSL510 : public Sensor {
      * its power controlled by the same pin as the SL-510.  This library does
      * not support any other configuration.
      */
-    ApogeeSL510(int8_t powerPin, uint8_t thermistorChannel,
+    ApogeeSL510(int8_t powerPin, float k1calib, float k2calib,
+                uint8_t thermistorChannel,
                 uint8_t thermistori2cAddress,
                 uint8_t thermopilei2cAddress,
                 uint8_t measurementsToAverage = 1);
@@ -332,6 +333,8 @@ class ApogeeSL510 : public Sensor {
     bool addSingleMeasurementResult(void) override;
 
  private:
+    float   _k1calib;
+    float   _k2calib;
     uint8_t _thermistorChannel;
     uint8_t _thermistori2cAddress;
     uint8_t _thermopilei2cAddress;

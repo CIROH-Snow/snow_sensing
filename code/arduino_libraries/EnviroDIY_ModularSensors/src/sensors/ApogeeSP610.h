@@ -200,9 +200,9 @@
  * @brief The calibration factor between output in volts and W m-2
  * (wattspermetersquared)
  */
-#ifndef SP610_CALIBRATION_FACTOR
-#define SP610_CALIBRATION_FACTOR 30.50
-#endif
+//#ifndef SP610_CALIBRATION_FACTOR
+//#define SP610_CALIBRATION_FACTOR 30.50
+//#endif
 
 /// The assumed address of the ADS1115, 1001 000 (ADDR = GND)
 #define ADS1115_ADDRESS 0x48
@@ -226,6 +226,7 @@ class ApogeeSP610 : public Sensor {
      * measurement. The only power requirements are if you run the heaters. This
      * power pin parameter could potentially be deleted, as it doesn't effect
      * functionality.
+     * Use -1 if continuously powered.
      * - The ADS1115 requires 2.0-5.5V but is assumed to be powered at 3.3V
      * @param i2cAddress The I2C address of the ADS 1x15, default is 0x48 (ADDR
      * = GND)
@@ -237,6 +238,7 @@ class ApogeeSP610 : public Sensor {
      * not support any other configuration.
      */
     ApogeeSP610(int8_t powerPin,
+                float calibrationFactor,
                 uint8_t i2cAddress            = ADS1115_ADDRESS,
                 uint8_t measurementsToAverage = 1);
     /**
@@ -258,6 +260,7 @@ class ApogeeSP610 : public Sensor {
     bool addSingleMeasurementResult(void) override;
 
  private:
+    float   _calibrationFactor;
     uint8_t _i2cAddress;
 };
 
