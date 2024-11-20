@@ -76,7 +76,7 @@ const char* sketchName = "satellite_station.ino";
 // This can be found on the bottom of the Mayfly if the ink hasn't rubbed off.
 // Sometimes I just use the name I've given the site here instead of the serial number.
 // Make sure it is a string (in double quotations).
-const char* LoggerID = "conifers";
+const char* LoggerID = "marshes";
 
 // How frequently (in minutes) to log data
 const uint8_t loggingInterval = 60;
@@ -155,7 +155,7 @@ AltSoftSerial sonarSerial(6, -1);  // The -1 indicates that no Tx wire is attach
 								   // on the board, pin 6).
 
 // Set the height of the sensor (in millimeters)
-const int32_t sonarHeight = 2896;
+const int32_t sonarHeight = 2247.9;
 
 // There is no need to continuously run this sensor when it isn't taking a measurement,
 // so set the sensor's power pin to the switched pin which we already defined
@@ -256,7 +256,7 @@ the address of the ADC you need to connect to:
   
 */
 
-float sp510calibFactor = 22.53;
+float sp510calibFactor = 26.03;
 
 // Construct the Apogee SP-510-SS sensor object
 ApogeeSP510 sp510(-1, sp510calibFactor, 0x48, 3);  // The -1 indicates that there is no powering up necessary for measurement 
@@ -288,7 +288,7 @@ Variable* sp510rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
-float sp610calibFactor = 32.00;
+float sp610calibFactor = 30.82;
 
 // Construct the Apogee SP-610-SS sensor object
 ApogeeSP610 sp610(-1, sp610calibFactor, 0x48, 3);
@@ -317,7 +317,7 @@ Variable* sp610rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
-float sl510k1 = 9.120;
+float sl510k1 = 9.509;
 float sl510k2 = 1.020;
 
 // Construct the Apogee SL-510-SS sensor object
@@ -352,8 +352,8 @@ Variable* sl510rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
-float sl610k1 = 9.031;
-float sl610k2 = 1.020;
+float sl610k1 = 9.323;
+float sl610k2 = 1.033;
 
 // Construct the Apogee SL-610-SS sensor object
 // The only parameter you should adjust is how many measurements you want to take (last parameter)
@@ -417,15 +417,15 @@ Variable* ec2 =
     new MeterTeros12_EC(&probe2, "12345678-abcd-1234-ef00-1234567890ab", "soilEC_8in");
 
 Variable* rawVWCCounts3 = 
-    new MeterTeros12_Count(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "rawCounts_15in");
+    new MeterTeros12_Count(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "rawCounts_20in");
 Variable* soilTemp3 =
-    new MeterTeros12_Temp(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilTemp_15in");
+    new MeterTeros12_Temp(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilTemp_20in");
 Variable* soilEa3 =
-    new MeterTeros12_Ea(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilEa_15in");
+    new MeterTeros12_Ea(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilEa_20in");
 Variable* vwc3 =
-    new MeterTeros12_VWC(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilVWC_15in");
+    new MeterTeros12_VWC(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilVWC_20in");
 Variable* ec3 =
-    new MeterTeros12_EC(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilEC_15in");
+    new MeterTeros12_EC(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilEC_20in");
 
 // ==========================================================================
 //    Apogee ST-110-SS for Air Temperature
@@ -869,7 +869,7 @@ void loop() {
   (45 min * 60 sec/min). If you want them to turn on at the 15-minute mark, for example,
   set it equal to 15 min * 60 sec/min = 900
   */
-  if (dataLogger.getNowLocalEpoch() % (loggingInterval * 60) == 2700) {  // Check if we are on the 45th minute (2700 seconds into the interval)
+  if (dataLogger.getNowLocalEpoch() % (loggingInterval * 60) == 900) {  // Check if we are on the 45th minute (2700 seconds into the interval)
     digitalWrite(22, HIGH);  // Power up the power relay (pin 22 is the Mayfly's switched power output)
     delay(1000);
     digitalWrite(powerRelayPin, HIGH);  // Set the signal pin high (to close the circuit, the relay is waiting for a signal drop)
