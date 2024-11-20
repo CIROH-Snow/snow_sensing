@@ -1,31 +1,13 @@
 # Libraries
-This repository contains _**links**_ to various libraries that are used to support functions and features of the EnvidoDIY Mayfly Data Logger board.  Please note that these libraries are not maintained in this repository, but rather are independent repositories that are linked as submodules of this repository.
+This folder contains all the libraries needed for programming an EnviroDIY Mayfly datalogger for the CIROH Advancing Snow Observations project. **These libraries are a copy.** These libraries are a composition of what the EnvrioDIY team has developed and the libraries their code depends on: https://github.com/EnviroDIY/Libraries. There are some that are not the most current version of the original developers' code. That means that after you copy these libraries over into your Arduino/libraries folder in your Documents, the Arduino IDE may ask if you would like to update the libraries you have. You should not do the update, or at least update them manually and only update the libraries that you know will not have new coding that will interfere with the functionality of your Mayfly.
 
-Please let us know if you have any trouble installing the libraries!
+Simply copy all the contents in this directory (folders and stand-alone files), and paste them in your Arduino\libraries folder (most likely found in your Documents, but may be different if you chose to store it in a different location when setting up your Arduino IDE).
 
-### Installing Libraries in the [Arduino.cc IDE](https://www.arduino.cc/en/Main/Software):
+### Description of libraries
 
-The simplest way to use these libraries is to right-click on this carefully crafted **[-->->link<-<--](https://github.com/EnviroDIY/Libraries/blob/master/libraries.zip?raw=true)**, select "save link as", and save the file somewhere on your computer.  You can also click on "libraries.zip" in the file list above and then click the grey download button on that page to download the zip.  In your the Arduino Software (IDE), import that zip file following the instructions for _"Manual Installation"_ from https://www.arduino.cc/en/Guide/Libraries#toc5.  You _cannot_ directly import the zip using the Arduino Library Manager because it contains multiple libraries.
+You may notice that there are several libraries, and by extension, source code that is not used in this project, such as various sensors. These libraries from the original EnviroDIY repository and have been left in this repository. That is because there are many dependencies that we are not familiar with that the Mayfly may have, and it keeps the door open for adding on additional sensors and applying the work done for this project to other hydrologic implementations. It is safer and more efficient to leave the entire contents in the repository rather than sift through what is needed and what isn't. These extra libraries will not occupy any extra space on your Mayfly because they will not be called. There are discrepencies found between this directory of libraries and EnviroDIY's version. EnviroDIY may add new libraries as they expand their functionality. This repository has modified code and has some additional libraries in case you want to do some unique troubleshooting. Just keep in mind that the purpose of using the libraries found in this repository is for the implementation of a snow sensing station in the context of the CIROH Advancing Snow Observations project. We cannot guaruntee that these libraries will function for other projects as code and hardware develop outside this project. 
 
-To update the libraries, you will need to re-download the zip file and overwrite the folders in your Arduino libraries folder.
-
-Please _**DO NOT**_ to use the green "Clone or Download" button to try to download a zip file.  The zip downloaded that way will only contain empty folders instead of the libraries themselves.
-
-If you prefer, and are familiar with Git, clone this repo into your Arduino\libraries folder.  The libraries should then be accessible to the Arduino Software (IDE).  Each library can also be downloaded individually by clicking on that library and then downloading a ZIP of only that library.
-
-### Installing Libraries in [PlatformIO](http://platformio.org/):
-
-The library manager in PlatformIO is far superior to anything in the [Arduino.cc IDE](https://www.arduino.cc/en/Main/Software).  I highly recommend using PlatformIO if you intend to do anything beyond very simple programming.
-
-To install the entire collection on PlatformIO enter this command into the terminal:
-
-`pio lib -g install https://github.com/EnviroDIY/Libraries.git#platformio`
-
-To update all libraries, run the command:
-
-`pio lib -g update`
-
-## Included Libraries
+The following sections are some summaries of the various libraries found here as described by EnvrioDIY in their Libraries repository that this originates from (https://github.com/EnviroDIY/Libraries). These sections are taken directly from the README.md file found in that repository. Any special comments made in regards to these libraries that may be of interest are noted in *italics*.
 
 #### These libraries are for basic components built into the EnviroDIYMayfly:
 * [soligen2010 fork of Adafruit ADS1x15](https://github.com/soligen2010/Adafruit_ADS1X15) - Includes the drivers for the auxillary ADC [TI's ADS1115 chip](http://www.ti.com/product/ADS1115) which is built into the Mayfly board. (The ADS115 is a 16-bit analog-to-digital converter (ADC) with a programmable gain amplifier (PGA) and digital comparator.)  This fork fixes bugs in the Adafruit version and should be used instead of the version direct from Adafruit.
