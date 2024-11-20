@@ -54,7 +54,7 @@ This is useful for visually verifying that any Bee modules being used are actual
 Putting the XBee to sleep does not mean that the socket is not still supplied with power, so the LED will still light up during those times if you make this adjustment.
 
 1. Flip over your Mayfly to reveal the jumpers on the back.
-![Revealed jumpers](soldering_images/soldering13.jpg)
+![Revealed jumpers](soldering_images/soldering13.JPG)
 2. Locate the SJ16 soldering area (LED7) on the back. It should be on the far right side and outline two small, metal pads.
 3. Solder the two pads together.
-![Soldered pads](soldering_images/soldering14.jpg)
+![Soldered pads](soldering_images/soldering14.JPG)
