@@ -1,6 +1,7 @@
 # Libraries
 This folder contains all the libraries needed for programming an EnviroDIY Mayfly datalogger for the CIROH Advancing Snow Observations project. **These libraries are a copy.** These libraries are a composition of what the EnvrioDIY team has developed and the libraries their code depends on: https://github.com/EnviroDIY/Libraries. There are some that are not the most current version of the original developers' code. That means that after you copy these libraries over into your Arduino/libraries folder in your Documents, the Arduino IDE may ask if you would like to update the libraries you have. You should not do the update, or at least update them manually and only update the libraries that you know will not have new coding that will interfere with the functionality of your Mayfly.
 
+## What to do with these libraries
 Simply copy all the contents in this directory (folders and stand-alone files), and paste them in your Arduino\libraries folder (most likely found in your Documents, but may be different if you chose to store it in a different location when setting up your Arduino IDE).
 
 ### Description of libraries
