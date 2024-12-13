@@ -47,6 +47,8 @@ https://www.youtube.com/watch?v=6rmErwU5E-k
 ![Flipped over board](soldering_images/soldering11.jpg)
 ![Soldered screw terminal pins](soldering_images/soldering12.jpg)
 
+**Note** that you may need to cut the header pins a small amount after soldering them to the board when you put it in the enclosure to mount it. The pins may be too long for the command strips to make contact between the board and the enclosure otherwise.
+
 ##### Optional Soldering
 
 You may add some functionality to your Mayfly if you desire. The following steps will enable your Mayfly to turn on a white LED near the top of the board when power is supplied to the Bee header.  
@@ -59,4 +61,4 @@ Putting the XBee to sleep does not mean that the socket is not still supplied wi
 3. Solder the two pads together.
 ![Soldered pads](soldering_images/soldering14.jpg)
 
-**Note** that you may need to cut the header pins a small amount after soldering them to the board when you put it in the enclosure to mount it. The pins may be too long for the command strips to make contact between the board and the enclosure otherwise.
+
