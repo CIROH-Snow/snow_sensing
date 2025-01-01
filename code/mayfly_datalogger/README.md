@@ -69,7 +69,7 @@ include the sampling interval, sonar height, etc. These are noted in the sketch.
 	14. Click on the module from that list (it should highlight orange when selecting it), avoiding the buttons on the right side
 	15. This will open up all the radio settings.
 	16. Under MAC/PHY settings, set Network ID (ID) to something significant to you that all radios will be on. Note that if two radios' network IDs do not match, they will not be able to communicate.
-	17. Under MAC/PHY settings, set Unicast Retries (RR) to File
+	17. Under MAC/PHY settings, set Unicast Mac Retries (RR) to F
 	18. Under Network settings, set Mesh Unicast Retries (MR) to 5
 	19. Under Addressing settings, set the Node Identifier (NI) to something meaningful such as the name of the station the module will be placed on
 	20. Under Addressing settings, make sure that the Transmit Options (TO) is set to C0 (DigiMesh)
