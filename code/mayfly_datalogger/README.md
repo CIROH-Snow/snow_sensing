@@ -29,20 +29,7 @@ include the sampling interval, sonar height, etc. These are noted in the sketch.
 	9. Navigate to Examples > EnvrioDIY_DS3231 > now
 	10. Upload the sketch
 	11. You may now power off and disconnect the Mayfly without it reseting the RTC
-2. If you are using the Apogee SP-510-SS, SP-610-SS, SP-710-SS, SL-510-SS, or SL-610-SS sensors for your station, you will need to adjust their source code files for their calibration factors.
-	1. Open up your files explorer.
-	2. Navigate to Documents > Arduino > libraries > EnviroDIY_ModularSensors > src > sensors
-	3. This will pull up a directory of all the sensors that are thus far coded to work with EnviroDIY's modular sensor library for this project.
-	4. You need to open up the **header** file of each of the Apogee sensors you will be using if they were listed above (SP-510-SS, SP-610-SS, etc.). A header file will have an extension of .h and will likely be titled "H File" under "Type" in your files explorer.
-	5. The files look slightly different depending on whether the sensor is a pyranometer (SP series) or a pyrgeometer (SL series). Note that if you are using an SP-710-SS, that sensor is just the SP-510-SS and the SP-610-SS combined, so you will just access those header files. There is no SP-710-SS header file.
-	6. Pyranometers (sensor name begins with SP):
-		1. Open the header file and scroll down to where <SP510_CALIBRATION_FACTOR> or <SP610_CALIBRATION_FACTOR> is defined. This can be found around lines 200-210. It should be not too far above where the ApogeeSP510 class is declared and the ADS1115_ADDRESS is defined.
-		2. Change the factor to what Apogee specified in the certificate of calibration you should have received with your sensor. 
-		3. Save the changes.
-	7. Pyrgeometers (sensor name begins with SL):
-		1. Open the header file and scroll down to where <SL510_CALIBRATION_FACTOR_K1> or <SL610_CALIBRATION_FACTOR_K2> is defined. This is just above the Steinhart-Hart equation coefficients are defined, around line 240.
-		2. Change both the K1 factor and the K2 factor to what your certificate of calibration states.
-		3. Save the changes.
+2. Make sure you have the pyranometer and pyrgeometer calibration factors on-hand. You will need them when you adjust the Arduino code on your Mayfly after these steps are complete.
 3. If you are using the MaxBotix sonar sensor for snow depth, you will need to measure the height of the sensor.
 	1. You can manually measure this, or you can use the "test_maxbotix" file found in snow_sensing > code > utilities > test_sensors. This will read out the sensor height. Get a height in millimeters, and write it down so you can add it to your sketch you'll upload upon deployment.
 	2. It is suggested that you manually measure the height of the sensor, as it loses accuracy without a snow surface to measure
@@ -66,7 +53,7 @@ include the sampling interval, sonar height, etc. These are noted in the sketch.
 	3. Attach your XBee S3B to the explorer making sure to match the board's geometry to the white outlines on the explorer
 	4. Attach the board to your computer. If you get a different explorer board, note that you may need to supply power externally, such as with a barrel jack and wall plug.
 	5. Open the XCTU software
-	6. In the top left, select button showing a module with a magnifying glass over it to discover the radio module
+	6. In the top left, select the button showing a module with a magnifying glass over it to discover the radio module
 	7. Select the port the radio is connected to
 	8. Press Next
 	9. Make sure the following settings are set:
