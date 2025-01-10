@@ -76,7 +76,7 @@ const char* sketchName = "satellite_station.ino";
 // This can be found on the bottom of the Mayfly if the ink hasn't rubbed off.
 // Sometimes I just use the name I've given the site here instead of the serial number.
 // Make sure it is a string (in double quotations).
-const char* LoggerID = "marshes";
+const char* LoggerID = "conifers";
 
 // How frequently (in minutes) to log data
 const uint8_t loggingInterval = 60;
@@ -142,6 +142,56 @@ MaximDS3231 ds3231(1);
 // delete the corresponding section, but make sure to also delete its associated variables
 // in the variable list found after these.
 
+// ==========================================================================
+//    Battery voltage
+// ==========================================================================
+/*
+This is for measuring battery voltage using the Adafruit ADS1115 16-bit
+Analog-to-digital converters (ADCs). The ADCs can only read voltages within
++/- 4.096 volts, so a voltage divider set up is needed. Please consult the wiring
+guide on the CIROH: Advancing Snow Observations GitHub page before including this
+measurement; otherwise, it is best to remove it
+*/
+
+# include <Adafruit_ADS1015.h>
+
+float calculateBatteryVoltage(void) {
+  float res1 = 100;  // resistor value in kOhms that comes directly off the battery
+  float res2 = 20;  // resistor value in kOhms that connects directly into ground
+  uint8_t i2cAddress = 0x49;  // Hexidecimal address of ADC that is taking the measurement
+  uint8_t posBatChannel = 2;  // Channel on ADC the battery is connected to
+  float inputVar1 = -9999;
+  float calculatedResult = -9999;
+  Adafruit_ADS1115 ads(i2cAddress);
+  ads.setGain(GAIN_ONE);
+  ads.begin();
+  inputVar1 = ads.readADC_SingleEnded_V(posBatChannel);
+  if (inputVar1 < 4.096 && inputVar1 > 0) {
+    calculatedResult = inputVar1 * (res2 / (res2 + res1));
+  } else {
+    inputVar1 = -9999;
+  }
+  return calculatedResult;
+}
+
+// Properties of the calculated battery voltage
+
+// The number of digits after the decimal place
+const uint8_t calculatedBatteryVoltageResolution = 2;
+// Variable name (this must be a value from http://vocabulary.odm2.org/variablename/)
+const char* calculatedBatteryVoltageName = "BatteryVoltage";
+// Variable units (this must be a value from http://vocabulary.odm2.org/units/)
+const char* calculatedBatteryVoltageUnit = "V";
+// A short code for the variable
+const char* calculatedBatteryVoltageCode = "batteryVolts";
+// The (optional) universallly unique identifier
+const char* calculatedBatteryVoltageUUID = "12345678-abcd-1234-ef00-1234567890ab";
+
+Variable* calculatedBatteryVoltage = new Variable(
+    calculateBatteryVoltage, calculatedBatteryVoltageResolution, calculatedBatteryVoltageName,
+    calculatedBatteryVoltageUnit, calculatedBatteryVoltageCode, calculatedBatteryVoltageUUID);
+
+// That's the end of the code for the battery voltage
 
 // ==========================================================================
 //    MaxBotix sonar sensor for snow depth
@@ -155,7 +205,7 @@ AltSoftSerial sonarSerial(6, -1);  // The -1 indicates that no Tx wire is attach
 								   // on the board, pin 6).
 
 // Set the height of the sensor (in millimeters)
-const int32_t sonarHeight = 2247.9;
+const int32_t sonarHeight = 2896;
 const double slopeAngleDeg = 0;
 double slopeAngleRad = slopeAngleDeg * 3.14159 / 180;
 
@@ -186,9 +236,9 @@ float calculateSnowDepth(void) {
     float inputVar1 = sonarHeight;  // The first variable input is the sonar height
     float inputVar2 = sonarRange->getValue();  // The second variable input is the sonar range measured
     // make sure both inputs are good
-	// A reading of 5000 is an error for the sensor as well
-	// It may seem odd to check if the first input variable isn't -9999 because it is just the sonar height we entered,
-	// but for the sake of consistency it is included
+    // A reading of 5000 is an error for the sensor as well
+    // It may seem odd to check if the first input variable isn't -9999 because it is just the sonar height we entered,
+    // but for the sake of consistency it is included
     if (inputVar1 != -9999 && inputVar2 != -9999 && inputVar2 != 5000) {
       calculatedResult = (inputVar1 - inputVar2) / cos(slopeAngleRad);  // The snow depth is the height of the sensor minus the sonar's range measurement
     }
@@ -258,7 +308,7 @@ the address of the ADC you need to connect to:
   
 */
 
-float sp510calibFactor = 26.03;
+float sp510calibFactor = 21.89;
 
 // Construct the Apogee SP-510-SS sensor object
 ApogeeSP510 sp510(-1, sp510calibFactor, 0x4B, 3);  // The -1 indicates that there is no powering up necessary for measurement 
@@ -290,7 +340,7 @@ Variable* sp510rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
-float sp610calibFactor = 30.82;
+float sp610calibFactor = 31.90;
 
 // Construct the Apogee SP-610-SS sensor object
 ApogeeSP610 sp610(-1, sp610calibFactor, 0x4B, 3);
@@ -319,8 +369,8 @@ Variable* sp610rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
-float sl510k1 = 9.509;
-float sl510k2 = 1.020;
+float sl510k1 = 9.229;
+float sl510k2 = 1.044;
 
 // Construct the Apogee SL-510-SS sensor object
 // The only parameter you should adjust is how many measurements you want to take (last parameter)
@@ -354,8 +404,8 @@ Variable* sl510rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
-float sl610k1 = 9.323;
-float sl610k2 = 1.033;
+float sl610k1 = 9.181;
+float sl610k2 = 1.018;
 
 // Construct the Apogee SL-610-SS sensor object
 // The only parameter you should adjust is how many measurements you want to take (last parameter)
@@ -500,7 +550,8 @@ Variable* variableList[] = {
     st110thermistorVolts,
     st110airTemp,
     sonarRange,
-    calculatedSnowDepth
+    calculatedSnowDepth,
+    //calculatedBatteryVoltage
     // Additional sensor variables can be added here, by copying the syntax
     //   for creating the variable pointer (FORM1) from the
     //   `menu_a_la_carte.ino` example
@@ -540,6 +591,7 @@ const char* UUIDs[] = {
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
+    //"12345678-abcd-1234-ef00-1234567890ab",
     //  ... The number of UUID's must match the number of variables!
     "12345678-abcd-1234-ef00-1234567890ab",
 };
