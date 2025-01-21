@@ -157,9 +157,9 @@ measurement; otherwise, it is best to remove it
 
 float calculateBatteryVoltage(void) {
   float res1 = 100;  // resistor value in kOhms that comes directly off the battery
-  float res2 = 20;  // resistor value in kOhms that connects directly into ground
+  float res2 = 22;  // resistor value in kOhms that connects directly into ground
   uint8_t i2cAddress = 0x49;  // Hexidecimal address of ADC that is taking the measurement
-  uint8_t posBatChannel = 2;  // Channel on ADC the battery is connected to
+  uint8_t posBatChannel = 3;  // Channel on ADC the battery is connected to
   float inputVar1 = -9999;
   float calculatedResult = -9999;
   Adafruit_ADS1115 ads(i2cAddress);
@@ -167,7 +167,7 @@ float calculateBatteryVoltage(void) {
   ads.begin();
   inputVar1 = ads.readADC_SingleEnded_V(posBatChannel);
   if (inputVar1 < 4.096 && inputVar1 > 0) {
-    calculatedResult = inputVar1 * (res2 / (res2 + res1));
+    calculatedResult = inputVar1 / (res2 / (res2 + res1));
   } else {
     inputVar1 = -9999;
   }
@@ -183,7 +183,7 @@ const char* calculatedBatteryVoltageName = "BatteryVoltage";
 // Variable units (this must be a value from http://vocabulary.odm2.org/units/)
 const char* calculatedBatteryVoltageUnit = "V";
 // A short code for the variable
-const char* calculatedBatteryVoltageCode = "batteryVolts";
+const char* calculatedBatteryVoltageCode = "MayflyBattVolt";
 // The (optional) universallly unique identifier
 const char* calculatedBatteryVoltageUUID = "12345678-abcd-1234-ef00-1234567890ab";
 
@@ -206,6 +206,7 @@ AltSoftSerial sonarSerial(6, -1);  // The -1 indicates that no Tx wire is attach
 
 // Set the height of the sensor (in millimeters)
 const int32_t sonarHeight = 2896;
+// Set the slope angle in degrees
 const double slopeAngleDeg = 0;
 double slopeAngleRad = slopeAngleDeg * 3.14159 / 180;
 
@@ -1012,7 +1013,7 @@ void loop() {
         if (timeRequested) {  // If a timestamp was requested
           String datetime = "";  // Create an empty String object for the datetime
 		  
-		  // Retrieve the datetime from the datalogger and store it in the String we just made
+		      // Retrieve the datetime from the datalogger and store it in the String we just made
           dataLogger.dtFromEpoch(dataLogger.markedLocalEpochTime).addToString(datetime);
 		  
           char timestamp[datetime.length() + 1];  // Create a string variable that is compatible with transmit requests
@@ -1041,12 +1042,12 @@ void loop() {
         }
 		
         if (varCountRequested) {  // If the variable count has been requested
-		  // We will send that number
-		  // Here I have elected to create the frame myself, as I had trouble implementing
-		  // the transmitByte function. Further debugging could clean this up to just use
-		  // that function rather than construct a frame ourselves
+          // We will send that number
+          // Here I have elected to create the frame myself, as I had trouble implementing
+          // the transmitByte function. Further debugging could clean this up to just use
+          // that function rather than construct a frame ourselves
 
-		  // Start of checksum
+		      // Start of checksum
           int sum = 0;  // Sum for checksum at end of transmit request frame
           sum += 0x10;
           sum += 0x00;
@@ -1063,7 +1064,7 @@ void loop() {
 
           sum += varCount;
           sum = 255 - (sum % 256);
-		  // End of checksum
+		      // End of checksum
 
           Serial1.write(0x7E);  // Send the XBee the starting delimeter
           Serial1.write(0x00);  // Send the XBee the message's MSB
@@ -1083,7 +1084,7 @@ void loop() {
 
         bool allDataSent = false;  // Assume that not all the data has been sent
 		
-		// While loop for sending all the data to the host station
+		    // While loop for sending all the data to the host station
         while (!allDataSent) {  // While all the data has not been sent
           memset(rx, 0x00, sizeof(rx));  // Clear the buffer
           bool breakWhile = false;  // Assume that we are going to break out of this while loop, unless something changes
@@ -1102,7 +1103,7 @@ void loop() {
             break;  // Break the overarching while loop where we send all the data, effectively ending all communication until the next logging interval
           }
 		  
-		  // In this part, we will check which variable number the host station is interested in and supply the name of that variable
+		      // In this part, we will check which variable number the host station is interested in and supply the name of that variable
           Serial1.readBytes(rx, Serial1.available());  // Move what was received into the buffer
           if (rx[3] == 0x90 && rx[15] < varCount) {  // If the message was a receive packet and a number less than the varCount
             delay(20);
