@@ -12,8 +12,6 @@ This document will go over the construction of a mast that does not use Campbell
 It will also cover to construct a central station for aggregating data from multiple snow satellite stations on a Mayfly and communicating that data to  
 a Campbell Scientific CR800.
 
-#### Campbell Scientific Tripod Setup
-
-
-
 #### Low-cost Platform Setup
+
+1. 
