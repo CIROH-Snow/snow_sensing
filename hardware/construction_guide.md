@@ -54,7 +54,7 @@ a Campbell Scientific CR800.
 ![Stake in guy wire](construction_images/IMG_9149.JPG)
 23. Repeat this process for all three wires.
 24. Tighten the turnbuckles to impart tension to the wires and level the mast. Note that this may be an interative process of realigning stakes, changing wire lengths, and loosening/tightening turnbuckles to create even and solid tension in all wires while keeping the mast level, and you may need to go back and change things a few times over as you narrow in on the correct dimensions and setup.
-![Tensioning the system](construction_images/IMG_9150.JPG)
+![Tensioning the system](construction_images/IMG_9148.JPG)
 25. Take the mast grounding clamp and open it up.
 ![Mast grounding clamp](construction_images/IMG_9153.JPG)
 ![Opening the mast grounding clamp](construction_images/IMG_9155.JPG)
