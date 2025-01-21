@@ -14,4 +14,5 @@ a Campbell Scientific CR800.
 
 #### Low-cost Platform Setup
 
-1. 
+1. Take an auger and drill/dig a hole at least 20 inches into the ground.
+2. Using a Sharpie, mark on the Teros sensors
