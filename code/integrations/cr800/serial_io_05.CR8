@@ -1,1379 +1,677 @@
-'CR800 Series Datalogger
-
-
-
-Const Debug_w_3000 = False    ' set true for debug only!!!
-
-
-
-' 13 Sep 2024  Larry and Braedon
-
-
-
-' Implements serial coms with a Mayfly datalogger. Receives a serial string, assigns values to
-
-'   variables and stores those values to one or more final storage tables.
-
-'   There is no handshaking between the Mayfly and CSI dataloggers. The Mayfly sends serial
-
-'   strings at its own unprompted output rate.
-
-'
-
-' Definitions
-
-'   variable string: a serial string of the format "@variablename=value;"
-
-'   station string: one or more variable strings concatenated together, from one station ending with "@endofstation=1;"
-
-'
-
-' Within the serial stream, case is ignored and extra white space is ignored.
-
-'
-
-'
-
-' 08 Nov 2024  Larry J    serial_io_03.cr8
-
-'    Doubled Mayfly_max_str to 2000. 
-
-'    Added Housekeeping Table for CR800 parameters, including Battery Voltage.
-
-'
-
-'    Added SW12 control to cycle power on Mayfly Base station.
-
-'      Controlled by public variable Mayfly_P_Manual.
-
-'        If true, manual control availabe by editing Public table variable Mayfly_PMan_On.
-
-'        If false, control based on real-time clock via public variable Mayfly_PRClk_On.
-
-'          Mayfly_PRClk_On is under CRBasic control with parameters in the Constant Table.
-
-'          Power-cycle interval is Mayfly_P_TInt in minutes in the Constant Table
-
-'          Power-cycle interval offset to turn power off is Mayfly_P_TOffsetUp in the Constant Table
-
-'          Power-cycle interval offset time to power down Mayfly_P_TOffsetDown in minutes in the Constant Table
-
-'            Example:
-
-'  Const Mayfly_P_TInt As Long = 60      ' in minutes
-
-'  Const Mayfly_P_TOffsetUp As Long = 58    ' in minutes from the top of the hour, power up 
-
-'  Const Mayfly_P_TOffsetDown As Long = 12  ' in minutes from the top of the hour, power down
-
-'
-
-'
-
-'    Moved a bunch of variables from public to dim.
-
-'    Added a debug mode to test program without the CR800 in the field.
-
-'        Controlled at compile time with Debug_w_3000
-
-'
-
-'
-
-' 16 Nov 2024  Larry J    serial_io_04.cr8
-
-'    Added code to default Mayfly variables to non-sensical values after table calls and at program start
-
-'    Added variables and code to record burst length between endofrecord=1 from Mayfly
-
-'    Doubled Mayfly_max_str_len again. Aborted Mayfly satelite transmission w/o endofrecord could over run the buffer.
-
-'        Has already recovered. Doubled for margin.
-
-
-' 10 Jan 2025 Braedon D & Larry J		serial_io_05.cr8
-
-'	Added battery voltage variable
-
-
-
-
-
-
-
-
-
-Const Mayfly_max_str_len = 4000    ' This needs to be updated with the burst string length from the Mayfly
-
-                                  '   That length is counted by Max_Burst_len (plus some white space and "@" and ";" per string)
-
-Const Rcv_str_buffer_len=Mayfly_max_str_len*2  ' doubled for asynchronicity
-
-
-
-Public Rcv_str As String * Rcv_str_buffer_len    
-
-Dim Rcv_str_len As Long
-
-
-
-Dim Total_Burst_Len As Long
-
-Public Max_Burst_Len As Long
-
-
-
-Dim SplitRes (3) As String * 25    ' used to parse the string based on the '=' character
-
-
-
-#If Debug_w_3000
-
-  Dim xmit_str_len As Long
-
-  Public Xmit_str As String * 100
-
-  Public test_SampNum As Long
-
-  Public test_ts As String *25
-
-#EndIf
-
-
-
-' Declare variables from Mayfly
-
-' As variables are added, three sections of code must modified
-
-'   This section to declare variables
-
-'   The variables to be stored in the output table
-
-'   The string parsing to store values into datalogger variables
-
-
-
-Public PTemp
-
-Units PTemp=degC
-
-Public BattVolt
-
-Units BattVolt=V
-
-
-
-Public last_UWRL_ts As String * 25    ' for quicklook on recent responses
-
-Public last_CR800_UWRL_ts As String * 25
-
-Public last_UWRL_sn As Long
-
-Public last_UWRL_Burst_Len As Long
-
-
-
-Public last_Marshes_ts As String * 25
-
-Public last_CR800_Marshes_ts As String * 25
-
-Public last_Marshes_sn As Long
-
-Public last_Marshes_Burst_Len As Long
-
-
-
-Public last_Sunny_ts As String * 25
-
-Public last_CR800_Sunny_ts As String * 25
-
-Public last_Sunny_sn As Long
-
-Public last_Sunny_Burst_Len As Long
-
-
-
-Public last_Aspens_ts As String * 25
-
-Public last_CR800_Aspens_ts As String * 25
-
-Public last_Aspens_sn As Long
-
-Public last_Aspens_Burst_Len As Long
-
-
-
-Public last_Conifers_ts As String * 25
-
-Public last_CR800_Conifers_ts As String * 25
-
-Public last_Conifers_sn As Long
-
-Public last_Conifers_Burst_Len As Long
-
-
-
-Public last_Roadside_ts As String * 25
-
-Public last_CR800_Roadside_ts As String * 25
-
-Public last_Roadside_sn As Long
-
-Public last_Roadside_Burst_Len As Long
-
-
-
-
-
-
-
-Dim station As String * 20
-
-Dim mayfly_ts As String * 20
-
-Dim sampNum As Long 
-
-Public boardTemp As Float
-
-Units boardTemp=degC
-
-Dim sonarRange As Float
-
-Units sonarRange=mm
-
-Dim snowDepth As Float
-
-Units snowDepth=mm
-
-Dim sp510thermopileVolt As Float
-
-Units sp510thermopileVolt=V
-
-Dim inShortRad As Float
-
-Units inShortRad=W/m^2
-
-Dim sp610thermopileVolt As Float
-
-Units sp610thermopileVolt=V
-
-Dim outShortRad As Float
-
-Units outShortRad=W/m^2
-
-Dim sl510thermistorVolt As Float
-
-Units sl510thermistorVolt=V
-
-Dim sl510thermopileVolt As Float
-
-Units sl510thermopileVolt=V
-
-Dim inLongRad As Float
-
-Units inLongRad=W/m^2
-
-Dim sl610thermistorVolt As Float
-
-Units sl610thermistorVolt=V
-
-Dim sl610thermopileVolt As Float
-
-Units sl610thermopileVolt=V
-
-Dim outLongRad As Float
-
-Units outLongRad=W/m^2
-
-Dim rawCounts_2in As Float
-
-Dim soilTemp_2in As Float
-
-Units soilTemp_2in=deg C
-
-Dim soilEa_2in As Float
-
-Dim soilVWC_2in As Float
-
-Dim soilEC_2in As Float
-
-Dim rawCounts_8in As Float
-
-Dim soilTemp_8in As Float
-
-Units soilTemp_8in=deg C
-
-Dim soilEa_8in As Float
-
-Dim soilVWC_8in As Float
-
-Dim soilEC_8in As Float
-
-Dim rawCounts_20in As Float
-
-Dim soilTemp_20in As Float
-
-Units soilTemp_20in=deg C
-
-Dim soilEa_20in As Float
-
-Dim soilVWC_20in As Float
-
-Dim soilEC_20in As Float
-
-Dim airTemp As Float
-
-Units airTemp=deg C
-
-Dim MayflyBattVolt As Float
-
-Units MayflyBattVolt=volts
-
-
-
-Public Mayfly_P_Manual As Boolean = false
-
-Public Mayfly_PMan_On As Boolean = true
-
-Public Mayfly_PRClk_On As Boolean = true
-
-
-
-
-
-Dim endofstation As Boolean
-
-
-
-
-
-
-
-ConstTable (Mayfly_Power)               ' see documentation: 08 Nov 2024  Larry J   serial_io_03.cr8
-
-  Const Mayfly_P_TInt As Long = 60      ' in minutes
-
-  Const Mayfly_P_TOffsetUp As Long = 58    ' in minutes from the top of the hour, power up 
-
-  Const Mayfly_P_TOffsetDown As Long = 12  ' in minutes from the top of the hour, power down
-
-EndConstTable
-
-
-
-
-
-
-
-
-
-' Add code as variables are added
-
-DataTable (UWRL, True, -1)
-
-  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
-
-  Sample (1, station, String) 
-
-  Sample (1, mayfly_ts, String)
-
-  Sample (1, sampNum, Long)
-
-  Sample (1, boardTemp, Float)
-
-  Sample (1, sonarRange, Float)
-
-  Sample (1, snowDepth, Float)
-
-  Sample (1, sp510thermopileVolt, Float)
-
-  Sample (1, inShortRad, Float)
-
-  Sample (1, sp610thermopileVolt, Float)
-
-  Sample (1, outShortRad, Float)
-
-  Sample (1, sl510thermistorVolt, Float)
-
-  Sample (1, sl510thermopileVolt, Float)
-
-  Sample (1, inLongRad, Float)
-
-  Sample (1, sl610thermistorVolt, Float)
-
-  Sample (1, sl610thermopileVolt, Float)
-
-  Sample (1, outLongRad, Float)
-
-  Sample (1, rawCounts_2in, Float)
-
-  Sample (1, soilTemp_2in, Float)
-
-  Sample (1, soilEa_2in, Float)
-
-  Sample (1, soilVWC_2in, Float)
-
-  Sample (1, soilEC_2in, Float)
-
-  Sample (1, rawCounts_8in, Float)
-
-  Sample (1, soilTemp_8in, Float)
-
-  Sample (1, soilEa_8in, Float)
-
-  Sample (1, soilVWC_8in, Float)
-
-  Sample (1, soilEC_8in, Float)
-
-  Sample (1, rawCounts_20in, Float)
-
-  Sample (1, soilTemp_20in, Float)
-
-  Sample (1, soilEa_20in, Float)
-
-  Sample (1, soilVWC_20in, Float)
-
-  Sample (1, soilEC_20in, Float)
-
-  Sample (1, airTemp, Float)
-  
-  Sample (1, MayflyBattVolt, Float)
-
-EndTable
-
-
-
-DataTable (Marshes, True, -1)
-
-  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
-
-  Sample (1, station, String) 
-
-  Sample (1, mayfly_ts, String)
-
-  Sample (1, sampNum, Long)
-
-  Sample (1, boardTemp, Float)
-
-  Sample (1, sonarRange, Float)
-
-  Sample (1, snowDepth, Float)
-
-  Sample (1, sp510thermopileVolt, Float)
-
-  Sample (1, inShortRad, Float)
-
-  Sample (1, sp610thermopileVolt, Float)
-
-  Sample (1, outShortRad, Float)
-
-  Sample (1, sl510thermistorVolt, Float)
-
-  Sample (1, sl510thermopileVolt, Float)
-
-  Sample (1, inLongRad, Float)
-
-  Sample (1, sl610thermistorVolt, Float)
-
-  Sample (1, sl610thermopileVolt, Float)
-
-  Sample (1, outLongRad, Float)
-
-  Sample (1, rawCounts_2in, Float)
-
-  Sample (1, soilTemp_2in, Float)
-
-  Sample (1, soilEa_2in, Float)
-
-  Sample (1, soilVWC_2in, Float)
-
-  Sample (1, soilEC_2in, Float)
-
-  Sample (1, rawCounts_8in, Float)
-
-  Sample (1, soilTemp_8in, Float)
-
-  Sample (1, soilEa_8in, Float)
-
-  Sample (1, soilVWC_8in, Float)
-
-  Sample (1, soilEC_8in, Float)
-
-  Sample (1, rawCounts_20in, Float)
-
-  Sample (1, soilTemp_20in, Float)
-
-  Sample (1, soilEa_20in, Float)
-
-  Sample (1, soilVWC_20in, Float)
-
-  Sample (1, soilEC_20in, Float)
-
-  Sample (1, airTemp, Float)
-  
-  Sample (1, MayflyBattVolt, Float)
-
-EndTable
-
-
-
-DataTable (Sunny, True, -1)
-
-  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
-
-  Sample (1, station, String) 
-
-  Sample (1, mayfly_ts, String)
-
-  Sample (1, sampNum, Long)
-
-  Sample (1, boardTemp, Float)
-
-  Sample (1, sonarRange, Float)
-
-  Sample (1, snowDepth, Float)
-
-  Sample (1, sp510thermopileVolt, Float)
-
-  Sample (1, inShortRad, Float)
-
-  Sample (1, sp610thermopileVolt, Float)
-
-  Sample (1, outShortRad, Float)
-
-  Sample (1, sl510thermistorVolt, Float)
-
-  Sample (1, sl510thermopileVolt, Float)
-
-  Sample (1, inLongRad, Float)
-
-  Sample (1, sl610thermistorVolt, Float)
-
-  Sample (1, sl610thermopileVolt, Float)
-
-  Sample (1, outLongRad, Float)
-
-  Sample (1, rawCounts_2in, Float)
-
-  Sample (1, soilTemp_2in, Float)
-
-  Sample (1, soilEa_2in, Float)
-
-  Sample (1, soilVWC_2in, Float)
-
-  Sample (1, soilEC_2in, Float)
-
-  Sample (1, rawCounts_8in, Float)
-
-  Sample (1, soilTemp_8in, Float)
-
-  Sample (1, soilEa_8in, Float)
-
-  Sample (1, soilVWC_8in, Float)
-
-  Sample (1, soilEC_8in, Float)
-
-  Sample (1, rawCounts_20in, Float)
-
-  Sample (1, soilTemp_20in, Float)
-
-  Sample (1, soilEa_20in, Float)
-
-  Sample (1, soilVWC_20in, Float)
-
-  Sample (1, soilEC_20in, Float)
-
-  Sample (1, airTemp, Float)
-  
-  Sample (1, MayflyBattVolt, Float)
-
-EndTable
-
-
-
-DataTable (Aspens, True, -1)
-
-  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
-
-  Sample (1, station, String) 
-
-  Sample (1, mayfly_ts, String)
-
-  Sample (1, sampNum, Long)
-
-  Sample (1, boardTemp, Float)
-
-  Sample (1, sonarRange, Float)
-
-  Sample (1, snowDepth, Float)
-
-  Sample (1, sp510thermopileVolt, Float)
-
-  Sample (1, inShortRad, Float)
-
-  Sample (1, sp610thermopileVolt, Float)
-
-  Sample (1, outShortRad, Float)
-
-  Sample (1, sl510thermistorVolt, Float)
-
-  Sample (1, sl510thermopileVolt, Float)
-
-  Sample (1, inLongRad, Float)
-
-  Sample (1, sl610thermistorVolt, Float)
-
-  Sample (1, sl610thermopileVolt, Float)
-
-  Sample (1, outLongRad, Float)
-
-  Sample (1, rawCounts_2in, Float)
-
-  Sample (1, soilTemp_2in, Float)
-
-  Sample (1, soilEa_2in, Float)
-
-  Sample (1, soilVWC_2in, Float)
-
-  Sample (1, soilEC_2in, Float)
-
-  Sample (1, rawCounts_8in, Float)
-
-  Sample (1, soilTemp_8in, Float)
-
-  Sample (1, soilEa_8in, Float)
-
-  Sample (1, soilVWC_8in, Float)
-
-  Sample (1, soilEC_8in, Float)
-
-  Sample (1, rawCounts_20in, Float)
-
-  Sample (1, soilTemp_20in, Float)
-
-  Sample (1, soilEa_20in, Float)
-
-  Sample (1, soilVWC_20in, Float)
-
-  Sample (1, soilEC_20in, Float)
-
-  Sample (1, airTemp, Float)
-  
-  Sample (1, MayflyBattVolt, Float)
-
-EndTable
-
-
-
-DataTable (Conifers, True, -1)
-
-  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
-
-  Sample (1, station, String) 
-
-  Sample (1, mayfly_ts, String)
-
-  Sample (1, sampNum, Long)
-
-  Sample (1, boardTemp, Float)
-
-  Sample (1, sonarRange, Float)
-
-  Sample (1, snowDepth, Float)
-
-  Sample (1, sp510thermopileVolt, Float)
-
-  Sample (1, inShortRad, Float)
-
-  Sample (1, sp610thermopileVolt, Float)
-
-  Sample (1, outShortRad, Float)
-
-  Sample (1, sl510thermistorVolt, Float)
-
-  Sample (1, sl510thermopileVolt, Float)
-
-  Sample (1, inLongRad, Float)
-
-  Sample (1, sl610thermistorVolt, Float)
-
-  Sample (1, sl610thermopileVolt, Float)
-
-  Sample (1, outLongRad, Float)
-
-  Sample (1, rawCounts_2in, Float)
-
-  Sample (1, soilTemp_2in, Float)
-
-  Sample (1, soilEa_2in, Float)
-
-  Sample (1, soilVWC_2in, Float)
-
-  Sample (1, soilEC_2in, Float)
-
-  Sample (1, rawCounts_8in, Float)
-
-  Sample (1, soilTemp_8in, Float)
-
-  Sample (1, soilEa_8in, Float)
-
-  Sample (1, soilVWC_8in, Float)
-
-  Sample (1, soilEC_8in, Float)
-
-  Sample (1, rawCounts_20in, Float)
-
-  Sample (1, soilTemp_20in, Float)
-
-  Sample (1, soilEa_20in, Float)
-
-  Sample (1, soilVWC_20in, Float)
-
-  Sample (1, soilEC_20in, Float)
-
-  Sample (1, airTemp, Float)
-  
-  Sample (1, MayflyBattVolt, Float)
-
-EndTable
-
-
-
-DataTable (Roadside, True, -1)
-
-  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
-
-  Sample (1, station, String) 
-
-  Sample (1, mayfly_ts, String)
-
-  Sample (1, sampNum, Long)
-
-  Sample (1, boardTemp, Float)
-
-  Sample (1, sonarRange, Float)
-
-  Sample (1, snowDepth, Float)
-
-  Sample (1, sp510thermopileVolt, Float)
-
-  Sample (1, inShortRad, Float)
-
-  Sample (1, sp610thermopileVolt, Float)
-
-  Sample (1, outShortRad, Float)
-
-  Sample (1, sl510thermistorVolt, Float)
-
-  Sample (1, sl510thermopileVolt, Float)
-
-  Sample (1, inLongRad, Float)
-
-  Sample (1, sl610thermistorVolt, Float)
-
-  Sample (1, sl610thermopileVolt, Float)
-
-  Sample (1, outLongRad, Float)
-
-  Sample (1, rawCounts_2in, Float)
-
-  Sample (1, soilTemp_2in, Float)
-
-  Sample (1, soilEa_2in, Float)
-
-  Sample (1, soilVWC_2in, Float)
-
-  Sample (1, soilEC_2in, Float)
-
-  Sample (1, rawCounts_8in, Float)
-
-  Sample (1, soilTemp_8in, Float)
-
-  Sample (1, soilEa_8in, Float)
-
-  Sample (1, soilVWC_8in, Float)
-
-  Sample (1, soilEC_8in, Float)
-
-  Sample (1, rawCounts_20in, Float)
-
-  Sample (1, soilTemp_20in, Float)
-
-  Sample (1, soilEa_20in, Float)
-
-  Sample (1, soilVWC_20in, Float)
-
-  Sample (1, soilEC_20in, Float)
-
-  Sample (1, airTemp, Float)
-  
-  Sample (1, MayflyBattVolt, Float)
-
-EndTable
-
-
-
-
-
-
-
-
-
-
-
-DataTable (HouseKeeping, True, 24*14) ' 14 days of storage for a one-hour interval
-
-  #If Debug_w_3000
-
-  DataInterval (15, 60, sec, 20)      ' sample 15 seconds after the top of each minute    
-
-  #Else
-
-  DataInterval (15, 60, min, 20)      ' sample 15 minutes after the top of each hour    
-
-  #EndIf  
-
-  Minimum (1, BattVolt, Float, 0, 0)
-
-  Average (1, BattVolt, Float, 0)
-
-  Average (1, PTemp, Float, 0)
-
-  
-
-  Sample (1, last_UWRL_ts, String)      ' quicklook for recent responses
-
-  Sample (1, last_CR800_UWRL_ts, String)
-
-  Sample (1, last_UWRL_sn, Long)
-
-  Sample (1, last_UWRL_Burst_Len, Long)
-
-  
-
-  Sample (1, last_Marshes_ts, String)  
-
-  Sample (1, last_CR800_Marshes_ts, String)
-
-  Sample (1, last_Marshes_sn, Long)
-
-  Sample (1, last_Marshes_Burst_Len, Long)  
-
-
-
-  Sample (1, last_Sunny_ts, String)
-
-  Sample (1, last_CR800_Sunny_ts, String)
-
-  Sample (1, last_Sunny_sn, Long)
-
-  Sample (1, last_Sunny_Burst_Len, Long)
-
-    
-
-  Sample (1, last_Aspens_ts, String)
-
-  Sample (1, last_CR800_Aspens_ts, String)
-
-  Sample (1, last_Aspens_sn, Long)
-
-  Sample (1, last_Aspens_Burst_Len, Long)  
-
-
-
-  Sample (1, last_Conifers_ts, String)
-
-  Sample (1, last_CR800_Conifers_ts, String)
-
-  Sample (1, last_Conifers_sn, Long)
-
-  Sample (1, last_Conifers_Burst_Len, Long)  
-
-
-
-  Sample (1, last_Roadside_ts, String)
-
-  Sample (1, last_CR800_Roadside_ts, String)
-
-  Sample (1, last_Roadside_sn, Long)
-
-  Sample (1, last_Roadside_Burst_Len, Long)
-
-
-
-  Sample (1, Mayfly_P_Manual, Boolean)
-
-EndTable
-
-
-
-
-
-Sub Set_Defaults      ' initializes generic variables that will be sent by Mayfly base
-
-                      ' default values are non-sensical to flag "no report" from Mayfly
-
-  station = "n/a"
-
-  mayfly_ts = "n/a"
-
-  sampNum = -999999
-
-  boardTemp = NaN
-
-  sonarRange = Nan
-
-  snowDepth = Nan
-
-  sp510thermopileVolt = Nan
-
-  inShortRad = Nan
-
-  sp610thermopileVolt = Nan
-
-  outShortRad = NaN
-
-  sl510thermistorVolt = NaN
-
-  sl510thermopileVolt = NaN
-
-  inLongRad = NaN
-
-  sl610thermistorVolt = NaN
-
-  sl610thermopileVolt = NaN
-
-  outLongRad = NaN
-
-  rawCounts_2in = NaN
-
-  soilTemp_2in = NaN
-
-  soilEa_2in = NaN
-
-  soilVWC_2in = NaN
-
-  soilEC_2in = NaN
-
-  rawCounts_8in = NaN
-
-  soilTemp_8in = NaN
-
-  soilEa_8in = NaN
-
-  soilVWC_8in = NaN
-
-  soilEC_8in = NaN
-
-  rawCounts_20in = NaN
-
-  soilTemp_20in = NaN
-
-  soilEa_20in = NaN
-
-  soilVWC_20in = NaN
-
-  soilEC_20in = NaN
-
-  airTemp = NaN
-  
-  MayflyBattVolt = NaN
-
-
-
-EndSub 
-
-  
-
-
-
-
-
-
-
-SequentialMode
-
-
-
-BeginProg
-
-
-
-  Call Set_Defaults
-
-
-
-  
-
-' Receiver, C4 screw terminal
-
-' SerialOpen (ComPort, BaudRate, Format, TXDelay, BufferSize,)
-
-  SerialOpen (Com2,    9600,     16,     0,       Rcv_str_buffer_len)    ' doubled for asynchronicity
-
-  
-
-#If Debug_w_3000
-
-  ' Transmitter, C1 screw terminal  
-
-  ' SerialOpen (ComPort, BaudRate, Format, TXDelay, BufferSize)
-
-    SerialOpen (Com1,    9600,     19,     0,       200)
-
-#EndIf
-
-
-
-
-
-
-
-  Total_Burst_Len = 0
-
- 
-
-	Scan (1, Sec, 0, 0)
-
-	  
-
-    ' read a number of variable strings. keep readinging until rcv buffer is empty
-
-    
-
-    Do
-
-  '   SerialInRecord (COMPort, Dest,    BeginWord, NBytes, EndWord, NBytesReturned, SerialInRecOption )
-
-      SerialInRecord (Com2,    Rcv_str, 64,        0,      59,      Rcv_str_len,    10)
-
-            ' 64 is ascii @, 59 is ascii ;
-
-        
-
-      If (Rcv_str_len > 0) 
-
-        Total_Burst_Len = Total_Burst_Len + Rcv_str_len
-
-        
-
-        SplitStr (SplitRes, Rcv_str, "=", 3, 7)         ' right and left of "="
-
-        'SplitRes (1) = Trim (LowerCase (SplitRes (1)))  ' get rid of white space and make lower case
-
-        SplitRes (1) = Trim (SplitRes (1))
-
-        
-
-        ' search for serial stream varable names that match logger variable names
-
-        ' add code as variables are added      
-
-        If StrComp (SplitRes (1), "station") = 0 Then station = SplitRes(2)
-
-        If StrComp (SplitRes (1), "timestamp") = 0 Then mayfly_ts = SplitRes(2)
-
-        If StrComp (SplitRes (1), "SampNum") = 0 Then sampNum = SplitRes(2)
-
-        If StrComp (SplitRes (1), "BoardTemp") = 0 Then boardTemp = SplitRes(2)
-
-        If StrComp (SplitRes (1), "sonarRange") = 0 Then sonarRange = SplitRes(2)
-
-        If StrComp (SplitRes (1), "snowDepth") = 0 Then snowDepth = SplitRes(2)
-
-        If StrComp (SplitRes (1), "sp510thermopileVolt") = 0 Then sp510thermopileVolt = SplitRes(2)
-
-        If StrComp (SplitRes (1), "inShortRad") = 0 Then inShortRad = SplitRes(2)
-
-        If StrComp (SplitRes (1), "sp610thermopileVolt") = 0 Then sp610thermopileVolt = SplitRes(2)
-
-        If StrComp (SplitRes (1), "outShortRad") = 0 Then outShortRad = SplitRes(2)
-
-        If StrComp (SplitRes (1), "sl510thermistorVolt") = 0 Then sl510thermistorVolt = SplitRes(2)
-
-        If StrComp (SplitRes (1), "sl510thermopileVolt") = 0 Then sl510thermopileVolt = SplitRes(2)
-
-        If StrComp (SplitRes (1), "inLongRad") = 0 Then inLongRad = SplitRes(2)
-
-        If StrComp (SplitRes (1), "sl610thermistorVolt") = 0 Then sl610thermistorVolt = SplitRes(2)
-
-        If StrComp (SplitRes (1), "sl610thermopileVolt") = 0 Then sl610thermopileVolt = SplitRes(2)
-
-        If StrComp (SplitRes (1), "outLongRad") = 0 Then outLongRad = SplitRes(2)
-
-        If StrComp (SplitRes (1), "rawCounts_2in") = 0 Then rawCounts_2in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "soilTemp_2in") = 0 Then soilTemp_2in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "soilEa_2in") = 0 Then soilEa_2in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "soilVWC_2in") = 0 Then soilVWC_2in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "soilEC_2in") = 0 Then soilEC_2in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "rawCounts_8in") = 0 Then rawCounts_8in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "soilTemp_8in") = 0 Then soilTemp_8in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "soilEa_8in") = 0 Then soilEa_8in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "soilVWC_8in") = 0 Then soilVWC_8in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "soilEC_8in") = 0 Then soilEC_8in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "rawCounts_20in") = 0 Then rawCounts_20in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "soilTemp_20in") = 0 Then soilTemp_20in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "soilEa_20in") = 0 Then soilEa_20in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "soilVWC_20in") = 0 Then soilVWC_20in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "soilEC_20in") = 0 Then soilEC_20in = SplitRes(2)
-
-        If StrComp (SplitRes (1), "airTemp") = 0 Then airTemp = SplitRes(2)
-		
-		If StrComp (SplitRes (1), "MayflyBattVolt") = 0 Then MayflyBattVolt = SplitRes(2)
-
-
-
-        If StrComp (SplitRes (1), "endofstation") = 0 Then endofstation = SplitRes(2)        
-
-     
-
-      Else
-
-        ExitDo      ' rcv_str_len was 0
-
-      EndIf
-
-      
-
-      If endofstation 
-
-        endofstation=false
-
-        
-
-        If (Total_Burst_Len > Max_Burst_Len) Then Max_Burst_Len = Total_Burst_Len
-
-
-
-        If StrComp (station, "UWRL") = 0
-
-          last_UWRL_ts = mayfly_ts
-
-          last_CR800_UWRL_ts = public.timestamp (1, 1)
-
-          last_UWRL_sn = sampNum
-
-          last_UWRL_Burst_Len = Total_Burst_Len
-
-          CallTable UWRL
-
-        EndIf  
-
-        
-
-        If StrComp (station, "Marshes") = 0
-
-          last_Marshes_ts = mayfly_ts
-
-          last_CR800_Marshes_ts = public.timestamp (1, 1)
-
-          last_Marshes_sn = sampNum
-
-          last_Marshes_Burst_Len = Total_Burst_Len
-
-          CallTable Marshes
-
-        EndIf
-
-        
-
-        If StrComp (station, "Sunny") = 0
-
-          last_Sunny_ts = mayfly_ts
-
-          last_CR800_Sunny_ts = public.timestamp (1, 1)
-
-          last_Sunny_sn = sampNum
-
-          last_Sunny_Burst_Len = Total_Burst_Len
-
-          CallTable Sunny
-
-        EndIf  
-
-        
-
-        If StrComp (station, "Aspens") = 0
-
-          last_Aspens_ts = mayfly_ts
-
-          last_CR800_Aspens_ts = public.timestamp (1, 1)
-
-          last_Aspens_sn = sampNum
-
-          last_Aspens_Burst_Len = Total_Burst_Len
-
-          CallTable Aspens
-
-        EndIf
-
-        
-
-        If StrComp (station, "Conifers") = 0 
-
-          last_Conifers_ts = mayfly_ts
-
-          last_CR800_Conifers_ts = public.timestamp (1, 1)
-
-          last_Conifers_sn = sampNum
-
-          last_Conifers_Burst_Len = Total_Burst_Len
-
-          CallTable Conifers
-
-        EndIf
-
-        
-
-        If StrComp (station, "Roadside") = 0 
-
-          last_Roadside_ts = mayfly_ts
-
-          last_CR800_Roadside_ts = public.timestamp (1, 1)
-
-          last_Roadside_sn = sampNum
-
-          last_Roadside_Burst_Len = Total_Burst_Len
-
-          CallTable Roadside
-
-        EndIf
-
-        
-
-        Total_Burst_Len = 0
-
-        
-
-        Call Set_Defaults      ' initialize to non-sensical values
-
-
-
-      EndIf
-
-      
-
-      'Delay (0, 150, msec)    ' testing (only!) when the entire burst is not read on one scan
-
-      
-
-    Loop      ' end of looping until input buffer is empty
-
-    
-
-    Battery (BattVolt)
-
-    CallTable HouseKeeping
-
-
-
-      
-
-
-
-  NextScan
-
-	
-
-  SlowSequence
-
-    Scan (10, sec, 0, 0)
-
-
-
-      PanelTemp (PTemp, 60)
-
-    
-
-      If TimeIntoInterval (Mayfly_P_TOffsetUp, Mayfly_P_TInt, min) Then Mayfly_PRClk_On = True
-
-      If TimeIntoInterval (Mayfly_P_TOffsetDown, Mayfly_P_TInt, min) Then Mayfly_PRClk_On = False
-
-      #If Debug_w_3000
-
-      If Mayfly_P_Manual
-
-        SW12 (1, Mayfly_PMan_On)    ' for CR3000
-
-      Else
-
-        SW12 (1, Mayfly_PRClk_On)
-
-      EndIf
-
-      
-
-      #Else
-
-        
-
-      If Mayfly_P_Manual
-
-        SW12 (Mayfly_PMan_On)    ' for CR800 or Cr1000
-
-      Else
-
-        SW12 (Mayfly_PRClk_On)
-
-      EndIf
-
-      #EndIf
-
-      
-
-      #If Debug_w_3000
-
-        
-
-      test_ts = UWRL.timestamp (1, 1)   
-
-      xmit_str_len = Sprintf (Xmit_str, "@station=UWRL; @timestamp=%s; @SampNum=%d; @endofstation=1;", test_ts, test_SampNum)        
-
-     'SerialOut (ComPort, OutString, WaitString, NumberTries, TimeOut )
-
-      SerialOut (Com1,    Xmit_str,  "",         0,           0)
-
-      
-
-      test_ts = Aspens.timestamp (1, 1)   
-
-      xmit_str_len = Sprintf (Xmit_str, "@station=Aspens; @timestamp=%s; @SampNum=%d; @endofstation=1;", test_ts, test_SampNum+10000)        
-
-     'SerialOut (ComPort, OutString, WaitString, NumberTries, TimeOut )
-
-      SerialOut (Com1,    Xmit_str,  "",         0,           0)
-
-      
-
-      test_SampNum = test_SampNum+1
-
-      #EndIf
-
-
-
-
-
-    NextScan
-
-   
-
-    
-
-EndProg
-
-
-
+'CR800 Series Datalogger
+
+Const Debug_w_3000 = False    ' set true for debug only!!!
+
+' 13 Sep 2024  Larry and Braedon
+
+' Implements serial coms with a Mayfly datalogger. Receives a serial string, assigns values to
+'   variables and stores those values to one or more final storage tables.
+'   There is no handshaking between the Mayfly and CSI dataloggers. The Mayfly sends serial
+'   strings at its own unprompted output rate.
+'
+' Definitions
+'   variable string: a serial string of the format "@variablename=value;"
+'   station string: one or more variable strings concatenated together, from one station ending with "@endofstation=1;"
+'
+' Within the serial stream, case is ignored and extra white space is ignored.
+'
+'
+' 08 Nov 2024  Larry J    serial_io_03.cr8
+'    Doubled Mayfly_max_str to 2000. 
+'    Added Housekeeping Table for CR800 parameters, including Battery Voltage.
+'
+'    Added SW12 control to cycle power on Mayfly Base station.
+'      Controlled by public variable Mayfly_P_Manual.
+'        If true, manual control availabe by editing Public table variable Mayfly_PMan_On.
+'        If false, control based on real-time clock via public variable Mayfly_PRClk_On.
+'          Mayfly_PRClk_On is under CRBasic control with parameters in the Constant Table.
+'          Power-cycle interval is Mayfly_P_TInt in minutes in the Constant Table
+'          Power-cycle interval offset to turn power off is Mayfly_P_TOffsetUp in the Constant Table
+'          Power-cycle interval offset time to power down Mayfly_P_TOffsetDown in minutes in the Constant Table
+'            Example:
+'  Const Mayfly_P_TInt As Long = 60      ' in minutes
+'  Const Mayfly_P_TOffsetUp As Long = 58    ' in minutes from the top of the hour, power up 
+'  Const Mayfly_P_TOffsetDown As Long = 12  ' in minutes from the top of the hour, power down
+'
+'
+'    Moved a bunch of variables from public to dim.
+'    Added a debug mode to test program without the CR800 in the field.
+'        Controlled at compile time with Debug_w_3000
+'
+'
+' 16 Nov 2024  Larry J    serial_io_04.cr8
+'    Added code to default Mayfly variables to non-sensical values after table calls and at program start
+'    Added variables and code to record burst length between endofrecord=1 from Mayfly
+'    Doubled Mayfly_max_str_len again. Aborted Mayfly satelite transmission w/o endofrecord could over run the buffer.
+'        Has already recovered. Doubled for margin.' 10 Jan 2025 Braedon D & Larry J		serial_io_05.cr8'	Added battery voltage variable
+
+
+
+
+Const Mayfly_max_str_len = 4000    ' This needs to be updated with the burst string length from the Mayfly
+                                  '   That length is counted by Max_Burst_len (plus some white space and "@" and ";" per string)
+Const Rcv_str_buffer_len=Mayfly_max_str_len*2  ' doubled for asynchronicity
+
+Public Rcv_str As String * Rcv_str_buffer_len    
+Dim Rcv_str_len As Long
+
+Dim Total_Burst_Len As Long
+Public Max_Burst_Len As Long
+
+Dim SplitRes (3) As String * 25    ' used to parse the string based on the '=' character
+
+#If Debug_w_3000
+  Dim xmit_str_len As Long
+  Public Xmit_str As String * 100
+  Public test_SampNum As Long
+  Public test_ts As String *25
+#EndIf
+
+' Declare variables from Mayfly
+' As variables are added, three sections of code must modified
+'   This section to declare variables
+'   The variables to be stored in the output table
+'   The string parsing to store values into datalogger variables
+
+Public PTemp
+Units PTemp=degC
+Public BattVolt
+Units BattVolt=V
+
+Public last_UWRL_ts As String * 25    ' for quicklook on recent responses
+Public last_CR800_UWRL_ts As String * 25
+Public last_UWRL_sn As Long
+Public last_UWRL_Burst_Len As Long
+
+Public last_Marshes_ts As String * 25
+Public last_CR800_Marshes_ts As String * 25
+Public last_Marshes_sn As Long
+Public last_Marshes_Burst_Len As Long
+
+Public last_Sunny_ts As String * 25
+Public last_CR800_Sunny_ts As String * 25
+Public last_Sunny_sn As Long
+Public last_Sunny_Burst_Len As Long
+
+Public last_Aspens_ts As String * 25
+Public last_CR800_Aspens_ts As String * 25
+Public last_Aspens_sn As Long
+Public last_Aspens_Burst_Len As Long
+
+Public last_Conifers_ts As String * 25
+Public last_CR800_Conifers_ts As String * 25
+Public last_Conifers_sn As Long
+Public last_Conifers_Burst_Len As Long
+
+Public last_Roadside_ts As String * 25
+Public last_CR800_Roadside_ts As String * 25
+Public last_Roadside_sn As Long
+Public last_Roadside_Burst_Len As Long
+
+
+
+Dim station As String * 20
+Dim mayfly_ts As String * 20
+Dim sampNum As Long 
+Public boardTemp As Float
+Units boardTemp=degC
+Dim sonarRange As Float
+Units sonarRange=mm
+Dim snowDepth As Float
+Units snowDepth=mm
+Dim sp510thermopileVolt As Float
+Units sp510thermopileVolt=V
+Dim inShortRad As Float
+Units inShortRad=W/m^2
+Dim sp610thermopileVolt As Float
+Units sp610thermopileVolt=V
+Dim outShortRad As Float
+Units outShortRad=W/m^2
+Dim sl510thermistorVolt As Float
+Units sl510thermistorVolt=V
+Dim sl510thermopileVolt As Float
+Units sl510thermopileVolt=V
+Dim inLongRad As Float
+Units inLongRad=W/m^2
+Dim sl610thermistorVolt As Float
+Units sl610thermistorVolt=V
+Dim sl610thermopileVolt As Float
+Units sl610thermopileVolt=V
+Dim outLongRad As Float
+Units outLongRad=W/m^2
+Dim rawCounts_2in As Float
+Dim soilTemp_2in As Float
+Units soilTemp_2in=deg C
+Dim soilEa_2in As Float
+Dim soilVWC_2in As Float
+Dim soilEC_2in As Float
+Dim rawCounts_8in As Float
+Dim soilTemp_8in As Float
+Units soilTemp_8in=deg C
+Dim soilEa_8in As Float
+Dim soilVWC_8in As Float
+Dim soilEC_8in As Float
+Dim rawCounts_20in As Float
+Dim soilTemp_20in As Float
+Units soilTemp_20in=deg C
+Dim soilEa_20in As Float
+Dim soilVWC_20in As Float
+Dim soilEC_20in As Float
+Dim airTemp As Float
+Units airTemp=deg CDim MayflyBattVolt As FloatUnits MayflyBattVolt=volts
+
+Public Mayfly_P_Manual As Boolean = false
+Public Mayfly_PMan_On As Boolean = true
+Public Mayfly_PRClk_On As Boolean = true
+
+
+Dim endofstation As Boolean
+
+
+
+ConstTable (Mayfly_Power)               ' see documentation: 08 Nov 2024  Larry J   serial_io_03.cr8
+  Const Mayfly_P_TInt As Long = 60      ' in minutes
+  Const Mayfly_P_TOffsetUp As Long = 58    ' in minutes from the top of the hour, power up 
+  Const Mayfly_P_TOffsetDown As Long = 12  ' in minutes from the top of the hour, power down
+EndConstTable
+
+
+
+
+' Add code as variables are added
+DataTable (UWRL, True, -1)
+  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
+  Sample (1, station, String) 
+  Sample (1, mayfly_ts, String)
+  Sample (1, sampNum, Long)
+  Sample (1, boardTemp, Float)
+  Sample (1, sonarRange, Float)
+  Sample (1, snowDepth, Float)
+  Sample (1, sp510thermopileVolt, Float)
+  Sample (1, inShortRad, Float)
+  Sample (1, sp610thermopileVolt, Float)
+  Sample (1, outShortRad, Float)
+  Sample (1, sl510thermistorVolt, Float)
+  Sample (1, sl510thermopileVolt, Float)
+  Sample (1, inLongRad, Float)
+  Sample (1, sl610thermistorVolt, Float)
+  Sample (1, sl610thermopileVolt, Float)
+  Sample (1, outLongRad, Float)
+  Sample (1, rawCounts_2in, Float)
+  Sample (1, soilTemp_2in, Float)
+  Sample (1, soilEa_2in, Float)
+  Sample (1, soilVWC_2in, Float)
+  Sample (1, soilEC_2in, Float)
+  Sample (1, rawCounts_8in, Float)
+  Sample (1, soilTemp_8in, Float)
+  Sample (1, soilEa_8in, Float)
+  Sample (1, soilVWC_8in, Float)
+  Sample (1, soilEC_8in, Float)
+  Sample (1, rawCounts_20in, Float)
+  Sample (1, soilTemp_20in, Float)
+  Sample (1, soilEa_20in, Float)
+  Sample (1, soilVWC_20in, Float)
+  Sample (1, soilEC_20in, Float)
+  Sample (1, airTemp, Float)    Sample (1, MayflyBattVolt, Float)
+EndTable
+
+DataTable (Marshes, True, -1)
+  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
+  Sample (1, station, String) 
+  Sample (1, mayfly_ts, String)
+  Sample (1, sampNum, Long)
+  Sample (1, boardTemp, Float)
+  Sample (1, sonarRange, Float)
+  Sample (1, snowDepth, Float)
+  Sample (1, sp510thermopileVolt, Float)
+  Sample (1, inShortRad, Float)
+  Sample (1, sp610thermopileVolt, Float)
+  Sample (1, outShortRad, Float)
+  Sample (1, sl510thermistorVolt, Float)
+  Sample (1, sl510thermopileVolt, Float)
+  Sample (1, inLongRad, Float)
+  Sample (1, sl610thermistorVolt, Float)
+  Sample (1, sl610thermopileVolt, Float)
+  Sample (1, outLongRad, Float)
+  Sample (1, rawCounts_2in, Float)
+  Sample (1, soilTemp_2in, Float)
+  Sample (1, soilEa_2in, Float)
+  Sample (1, soilVWC_2in, Float)
+  Sample (1, soilEC_2in, Float)
+  Sample (1, rawCounts_8in, Float)
+  Sample (1, soilTemp_8in, Float)
+  Sample (1, soilEa_8in, Float)
+  Sample (1, soilVWC_8in, Float)
+  Sample (1, soilEC_8in, Float)
+  Sample (1, rawCounts_20in, Float)
+  Sample (1, soilTemp_20in, Float)
+  Sample (1, soilEa_20in, Float)
+  Sample (1, soilVWC_20in, Float)
+  Sample (1, soilEC_20in, Float)
+  Sample (1, airTemp, Float)    Sample (1, MayflyBattVolt, Float)
+EndTable
+
+DataTable (Sunny, True, -1)
+  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
+  Sample (1, station, String) 
+  Sample (1, mayfly_ts, String)
+  Sample (1, sampNum, Long)
+  Sample (1, boardTemp, Float)
+  Sample (1, sonarRange, Float)
+  Sample (1, snowDepth, Float)
+  Sample (1, sp510thermopileVolt, Float)
+  Sample (1, inShortRad, Float)
+  Sample (1, sp610thermopileVolt, Float)
+  Sample (1, outShortRad, Float)
+  Sample (1, sl510thermistorVolt, Float)
+  Sample (1, sl510thermopileVolt, Float)
+  Sample (1, inLongRad, Float)
+  Sample (1, sl610thermistorVolt, Float)
+  Sample (1, sl610thermopileVolt, Float)
+  Sample (1, outLongRad, Float)
+  Sample (1, rawCounts_2in, Float)
+  Sample (1, soilTemp_2in, Float)
+  Sample (1, soilEa_2in, Float)
+  Sample (1, soilVWC_2in, Float)
+  Sample (1, soilEC_2in, Float)
+  Sample (1, rawCounts_8in, Float)
+  Sample (1, soilTemp_8in, Float)
+  Sample (1, soilEa_8in, Float)
+  Sample (1, soilVWC_8in, Float)
+  Sample (1, soilEC_8in, Float)
+  Sample (1, rawCounts_20in, Float)
+  Sample (1, soilTemp_20in, Float)
+  Sample (1, soilEa_20in, Float)
+  Sample (1, soilVWC_20in, Float)
+  Sample (1, soilEC_20in, Float)
+  Sample (1, airTemp, Float)    Sample (1, MayflyBattVolt, Float)
+EndTable
+
+DataTable (Aspens, True, -1)
+  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
+  Sample (1, station, String) 
+  Sample (1, mayfly_ts, String)
+  Sample (1, sampNum, Long)
+  Sample (1, boardTemp, Float)
+  Sample (1, sonarRange, Float)
+  Sample (1, snowDepth, Float)
+  Sample (1, sp510thermopileVolt, Float)
+  Sample (1, inShortRad, Float)
+  Sample (1, sp610thermopileVolt, Float)
+  Sample (1, outShortRad, Float)
+  Sample (1, sl510thermistorVolt, Float)
+  Sample (1, sl510thermopileVolt, Float)
+  Sample (1, inLongRad, Float)
+  Sample (1, sl610thermistorVolt, Float)
+  Sample (1, sl610thermopileVolt, Float)
+  Sample (1, outLongRad, Float)
+  Sample (1, rawCounts_2in, Float)
+  Sample (1, soilTemp_2in, Float)
+  Sample (1, soilEa_2in, Float)
+  Sample (1, soilVWC_2in, Float)
+  Sample (1, soilEC_2in, Float)
+  Sample (1, rawCounts_8in, Float)
+  Sample (1, soilTemp_8in, Float)
+  Sample (1, soilEa_8in, Float)
+  Sample (1, soilVWC_8in, Float)
+  Sample (1, soilEC_8in, Float)
+  Sample (1, rawCounts_20in, Float)
+  Sample (1, soilTemp_20in, Float)
+  Sample (1, soilEa_20in, Float)
+  Sample (1, soilVWC_20in, Float)
+  Sample (1, soilEC_20in, Float)
+  Sample (1, airTemp, Float)    Sample (1, MayflyBattVolt, Float)
+EndTable
+
+DataTable (Conifers, True, -1)
+  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
+  Sample (1, station, String) 
+  Sample (1, mayfly_ts, String)
+  Sample (1, sampNum, Long)
+  Sample (1, boardTemp, Float)
+  Sample (1, sonarRange, Float)
+  Sample (1, snowDepth, Float)
+  Sample (1, sp510thermopileVolt, Float)
+  Sample (1, inShortRad, Float)
+  Sample (1, sp610thermopileVolt, Float)
+  Sample (1, outShortRad, Float)
+  Sample (1, sl510thermistorVolt, Float)
+  Sample (1, sl510thermopileVolt, Float)
+  Sample (1, inLongRad, Float)
+  Sample (1, sl610thermistorVolt, Float)
+  Sample (1, sl610thermopileVolt, Float)
+  Sample (1, outLongRad, Float)
+  Sample (1, rawCounts_2in, Float)
+  Sample (1, soilTemp_2in, Float)
+  Sample (1, soilEa_2in, Float)
+  Sample (1, soilVWC_2in, Float)
+  Sample (1, soilEC_2in, Float)
+  Sample (1, rawCounts_8in, Float)
+  Sample (1, soilTemp_8in, Float)
+  Sample (1, soilEa_8in, Float)
+  Sample (1, soilVWC_8in, Float)
+  Sample (1, soilEC_8in, Float)
+  Sample (1, rawCounts_20in, Float)
+  Sample (1, soilTemp_20in, Float)
+  Sample (1, soilEa_20in, Float)
+  Sample (1, soilVWC_20in, Float)
+  Sample (1, soilEC_20in, Float)
+  Sample (1, airTemp, Float)    Sample (1, MayflyBattVolt, Float)
+EndTable
+
+DataTable (Roadside, True, -1)
+  'DataInterval (0, 0, 0, 20)      ' don't use this. interval is driven by input strings, not datalogger real-time clock
+  Sample (1, station, String) 
+  Sample (1, mayfly_ts, String)
+  Sample (1, sampNum, Long)
+  Sample (1, boardTemp, Float)
+  Sample (1, sonarRange, Float)
+  Sample (1, snowDepth, Float)
+  Sample (1, sp510thermopileVolt, Float)
+  Sample (1, inShortRad, Float)
+  Sample (1, sp610thermopileVolt, Float)
+  Sample (1, outShortRad, Float)
+  Sample (1, sl510thermistorVolt, Float)
+  Sample (1, sl510thermopileVolt, Float)
+  Sample (1, inLongRad, Float)
+  Sample (1, sl610thermistorVolt, Float)
+  Sample (1, sl610thermopileVolt, Float)
+  Sample (1, outLongRad, Float)
+  Sample (1, rawCounts_2in, Float)
+  Sample (1, soilTemp_2in, Float)
+  Sample (1, soilEa_2in, Float)
+  Sample (1, soilVWC_2in, Float)
+  Sample (1, soilEC_2in, Float)
+  Sample (1, rawCounts_8in, Float)
+  Sample (1, soilTemp_8in, Float)
+  Sample (1, soilEa_8in, Float)
+  Sample (1, soilVWC_8in, Float)
+  Sample (1, soilEC_8in, Float)
+  Sample (1, rawCounts_20in, Float)
+  Sample (1, soilTemp_20in, Float)
+  Sample (1, soilEa_20in, Float)
+  Sample (1, soilVWC_20in, Float)
+  Sample (1, soilEC_20in, Float)
+  Sample (1, airTemp, Float)    Sample (1, MayflyBattVolt, Float)
+EndTable
+
+
+
+
+
+DataTable (HouseKeeping, True, 24*14) ' 14 days of storage for a one-hour interval
+  #If Debug_w_3000
+  DataInterval (15, 60, sec, 20)      ' sample 15 seconds after the top of each minute    
+  #Else
+  DataInterval (15, 60, min, 20)      ' sample 15 minutes after the top of each hour    
+  #EndIf  
+  Minimum (1, BattVolt, Float, 0, 0)
+  Average (1, BattVolt, Float, 0)
+  Average (1, PTemp, Float, 0)
+  
+  Sample (1, last_UWRL_ts, String)      ' quicklook for recent responses
+  Sample (1, last_CR800_UWRL_ts, String)
+  Sample (1, last_UWRL_sn, Long)
+  Sample (1, last_UWRL_Burst_Len, Long)
+  
+  Sample (1, last_Marshes_ts, String)  
+  Sample (1, last_CR800_Marshes_ts, String)
+  Sample (1, last_Marshes_sn, Long)
+  Sample (1, last_Marshes_Burst_Len, Long)  
+
+  Sample (1, last_Sunny_ts, String)
+  Sample (1, last_CR800_Sunny_ts, String)
+  Sample (1, last_Sunny_sn, Long)
+  Sample (1, last_Sunny_Burst_Len, Long)
+    
+  Sample (1, last_Aspens_ts, String)
+  Sample (1, last_CR800_Aspens_ts, String)
+  Sample (1, last_Aspens_sn, Long)
+  Sample (1, last_Aspens_Burst_Len, Long)  
+
+  Sample (1, last_Conifers_ts, String)
+  Sample (1, last_CR800_Conifers_ts, String)
+  Sample (1, last_Conifers_sn, Long)
+  Sample (1, last_Conifers_Burst_Len, Long)  
+
+  Sample (1, last_Roadside_ts, String)
+  Sample (1, last_CR800_Roadside_ts, String)
+  Sample (1, last_Roadside_sn, Long)
+  Sample (1, last_Roadside_Burst_Len, Long)
+
+  Sample (1, Mayfly_P_Manual, Boolean)
+EndTable
+
+
+Sub Set_Defaults      ' initializes generic variables that will be sent by Mayfly base
+                      ' default values are non-sensical to flag "no report" from Mayfly
+  station = "n/a"
+  mayfly_ts = "n/a"
+  sampNum = -999999
+  boardTemp = NaN
+  sonarRange = Nan
+  snowDepth = Nan
+  sp510thermopileVolt = Nan
+  inShortRad = Nan
+  sp610thermopileVolt = Nan
+  outShortRad = NaN
+  sl510thermistorVolt = NaN
+  sl510thermopileVolt = NaN
+  inLongRad = NaN
+  sl610thermistorVolt = NaN
+  sl610thermopileVolt = NaN
+  outLongRad = NaN
+  rawCounts_2in = NaN
+  soilTemp_2in = NaN
+  soilEa_2in = NaN
+  soilVWC_2in = NaN
+  soilEC_2in = NaN
+  rawCounts_8in = NaN
+  soilTemp_8in = NaN
+  soilEa_8in = NaN
+  soilVWC_8in = NaN
+  soilEC_8in = NaN
+  rawCounts_20in = NaN
+  soilTemp_20in = NaN
+  soilEa_20in = NaN
+  soilVWC_20in = NaN
+  soilEC_20in = NaN
+  airTemp = NaN    MayflyBattVolt = NaN
+
+EndSub 
+  
+
+
+
+SequentialMode
+
+BeginProg
+
+  Call Set_Defaults
+
+  
+' Receiver, C4 screw terminal
+' SerialOpen (ComPort, BaudRate, Format, TXDelay, BufferSize,)
+  SerialOpen (Com2,    9600,     16,     0,       Rcv_str_buffer_len)    ' doubled for asynchronicity
+  
+#If Debug_w_3000
+  ' Transmitter, C1 screw terminal  
+  ' SerialOpen (ComPort, BaudRate, Format, TXDelay, BufferSize)
+    SerialOpen (Com1,    9600,     19,     0,       200)
+#EndIf
+
+
+
+  Total_Burst_Len = 0
+ 
+	Scan (1, Sec, 0, 0)
+	  
+    ' read a number of variable strings. keep readinging until rcv buffer is empty
+    
+    Do
+  '   SerialInRecord (COMPort, Dest,    BeginWord, NBytes, EndWord, NBytesReturned, SerialInRecOption )
+      SerialInRecord (Com2,    Rcv_str, 64,        0,      59,      Rcv_str_len,    10)
+            ' 64 is ascii @, 59 is ascii ;
+        
+      If (Rcv_str_len > 0) 
+        Total_Burst_Len = Total_Burst_Len + Rcv_str_len
+        
+        SplitStr (SplitRes, Rcv_str, "=", 3, 7)         ' right and left of "="
+        'SplitRes (1) = Trim (LowerCase (SplitRes (1)))  ' get rid of white space and make lower case
+        SplitRes (1) = Trim (SplitRes (1))
+        
+        ' search for serial stream varable names that match logger variable names
+        ' add code as variables are added      
+        If StrComp (SplitRes (1), "station") = 0 Then station = SplitRes(2)
+        If StrComp (SplitRes (1), "timestamp") = 0 Then mayfly_ts = SplitRes(2)
+        If StrComp (SplitRes (1), "SampNum") = 0 Then sampNum = SplitRes(2)
+        If StrComp (SplitRes (1), "BoardTemp") = 0 Then boardTemp = SplitRes(2)
+        If StrComp (SplitRes (1), "sonarRange") = 0 Then sonarRange = SplitRes(2)
+        If StrComp (SplitRes (1), "snowDepth") = 0 Then snowDepth = SplitRes(2)
+        If StrComp (SplitRes (1), "sp510thermopileVolt") = 0 Then sp510thermopileVolt = SplitRes(2)
+        If StrComp (SplitRes (1), "inShortRad") = 0 Then inShortRad = SplitRes(2)
+        If StrComp (SplitRes (1), "sp610thermopileVolt") = 0 Then sp610thermopileVolt = SplitRes(2)
+        If StrComp (SplitRes (1), "outShortRad") = 0 Then outShortRad = SplitRes(2)
+        If StrComp (SplitRes (1), "sl510thermistorVolt") = 0 Then sl510thermistorVolt = SplitRes(2)
+        If StrComp (SplitRes (1), "sl510thermopileVolt") = 0 Then sl510thermopileVolt = SplitRes(2)
+        If StrComp (SplitRes (1), "inLongRad") = 0 Then inLongRad = SplitRes(2)
+        If StrComp (SplitRes (1), "sl610thermistorVolt") = 0 Then sl610thermistorVolt = SplitRes(2)
+        If StrComp (SplitRes (1), "sl610thermopileVolt") = 0 Then sl610thermopileVolt = SplitRes(2)
+        If StrComp (SplitRes (1), "outLongRad") = 0 Then outLongRad = SplitRes(2)
+        If StrComp (SplitRes (1), "rawCounts_2in") = 0 Then rawCounts_2in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilTemp_2in") = 0 Then soilTemp_2in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilEa_2in") = 0 Then soilEa_2in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilVWC_2in") = 0 Then soilVWC_2in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilEC_2in") = 0 Then soilEC_2in = SplitRes(2)
+        If StrComp (SplitRes (1), "rawCounts_8in") = 0 Then rawCounts_8in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilTemp_8in") = 0 Then soilTemp_8in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilEa_8in") = 0 Then soilEa_8in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilVWC_8in") = 0 Then soilVWC_8in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilEC_8in") = 0 Then soilEC_8in = SplitRes(2)
+        If StrComp (SplitRes (1), "rawCounts_20in") = 0 Then rawCounts_20in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilTemp_20in") = 0 Then soilTemp_20in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilEa_20in") = 0 Then soilEa_20in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilVWC_20in") = 0 Then soilVWC_20in = SplitRes(2)
+        If StrComp (SplitRes (1), "soilEC_20in") = 0 Then soilEC_20in = SplitRes(2)
+        If StrComp (SplitRes (1), "airTemp") = 0 Then airTemp = SplitRes(2)				If StrComp (SplitRes (1), "MayflyBattVolt") = 0 Then MayflyBattVolt = SplitRes(2)
+
+        If StrComp (SplitRes (1), "endofstation") = 0 Then endofstation = SplitRes(2)        
+     
+      Else
+        ExitDo      ' rcv_str_len was 0
+      EndIf
+      
+      If endofstation 
+        endofstation=false
+        
+        If (Total_Burst_Len > Max_Burst_Len) Then Max_Burst_Len = Total_Burst_Len
+
+        If StrComp (station, "UWRL") = 0
+          last_UWRL_ts = mayfly_ts
+          last_CR800_UWRL_ts = public.timestamp (1, 1)
+          last_UWRL_sn = sampNum
+          last_UWRL_Burst_Len = Total_Burst_Len
+          CallTable UWRL
+        EndIf  
+        
+        If StrComp (station, "Marshes") = 0
+          last_Marshes_ts = mayfly_ts
+          last_CR800_Marshes_ts = public.timestamp (1, 1)
+          last_Marshes_sn = sampNum
+          last_Marshes_Burst_Len = Total_Burst_Len
+          CallTable Marshes
+        EndIf
+        
+        If StrComp (station, "Sunny") = 0
+          last_Sunny_ts = mayfly_ts
+          last_CR800_Sunny_ts = public.timestamp (1, 1)
+          last_Sunny_sn = sampNum
+          last_Sunny_Burst_Len = Total_Burst_Len
+          CallTable Sunny
+        EndIf  
+        
+        If StrComp (station, "Aspens") = 0
+          last_Aspens_ts = mayfly_ts
+          last_CR800_Aspens_ts = public.timestamp (1, 1)
+          last_Aspens_sn = sampNum
+          last_Aspens_Burst_Len = Total_Burst_Len
+          CallTable Aspens
+        EndIf
+        
+        If StrComp (station, "Conifers") = 0 
+          last_Conifers_ts = mayfly_ts
+          last_CR800_Conifers_ts = public.timestamp (1, 1)
+          last_Conifers_sn = sampNum
+          last_Conifers_Burst_Len = Total_Burst_Len
+          CallTable Conifers
+        EndIf
+        
+        If StrComp (station, "Roadside") = 0 
+          last_Roadside_ts = mayfly_ts
+          last_CR800_Roadside_ts = public.timestamp (1, 1)
+          last_Roadside_sn = sampNum
+          last_Roadside_Burst_Len = Total_Burst_Len
+          CallTable Roadside
+        EndIf
+        
+        Total_Burst_Len = 0
+        
+        Call Set_Defaults      ' initialize to non-sensical values
+
+      EndIf
+      
+      'Delay (0, 150, msec)    ' testing (only!) when the entire burst is not read on one scan
+      
+    Loop      ' end of looping until input buffer is empty
+    
+    Battery (BattVolt)
+    CallTable HouseKeeping
+
+      
+
+  NextScan
+	
+  SlowSequence
+    Scan (10, sec, 0, 0)
+
+      PanelTemp (PTemp, 60)
+    
+      If TimeIntoInterval (Mayfly_P_TOffsetUp, Mayfly_P_TInt, min) Then Mayfly_PRClk_On = True
+      If TimeIntoInterval (Mayfly_P_TOffsetDown, Mayfly_P_TInt, min) Then Mayfly_PRClk_On = False
+      #If Debug_w_3000
+      If Mayfly_P_Manual
+        SW12 (1, Mayfly_PMan_On)    ' for CR3000
+      Else
+        SW12 (1, Mayfly_PRClk_On)
+      EndIf
+      
+      #Else
+        
+      If Mayfly_P_Manual
+        SW12 (Mayfly_PMan_On)    ' for CR800 or Cr1000
+      Else
+        SW12 (Mayfly_PRClk_On)
+      EndIf
+      #EndIf
+      
+      #If Debug_w_3000
+        
+      test_ts = UWRL.timestamp (1, 1)   
+      xmit_str_len = Sprintf (Xmit_str, "@station=UWRL; @timestamp=%s; @SampNum=%d; @endofstation=1;", test_ts, test_SampNum)        
+     'SerialOut (ComPort, OutString, WaitString, NumberTries, TimeOut )
+      SerialOut (Com1,    Xmit_str,  "",         0,           0)
+      
+      test_ts = Aspens.timestamp (1, 1)   
+      xmit_str_len = Sprintf (Xmit_str, "@station=Aspens; @timestamp=%s; @SampNum=%d; @endofstation=1;", test_ts, test_SampNum+10000)        
+     'SerialOut (ComPort, OutString, WaitString, NumberTries, TimeOut )
+      SerialOut (Com1,    Xmit_str,  "",         0,           0)
+      
+      test_SampNum = test_SampNum+1
+      #EndIf
+
+
+    NextScan
+   
+    
+EndProg
+
