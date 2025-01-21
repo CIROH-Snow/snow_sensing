@@ -143,7 +143,9 @@ a Campbell Scientific CR800.
 ![Hardware for solar panel brace](construction_images/IMG_9216.JPG)
 68. Attach the solar panel to the mast using the U-bolt kit. Set the angle to be as perpendicular to midday sun as possible.
 ![Add the panel to the mast](construction_images/IMG_9219.JPG)
-69. Ziptie the sensor cables to the cross arm and the solar panel to the mast.
+69. Ziptie the sensor cables to the crossarm and the solar panel and air temperature sensors to the mast.
+![Ziptie crossarm sensor cables](construction_images/IMG_9349.JPG)
+![Ziptie air temperature sensor and solar panel wires to mast](construction_images/IMG_9350.JPG)
 70. Coil the wires and attach them to the mast behind the enclosure. Leave enough of a lead on each wire to feed it through its cable gland.
 ![Coil the wires](construction_images/IMG_9258.JPG)
-72. Feed the cables through their respective glands in the enclosure and tighten the glands.
+71. Feed the cables through their respective glands in the enclosure and tighten the glands.
