@@ -102,3 +102,4 @@ Necessary tools and hardware:
 ![Attach the temperature sensors to their ADC](wiring_images/IMG_9382.JPG)
 46. Attach the white wire of the SL-510 to A0 of the ADC addressed to SDA. Attach the black wire of the SL-510 to A1 of the same board. Attach the white wire of the SL-610 to A2 and the black wire of the SL-610 to A3 of this board.
 ![Attach the thermopiles of the pyrgeometers](wiring_images/IMG_9383.JPG)
+47. Attach the solar panel leads to the charge controller solar panel leads through the lever connector. There should be 2 lights on indicating that a battery is attached and that loads can be run, and if there is solar power then a third light will come on (the light on the left).
