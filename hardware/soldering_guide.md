@@ -1,6 +1,6 @@
 ### Soldering Guide
 
-This guide walks through the different soldering requirements of this project for the additional analog-to-digital converters (ADCs).  
+This guide walks through the different soldering requirements of this project. It includes the additional analog-to-digital converters (ADCs) needed for making longwave radiation measurements and the MaxBotix sonar sensor.  
 An optional soldering jumper setting on the Mayfly is also discussed.
 
 Hardware and tools needed:
@@ -13,6 +13,7 @@ Hardware and tools needed:
 - Solder fume extractor: [Amazon Link](https://www.amazon.com/YIHUA-Extractor-Absorber-Tiltable-Soldering/dp/B0B4CB6KRW/ref=sr_1_1?dib=eyJ2IjoiMSJ9.nfZb-SxE9A3ZLDvZFrS9P3f2pguFB6soC_NoyBhH44ZWfXSyKNhnsDazsyKV3rkWxfUr1TMra-BXLt5ubo_GJIh-a7kCreDrc8hFH29_HS9y4ZDl5KFzHVFw81lWZpNeU2Dh023MpbDnDdeXYmOPhehh24v2OSccqHt3kT3pwKoESynoxTHFsERFNnj_1BZ0B3CHpBZG3mRCGZLl4Baq45s13vL1qv2GXuOPhlAJHxw.sH5dsSyoXdfDvirtIyiJwdXuWzr0Ma28fcy23hEHOis&dib_tag=se&keywords=charcoal%2Bsoldering%2Bvent&qid=1731533409&sr=8-1&th=1)
 - A small piece of cardboard
 - A pocket knife
+- PVC Jacketed 22 Gauge 5-wire Power Wire: [Super Bright LEDs Link](https://www.superbrightleds.com/pvc-jacketed-22-gauge-wire-five-conductor-power-wire-22-awg-5-wire)
 
 **Note that there are inherent risks with soldering!** Make sure you learn proper technique and safety when soldering. Work in a well-ventilated area.  
 Use a fume extractor to avoid breathing toxic gases, and wear safety glasses incase any solder splashes. **Also do not solder any live circuits.** 
@@ -23,6 +24,7 @@ https://www.youtube.com/watch?v=6rmErwU5E-k
 
 ##### Required Soldering
 
+### Soldering the ADCs
 1. Unpack both ADCs from Adafruit and their header pins.
 2. Using a pocket knife, cut the header pins in half so they are 6 across.
 ![Prepping the header pins](soldering_images/soldering1.jpg)
@@ -47,6 +49,12 @@ https://www.youtube.com/watch?v=6rmErwU5E-k
 ![Flipped over board](soldering_images/soldering11.jpg)
 ![Soldered screw terminal pins](soldering_images/soldering12.jpg)
 
+### Soldering the MaxBotix Sensor
+1. Strip the outer conduit of the PVC jacketed wire to expose all the individual wires inside.
+2. Take enough conduit off to provide a couple of inches of wiring and cut all the wires down to the outer conduit excluding the white, black, and red wires which will be used.
+3. Strip the red, black, and white wires and twist the ends.
+4. Stick the black wire in the MaxBotix hole farthest away from the hole with a square metal pad, then stick in the red, then the white. Solder these wires.
+![Solder the MaxBotix](soldering_images/IMG_9191.JPG)
 **Note** that you may need to cut the header pins a small amount after soldering them to the board when you put it in the enclosure to mount it. The pins may be too long for the command strips to make contact between the board and the enclosure otherwise.
 
 ##### Optional Soldering
