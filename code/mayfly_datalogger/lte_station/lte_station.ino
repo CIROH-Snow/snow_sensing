@@ -752,7 +752,6 @@ void setup() {
                             greenLED);
 
   // Begin the logger
-  dataLogger.begin();
 
   // Set up the sensors, except at lowest battery level
   Serial.println(F("Setting up sensors..."));
