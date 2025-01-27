@@ -85,7 +85,7 @@ a Campbell Scientific CR800.
 39. Drill holes down the center of this piece for the U-bolts that came in the radiation shield packet.
 ![U-bolts for radiation shield](construction_images/IMG_9162.JPG)
 40. Slide the crossarm into the U-bolts and tighten the U-bolts to the crossarm.
-![Attach the radiation shield top to the crossarm](construction_images/IMG_9136.JPG)
+![Attach the radiation shield top to the crossarm](construction_images/IMG_9163.JPG)
 41. Attach the packet's long threaded rods to each of the three threaded holes in the underside of the top piece of the radiation shield.
 ![Attach the threaded rods](construction_images/IMG_9167.JPG)
 42. Slide the next piece over these rods. Use the piece shown in the image.
