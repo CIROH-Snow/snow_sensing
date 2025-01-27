@@ -45,4 +45,15 @@ Necessary tools and hardware:
 15. Cut and strip two small pieces of primary wire. One needs to reach from the positive (red) charge controller load lever port to the latching power relay and the other from the power relay to the bottom 3-to-9 lever port connector.
 ![Cut two red primary wires](wiring_images/IMG_9272.JPG)
 16. Attach one wire to the single orange lever of the bottom 3-to-9 connector and to one of the common ports of the power relay, preferably 1COM. If you use 2COM, make sure to use 2NC instead of 1NC in the following step.
-![Attach the power relay common port to the orange single end port of the bottom 3-to-9 connector](
+![Attach the power relay common port to the orange single end port of the bottom 3-to-9 connector](wiring_images/IMG_9274.JPG)
+17. Attach the other primary wire from the 1NC (normally closed) port to the last open port on the positive (red) line of the charge controller load wire.
+![Connect the power relay to the load of the charge controller](wiring_images/IMG_9275.JPG)
+18. Cut and strip a piece of black primary wire to connect the single-end blue lever of the 3-to-9 connector just used to the last free lever port of the negative (black) line of the charge controller load wire.
+19. Take a Grove cable and cut it in half, stripping the ends. Connec the cable to the Grove terminal of a stereo jack to grove converter.
+![Connect a stripped Grove cable to a stereo jack converter](wiring_images/IMG_9277.JPG)
+20. Using the 3-to-9 connector that is not being used for the power relay, connect the black wire of the Grove cable to one of the 3 blue ports, the white wire to one of the yellow ports, and the red wire to one of the orange ports.
+![Connect a stereo jack converter to teh 3-to-9 connector](wiring_images/IMG_9278.JPG)
+21. Repeat this process two more times until all 9 lever ports are filled. Note in these instructions one of the stereo jack converters is replaced with a screw gate converter in case you forgoe the stereo jacks and go the route of stripping the soil sensor wiring, which is shown in the next step.
+22. Connect the soil sensors to the converters. It does not matter which one they are connected to. If you are not using stereo jack converters, strip the sensor sheath and connect the bare wire to the black Grove cable, the brown wire to the red Grove cable, and the yellow wire to the white Grove cable.
+![Connect the soil sensors](wiring_images/IMG_9358.JPG)
+23.
