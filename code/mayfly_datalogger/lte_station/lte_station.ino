@@ -65,16 +65,12 @@
 //         platformio.ini
 // ==========================================================================
 /** Start [defines] */
-// We need to tell the Mayfly where the XBee's asyncronous sleep pin is connected to it
-#define xbeeSleepPin 23
-
-// The pin that controls power supply to the XBee modules
-#define xbeeRegulatorPin 18
 
 // This pin will interface the Adafruit power relay for the Apogee sensors' heaters with the Mayfly
 // Make sure your power relay's grove port is connected to the Mayfly's grove port that includes the
 // digital pin defined here
 #define powerRelayPin 10
+
 /** End [defines] */
 
 // ==========================================================================
@@ -91,7 +87,7 @@ const char* sketchName = "lte_station.ino";
 const char* LoggerID = "UWRL";
 
 // How frequently (in minutes) to log data
-const uint8_t loggingInterval = 60;
+const uint8_t loggingInterval = 3;
 
 // Your logger's timezone.
 const int8_t timeZone = -7;  // Mountain Standard Time is -7
@@ -99,7 +95,7 @@ const int8_t timeZone = -7;  // Mountain Standard Time is -7
 
 // Set the input and output pins for the logger
 // NOTE:  Use -1 for pins that do not apply
-const int32_t serialBaud = 9600;  // Baud rate for debugging (this is what you'll set your serial monitor's baud rate to)
+const int32_t serialBaud = 57600;  // Baud rate for debugging (this is what you'll set your serial monitor's baud rate to)
 const int8_t  greenLED   = 8;       // Pin for the green LED (don't change)
 const int8_t  redLED     = 9;       // Pin for the red LED (don't change)
 const int8_t  buttonPin  = 21;      // Pin for debugging mode (ie, button pin, don't change)
@@ -233,7 +229,7 @@ const char* calculatedBatteryVoltageUnit = "V";
 // A short code for the variable
 const char* calculatedBatteryVoltageCode = "MayflyBattVolt";
 // The (optional) universallly unique identifier
-const char* calculatedBatteryVoltageUUID = "12345678-abcd-1234-ef00-1234567890ab";
+const char* calculatedBatteryVoltageUUID = "6ca3b220-253f-4403-a92a-bc684963d0f5";
 
 Variable* calculatedBatteryVoltage = new Variable(
     calculateBatteryVoltage, calculatedBatteryVoltageResolution, calculatedBatteryVoltageName,
@@ -253,7 +249,7 @@ AltSoftSerial sonarSerial(6, -1);  // The -1 indicates that no Tx wire is attach
 								   // on the board, pin 6).
 
 // Set the height of the sensor (in millimeters)
-const int32_t sonarHeight = 2438.4;
+const int32_t sonarHeight = 2451;
 // Set the slope angle in degrees
 const double slopeAngleDeg = 0;
 double slopeAngleRad = slopeAngleDeg * 3.14159 / 180;
@@ -277,7 +273,7 @@ MaxBotixSonar sonar(sonarSerial, sonarHeight, sonarPower, sonarTrigger, sonarNum
 
 // Sonar range variable construction
 Variable* sonarRange =
-    new MaxBotixSonar_Range(&sonar, "12345678-abcd-1234-ef00-1234567890ab");
+    new MaxBotixSonar_Range(&sonar, "67816ba3-9f09-439c-861e-93ed09cdc08d");
 
 // This function calculates the depth of snow
 float calculateSnowDepth(void) {
@@ -305,7 +301,7 @@ const char* calculatedSnowDepthUnit = "mm";
 // A short code for the variable
 const char* calculatedSnowDepthCode = "snowDepth";
 // The (optional) universallly unique identifier
-const char* calculatedSnowDepthUUID = "12345678-abcd-1234-ef00-1234567890ab";
+const char* calculatedSnowDepthUUID = "6ca3b220-253f-4403-a92a-bc684963d0f5";
 
 Variable* calculatedSnowDepth = new Variable(
     calculateSnowDepth, calculatedSnowDepthResolution, calculatedSnowDepthName,
@@ -364,11 +360,11 @@ ApogeeSP510 sp510(-1, sp510calibFactor, 0x48, 3);  // The -1 indicates that ther
 
 // Construct the variable for the differential voltage measurement
 Variable* sp510volts =
-    new ApogeeSP510_Voltage(&sp510, "12345678-abcd-1234-ef00-1234567890ab");
+    new ApogeeSP510_Voltage(&sp510, "42406d9f-6ee1-4323-94c4-c23c572c3c43");
 
 // Construct the variable for the incoming shortwave radiation
 Variable* sp510rad =
-    new ApogeeSP510_ISWR(&sp510, "12345678-abcd-1234-ef00-1234567890ab");
+    new ApogeeSP510_ISWR(&sp510, "a36b4b4e-32d8-456f-8bc8-c01f73c8b2da");
 
 
 // ==========================================================================
@@ -396,11 +392,11 @@ ApogeeSP610 sp610(-1, sp610calibFactor, 0x48, 3);
 
 // Construct the variable for the differential voltage measurement
 Variable* sp610volts =
-    new ApogeeSP610_Voltage(&sp610, "12345678-abcd-1234-ef00-1234567890ab");
+    new ApogeeSP610_Voltage(&sp610, "1617dcba-b106-4d97-8073-e9887b2c7679");
 
 // Construct the variable for the outgoing shortwave radiation
 Variable* sp610rad =
-    new ApogeeSP610_OSWR(&sp610, "12345678-abcd-1234-ef00-1234567890ab");
+    new ApogeeSP610_OSWR(&sp610, "300d9b9f-f60f-4f61-acfa-c4af2c7fb294");
 
 
 // ==========================================================================
@@ -427,15 +423,15 @@ ApogeeSL510 sl510(sensorPowerPin, sl510k1, sl510k2, 1, 0x49, 0x4A, 3);  // Note 
 
 // Construct the variable for the thermistor voltage
 Variable* sl510thermistorVolts =
-    new ApogeeSL510_Thermistor_Voltage(&sl510, "12345678-abcd-1234-ef00-1234567890ab");
+    new ApogeeSL510_Thermistor_Voltage(&sl510, "3f781892-f523-446b-906b-20916d824560");
 
 // Construct the variable for the thermopile voltage
 Variable* sl510thermopileVolts =
-    new ApogeeSL510_Thermopile_Voltage(&sl510, "12345678-abcd-1234-ef00-1234567890ab");
+    new ApogeeSL510_Thermopile_Voltage(&sl510, "4a13fccf-e9aa-469e-a718-5b9be6b2f80f");
 
 // Construct the variable for incoming longwave radiation
 Variable* sl510rad =
-    new ApogeeSL510_ILWR(&sl510, "12345678-abcd-1234-ef00-1234567890ab");
+    new ApogeeSL510_ILWR(&sl510, "6c5e737a-5187-4541-99e0-25c6c1f11558");
 
 
 // ==========================================================================
@@ -462,15 +458,15 @@ ApogeeSL610 sl610(sensorPowerPin, sl610k1, sl610k2, 2, 0x49, 0x4A, 3);  // Note 
 
 // Construct the variable for the thermistor voltage
 Variable* sl610thermistorVolts =
-    new ApogeeSL610_Thermistor_Voltage(&sl610, "12345678-abcd-1234-ef00-1234567890ab");
+    new ApogeeSL610_Thermistor_Voltage(&sl610, "2a3eeee1-b6c4-4721-acaf-e4e1d71f1dd3");
 
 // Construct the variable for the thermopile voltage
 Variable* sl610thermopileVolts =
-    new ApogeeSL610_Thermopile_Voltage(&sl610, "12345678-abcd-1234-ef00-1234567890ab");
+    new ApogeeSL610_Thermopile_Voltage(&sl610, "81c1b00f-65b9-4bd6-9fb8-36d8b89e180f");
 
 // Construct the variable for outgoing longwave radiation
 Variable* sl610rad =
-    new ApogeeSL610_OLWR(&sl610, "12345678-abcd-1234-ef00-1234567890ab");
+    new ApogeeSL610_OLWR(&sl610, "66311c5c-6a04-419d-ae93-28c54d6c7cfd");
 
 
 // ==========================================================================
@@ -496,37 +492,37 @@ MeterTeros12 probe3(add3, sdiPowerPin, sdiDataPin);
 // If you are using more than one soil sensor, make sure to differentiate between 
 // the different depths using the third parameter of the variable declaration
 Variable* rawVWCCounts1 = 
-    new MeterTeros12_Count(&probe1, "12345678-abcd-1234-ef00-1234567890ab", "rawCounts_2in");
+    new MeterTeros12_Count(&probe1, "197ebe02-508b-4d9b-b263-58ce21b0850e", "rawCounts_2in");
 Variable* soilTemp1 =
-    new MeterTeros12_Temp(&probe1, "12345678-abcd-1234-ef00-1234567890ab", "soilTemp_2in");
+    new MeterTeros12_Temp(&probe1, "5bbacc0c-8969-4866-a3c0-619a3d735e13", "soilTemp_2in");
 Variable* soilEa1 =
-    new MeterTeros12_Ea(&probe1, "12345678-abcd-1234-ef00-1234567890ab", "soilEa_2in");
+    new MeterTeros12_Ea(&probe1, "1fed19ea-7c23-467b-ad18-1cf3db2906d6", "soilEa_2in");
 Variable* vwc1 =
-    new MeterTeros12_VWC(&probe1, "12345678-abcd-1234-ef00-1234567890ab", "soilVWC_2in");
+    new MeterTeros12_VWC(&probe1, "ca97d866-4cae-410f-a21e-7bfcb83efdd5", "soilVWC_2in");
 Variable* ec1 =
-    new MeterTeros12_EC(&probe1, "12345678-abcd-1234-ef00-1234567890ab", "soilEC_2in");
+    new MeterTeros12_EC(&probe1, "3fd5349b-aea8-401b-b8b0-d0fbfb9718c7", "soilEC_2in");
 
 Variable* rawVWCCounts2 = 
-    new MeterTeros12_Count(&probe2, "12345678-abcd-1234-ef00-1234567890ab", "rawCounts_8in");
+    new MeterTeros12_Count(&probe2, "ff7af7e4-2753-4116-b43b-1fdce0146879", "rawCounts_8in");
 Variable* soilTemp2 =
-    new MeterTeros12_Temp(&probe2, "12345678-abcd-1234-ef00-1234567890ab", "soilTemp_8in");
+    new MeterTeros12_Temp(&probe2, "1007f0b5-6724-4788-8485-4d566a6abc74", "soilTemp_8in");
 Variable* soilEa2 =
-    new MeterTeros12_Ea(&probe2, "12345678-abcd-1234-ef00-1234567890ab", "soilEa_8in");
+    new MeterTeros12_Ea(&probe2, "8dbaa459-d3db-4e8f-81ba-5a495497903d", "soilEa_8in");
 Variable* vwc2 =
-    new MeterTeros12_VWC(&probe2, "12345678-abcd-1234-ef00-1234567890ab", "soilVWC_8in");
+    new MeterTeros12_VWC(&probe2, "758067f4-721a-4eef-8bc7-8215b2cb1bc7", "soilVWC_8in");
 Variable* ec2 =
-    new MeterTeros12_EC(&probe2, "12345678-abcd-1234-ef00-1234567890ab", "soilEC_8in");
+    new MeterTeros12_EC(&probe2, "9ec8167a-b2b6-45b4-8b04-84e2b623bad8", "soilEC_8in");
 
 Variable* rawVWCCounts3 = 
-    new MeterTeros12_Count(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "rawCounts_20in");
+    new MeterTeros12_Count(&probe3, "9b419df6-e291-4717-98d3-dbba9078ca4b", "rawCounts_20in");
 Variable* soilTemp3 =
-    new MeterTeros12_Temp(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilTemp_20in");
+    new MeterTeros12_Temp(&probe3, "3f1833fc-5000-47f0-ab33-b9acbc396b0d", "soilTemp_20in");
 Variable* soilEa3 =
-    new MeterTeros12_Ea(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilEa_20in");
+    new MeterTeros12_Ea(&probe3, "9f8c7c97-3a35-4021-954b-f4736fa0a08c", "soilEa_20in");
 Variable* vwc3 =
-    new MeterTeros12_VWC(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilVWC_20in");
+    new MeterTeros12_VWC(&probe3, "0654f39e-a089-4873-b116-fa3d416cde1a", "soilVWC_20in");
 Variable* ec3 =
-    new MeterTeros12_EC(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilEC_20in");
+    new MeterTeros12_EC(&probe3, "30555c33-e411-44f8-9dca-57682c2409e8", "soilEC_20in");
 
 // ==========================================================================
 //    Apogee ST-110-SS for Air Temperature
@@ -545,11 +541,11 @@ ApogeeST110 st110(sensorPowerPin, 0, 0x49, 50);
 
 // Create the thermistor voltage variable
 Variable* st110thermistorVolts =
-    new ApogeeST110_Thermistor_Voltage(&st110, "12345678-abcd-1234-ef00-1234567890ab");
+    new ApogeeST110_Thermistor_Voltage(&st110, "d411f3e5-1f1c-479e-a04d-b98093a7a2c1");
 
 // Create the air temperature variable
 Variable* st110airTemp =
-    new ApogeeST110_AIRT(&st110, "12345678-abcd-1234-ef00-1234567890ab");
+    new ApogeeST110_AIRT(&st110, "d411f3e5-1f1c-479e-a04d-b98093a7a2c1");
 
 
 // ==========================================================================
@@ -567,10 +563,10 @@ next list as well.
 */
 
 Variable* variableList[] = {
-    new ProcessorStats_SampleNumber(&mcuBoard),
+    new ProcessorStats_SampleNumber(&mcuBoard, "2a4186be-5691-414b-aa9a-cfb80a42649a"),
     //new ProcessorStats_FreeRam(&mcuBoard),
     //new ProcessorStats_Battery(&mcuBoard), 
-    new MaximDS3231_Temp(&ds3231),
+    new MaximDS3231_Temp(&ds3231, "ec554e0b-28d7-4eea-a5c2-9408317f0c5c"),
     sp510volts,
     sp510rad,
     sp610volts,
@@ -581,6 +577,7 @@ Variable* variableList[] = {
     sl610thermistorVolts,
     sl610thermopileVolts,
     sl610rad,
+    /*
     rawVWCCounts1,
     soilTemp1,
     soilEa1,
@@ -596,10 +593,11 @@ Variable* variableList[] = {
     soilEa3,
     vwc3,
     ec3,
+    */
     st110thermistorVolts,
     st110airTemp,
     sonarRange,
-    calculatedSnowDepth,
+    calculatedSnowDepth
     //calculatedBatteryVoltage
     // Additional sensor variables can be added here, by copying the syntax
     //   for creating the variable pointer (FORM1) from the
@@ -608,41 +606,43 @@ Variable* variableList[] = {
 };
 
 const char* UUIDs[] = {
-    "2a4186be-5691-414b-aa9a-cfb80a42649a",
+    "2a4186be-5691-414b-aa9a-cfb80a42649a",  // sampNum
     //"12345678-abcd-1234-ef00-1234567890ab", not used
     //"12345678-abcd-1234-ef00-1234567890ab", not used
-    "ec554e0b-28d7-4eea-a5c2-9408317f0c5c",
-    "42406d9f-6ee1-4323-94c4-c23c572c3c43",
-    "a36b4b4e-32d8-456f-8bc8-c01f73c8b2da",
-    "1617dcba-b106-4d97-8073-e9887b2c7679",
-    "300d9b9f-f60f-4f61-acfa-c4af2c7fb294",
-    "3f781892-f523-446b-906b-20916d824560",
-    "4a13fccf-e9aa-469e-a718-5b9be6b2f80f",
-    "6c5e737a-5187-4541-99e0-25c6c1f11558",
-    "2a3eeee1-b6c4-4721-acaf-e4e1d71f1dd3",
-    "81c1b00f-65b9-4bd6-9fb8-36d8b89e180f",
-    "66311c5c-6a04-419d-ae93-28c54d6c7cfd",
-    "197ebe02-508b-4d9b-b263-58ce21b0850e",
-    "5bbacc0c-8969-4866-a3c0-619a3d735e13",
-    "1fed19ea-7c23-467b-ad18-1cf3db2906d6",
-    "ca97d866-4cae-410f-a21e-7bfcb83efdd5",
-    "3fd5349b-aea8-401b-b8b0-d0fbfb9718c7",
-    "ff7af7e4-2753-4116-b43b-1fdce0146879",
-    "1007f0b5-6724-4788-8485-4d566a6abc74",
-    "8dbaa459-d3db-4e8f-81ba-5a495497903d",
-    "758067f4-721a-4eef-8bc7-8215b2cb1bc7",
-    "9ec8167a-b2b6-45b4-8b04-84e2b623bad8",
-    "9b419df6-e291-4717-98d3-dbba9078ca4b",
-    "3f1833fc-5000-47f0-ab33-b9acbc396b0d",
-    "9f8c7c97-3a35-4021-954b-f4736fa0a08c",
-    "0654f39e-a089-4873-b116-fa3d416cde1a",
-    "30555c33-e411-44f8-9dca-57682c2409e8",
-    "d411f3e5-1f1c-479e-a04d-b98093a7a2c1",
-    "61aacdf4-c89d-498d-afeb-bc71629660b6",
-    "67816ba3-9f09-439c-861e-93ed09cdc08d",
+    "ec554e0b-28d7-4eea-a5c2-9408317f0c5c",  // boardTemp
+    "42406d9f-6ee1-4323-94c4-c23c572c3c43",  // sp510volts
+    "a36b4b4e-32d8-456f-8bc8-c01f73c8b2da",  // sp510rad
+    "1617dcba-b106-4d97-8073-e9887b2c7679",  // sp610volts
+    "300d9b9f-f60f-4f61-acfa-c4af2c7fb294",  // sp610rad
+    "3f781892-f523-446b-906b-20916d824560",  // sl510thermistorVolts
+    "4a13fccf-e9aa-469e-a718-5b9be6b2f80f",  // sl510thermopileVolts
+    "6c5e737a-5187-4541-99e0-25c6c1f11558",  // sl510rad
+    "2a3eeee1-b6c4-4721-acaf-e4e1d71f1dd3",  // sl610thermistorVolts
+    "81c1b00f-65b9-4bd6-9fb8-36d8b89e180f",  // sl610thermopileVolts
+    "66311c5c-6a04-419d-ae93-28c54d6c7cfd",  // sl610rad
+    /*
+    "197ebe02-508b-4d9b-b263-58ce21b0850e",  // rawCountsVWC1
+    "5bbacc0c-8969-4866-a3c0-619a3d735e13",  // soilTemp1
+    "1fed19ea-7c23-467b-ad18-1cf3db2906d6",  // soilEa1
+    "ca97d866-4cae-410f-a21e-7bfcb83efdd5",  // vwc1
+    "3fd5349b-aea8-401b-b8b0-d0fbfb9718c7",  // ec1
+    "ff7af7e4-2753-4116-b43b-1fdce0146879",  // rawCountsVWC2
+    "1007f0b5-6724-4788-8485-4d566a6abc74",  // soilTemp2
+    "8dbaa459-d3db-4e8f-81ba-5a495497903d",  // soilEa2
+    "758067f4-721a-4eef-8bc7-8215b2cb1bc7",  // vwc2
+    "9ec8167a-b2b6-45b4-8b04-84e2b623bad8",  // ec2
+    "9b419df6-e291-4717-98d3-dbba9078ca4b",  // rawCountsVWC3
+    "3f1833fc-5000-47f0-ab33-b9acbc396b0d",  // soilTemp3
+    "9f8c7c97-3a35-4021-954b-f4736fa0a08c",  // soilEa3
+    "0654f39e-a089-4873-b116-fa3d416cde1a",  // vwc3
+    "30555c33-e411-44f8-9dca-57682c2409e8",  // ec3
+    */
+    "d411f3e5-1f1c-479e-a04d-b98093a7a2c1",  // st110thermistorVolts
+    "61aacdf4-c89d-498d-afeb-bc71629660b6",  // st110airTemp
+    "67816ba3-9f09-439c-861e-93ed09cdc08d",  // sonarRange
     //"12345678-abcd-1234-ef00-1234567890ab",
     //  ... The number of UUID's must match the number of variables!
-    "6ca3b220-253f-4403-a92a-bc684963d0f5",
+    "6ca3b220-253f-4403-a92a-bc684963d0f5"  // calculatedSnowDepth
 };
 
 // Count up the number of pointers in the array
