@@ -95,10 +95,11 @@ Necessary tools and hardware:
 42. Attach the Grove cable of that screw gate to the inner-most auxiliary analog Grove terminal on the Mayfly. Its switched power jmper should already be at 3.3 volts, and it should stay there.
 ![Attach the screw gate terminal to the Mayfly](wiring_images/IMG_9375.JPG)
 43. Take the other screw gate terminal and attach the yellow wire of the SP-710 to D1 (yellow) and the blue wire of the SP-710 to D2 (white). Take the two red wires from the SL-510 and the SL-610 and attach them to VCC. Take the clear and black wires of the ST-110 and attach them to GND. Note that the clear and black wires of the ST-110 could be attached to the other screw terminal as well. It does not matter. The red wires of the SL-510/610 and the ST-110 could also be attached to either terminal.
-![Attach the thermopiles of the pyranometer, the excitiation lines of the pyrgeometers, and the shield and ground of the air temperature sensor](wiring_image/IMG_9377.JPG)
+![Attach the thermopiles of the pyranometer, the excitiation lines of the pyrgeometers, and the shield and ground of the air temperature sensor](wiring_images/IMG_9377.JPG)
 44. Attach the Grove cable to the outer-most auxiliary analog Grove port on the Mayfly, leaving the jumper pin as is.
 ![Attach the Grove cable to the Mayfly](wiring_images/IMG_9378.JPG)
 45. Attach the green wire of the SL-510 to A1 on the board addressed to VIN. Attach the green wire of the SL-610 to A2 of the same board. As well attach the white wire of the ST-110 to A0 to this board.
 ![Attach the temperature sensors to their ADC](wiring_images/IMG_9382.JPG)
 46. Attach the white wire of the SL-510 to A0 of the ADC addressed to SDA. Attach the black wire of the SL-510 to A1 of the same board. Attach the white wire of the SL-610 to A2 and the black wire of the SL-610 to A3 of this board.
 ![Attach the thermopiles of the pyrgeometers](wiring_images/IMG_9383.JPG)
+47. Attach the solar panel leads to the charge controller solar panel leads through the lever connector. There should be 2 lights on indicating that a battery is attached and that loads can be run, and if there is solar power then a third light will come on (the light on the left).
