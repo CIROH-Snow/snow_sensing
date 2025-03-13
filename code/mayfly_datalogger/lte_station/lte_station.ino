@@ -249,7 +249,7 @@ AltSoftSerial sonarSerial(6, -1);  // The -1 indicates that no Tx wire is attach
 								   // on the board, pin 6).
 
 // Set the height of the sensor (in millimeters)
-const int32_t sonarHeight = 2451;
+const int32_t sonarHeight = 2379;
 // Set the slope angle in degrees
 const double slopeAngleDeg = 0;
 double slopeAngleRad = slopeAngleDeg * 3.14159 / 180;
@@ -545,7 +545,7 @@ Variable* st110thermistorVolts =
 
 // Create the air temperature variable
 Variable* st110airTemp =
-    new ApogeeST110_AIRT(&st110, "d411f3e5-1f1c-479e-a04d-b98093a7a2c1");
+    new ApogeeST110_AIRT(&st110, "61aacdf4-c89d-498d-afeb-bc71629660b6");
 
 
 // ==========================================================================
@@ -571,13 +571,14 @@ Variable* variableList[] = {
     sp510rad,
     sp610volts,
     sp610rad,
+    /*
     sl510thermistorVolts,
     sl510thermopileVolts,
     sl510rad,
     sl610thermistorVolts,
     sl610thermopileVolts,
     sl610rad,
-    /*
+    */
     rawVWCCounts1,
     soilTemp1,
     soilEa1,
@@ -593,9 +594,8 @@ Variable* variableList[] = {
     soilEa3,
     vwc3,
     ec3,
-    */
-    st110thermistorVolts,
-    st110airTemp,
+    //st110thermistorVolts,
+    //st110airTemp,
     sonarRange,
     calculatedSnowDepth
     //calculatedBatteryVoltage
@@ -614,13 +614,14 @@ const char* UUIDs[] = {
     "a36b4b4e-32d8-456f-8bc8-c01f73c8b2da",  // sp510rad
     "1617dcba-b106-4d97-8073-e9887b2c7679",  // sp610volts
     "300d9b9f-f60f-4f61-acfa-c4af2c7fb294",  // sp610rad
+    /*
     "3f781892-f523-446b-906b-20916d824560",  // sl510thermistorVolts
     "4a13fccf-e9aa-469e-a718-5b9be6b2f80f",  // sl510thermopileVolts
     "6c5e737a-5187-4541-99e0-25c6c1f11558",  // sl510rad
     "2a3eeee1-b6c4-4721-acaf-e4e1d71f1dd3",  // sl610thermistorVolts
     "81c1b00f-65b9-4bd6-9fb8-36d8b89e180f",  // sl610thermopileVolts
     "66311c5c-6a04-419d-ae93-28c54d6c7cfd",  // sl610rad
-    /*
+    */
     "197ebe02-508b-4d9b-b263-58ce21b0850e",  // rawCountsVWC1
     "5bbacc0c-8969-4866-a3c0-619a3d735e13",  // soilTemp1
     "1fed19ea-7c23-467b-ad18-1cf3db2906d6",  // soilEa1
@@ -636,9 +637,8 @@ const char* UUIDs[] = {
     "9f8c7c97-3a35-4021-954b-f4736fa0a08c",  // soilEa3
     "0654f39e-a089-4873-b116-fa3d416cde1a",  // vwc3
     "30555c33-e411-44f8-9dca-57682c2409e8",  // ec3
-    */
-    "d411f3e5-1f1c-479e-a04d-b98093a7a2c1",  // st110thermistorVolts
-    "61aacdf4-c89d-498d-afeb-bc71629660b6",  // st110airTemp
+    //"d411f3e5-1f1c-479e-a04d-b98093a7a2c1",  // st110thermistorVolts
+    //"61aacdf4-c89d-498d-afeb-bc71629660b6",  // st110airTemp
     "67816ba3-9f09-439c-861e-93ed09cdc08d",  // sonarRange
     //"12345678-abcd-1234-ef00-1234567890ab",
     //  ... The number of UUID's must match the number of variables!

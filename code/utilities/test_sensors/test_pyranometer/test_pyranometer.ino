@@ -5,8 +5,8 @@
 Adafruit_ADS1115 ads(0x48);
 
 // Calibration coefficients from apogee calibration certificate
-float c_in = 22.93;  // SP-510 calibration (W/m-2 per mV)
-float c_out = 32.05;  // SP-610 calibration (W/m-2 per mV)
+float c_in = 21.89;  // SP-510 calibration (W/m-2 per mV)
+float c_out = 31.90;  // SP-610 calibration (W/m-2 per mV)
 
 /* Wiring
 Green   -> GND
