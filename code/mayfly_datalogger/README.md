@@ -4,7 +4,7 @@ This folder contains the sketches will ultimately be uploaded to the Mayfly data
 Stations that do not telemeter data simply make measurements and record those measurements to a microSD card attached to the Mayfly board. Stations that do telemeter data likewise record measurements to an attached microSD but also send that data either over 900 MHz spreadspectrum radio to another data logger that is connected to a Hydrologic Information System (HIS) or directly posts that data to an HIS if it has cellular service at the station.
 Further instruction is found in each folder based on the approach you are planning on taking with your snow station.
 
-#### Hardware needed to successfully program the computerized components of a snow sensing station (i.e., Mayfly Datalogger, XBee radios, soil sensors, etc.):
+#### Hardware needed to successfully program the Mayfly and soil sensors a snow sensing station:
 - Mayfly datalogger: [EnviroDIY Link](https://www.envirodiy.org/product/envirodiy-mayfly-data-logger/)
 - CR1220 battery: [DigiKey Link](https://www.digikey.com/en/products/detail/panasonic-bsg/CR1220/269740?s=N4IgTCBcDaIA4AYDMSC0A7AJiAugXyA)
 - USB to USB-C cable (make sure it has a data line on it and that it isn't just a charging cable): [Amazon Link](https://www.amazon.com/Anker-2-Pack-Premium-Samsung-Galaxy/dp/B07DD5YHMH/ref=sr_1_1?crid=OCEUG0LMDYLP&dib=eyJ2IjoiMSJ9.IcOZhxxaDPccd7D_9PJSez4TC7ZeslNm1EJdKPeQneHBEF-uoIV7LasPMxWyuM_Vya40K-iyPyMg6v_H45wy6mzKXxt6s3OYqWP5zhy1B9J-1LUpHezs29_rckwloWXBiXYf8MJ05P_svLPunlYzUe7gQfveNh-Zn7VBKaGt_9iWLG-n9virw4ACfWX6lJk2vqfw9e2OuA637VG6T4SehBXUF63MhLmMbi_0Qzeq_wo.LhyREBSKszocFqOQPSyZ6cSP8CXedu0OlJd6lyo4osc&dib_tag=se&keywords=usb+to+usb+c+cable&qid=1731527951&sprefix=usb+to%2Caps%2C163&sr=8-1)
