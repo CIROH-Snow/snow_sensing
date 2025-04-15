@@ -1,7 +1,7 @@
 // This is the Mayfly sketch for the deployment of a snow station for the CIROH: Advaning Snow Observations project.
 
 /** =========================================================================
- * @file satellite_station.ino
+ * @file basic.ino
  * @brief Arduino code for the Advancing Snow Observations CIROH project
  *
  * @author Braedon Dority <braedon.dority@usu.edu>
@@ -53,11 +53,6 @@
 //         platformio.ini
 // ==========================================================================
 /** Start [defines] */
-// We need to tell the Mayfly where the XBee's asyncronous sleep pin is connected to it
-#define xbeeSleepPin 23
-
-// The pin that controls power supply to the XBee modules
-#define xbeeRegulatorPin 18
 
 // This pin will interface the Adafruit power relay for the Apogee sensors' heaters with the Mayfly
 // Make sure your power relay's grove port is connected to the Mayfly's grove port that includes the
@@ -70,13 +65,13 @@
 // ==========================================================================
 /** Start [logging_options] */
 // The name of this program file
-const char* sketchName = "satellite_station.ino";
+const char* sketchName = "basic.ino";
 
 // Logger ID, also becomes the prefix for the name of the data file on SD card
 // This can be found on the bottom of the Mayfly if the ink hasn't rubbed off.
 // Sometimes I just use the name I've given the site here instead of the serial number.
 // Make sure it is a string (in double quotations).
-const char* LoggerID = "conifers";
+const char* LoggerID = "roadside";
 
 // How frequently (in minutes) to log data
 const uint8_t loggingInterval = 60;
@@ -205,7 +200,7 @@ AltSoftSerial sonarSerial(6, -1);  // The -1 indicates that no Tx wire is attach
 								   // on the board, pin 6).
 
 // Set the height of the sensor (in millimeters)
-const int32_t sonarHeight = 2896;
+const int32_t sonarHeight = 2787.65;
 // Set the slope angle in degrees
 const double slopeAngleDeg = 0;
 double slopeAngleRad = slopeAngleDeg * 3.14159 / 180;
@@ -309,7 +304,7 @@ the address of the ADC you need to connect to:
   
 */
 
-float sp510calibFactor = 21.89;
+float sp510calibFactor = 21.65;
 
 // Construct the Apogee SP-510-SS sensor object
 ApogeeSP510 sp510(-1, sp510calibFactor, 0x48, 3);  // The -1 indicates that there is no powering up necessary for measurement 
@@ -341,7 +336,7 @@ Variable* sp510rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
-float sp610calibFactor = 31.90;
+float sp610calibFactor = 31.44;
 
 // Construct the Apogee SP-610-SS sensor object
 ApogeeSP610 sp610(-1, sp610calibFactor, 0x48, 3);
@@ -370,8 +365,8 @@ Variable* sp610rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
-float sl510k1 = 9.229;
-float sl510k2 = 1.044;
+float sl510k1 = 9.141;
+float sl510k2 = 1.020;
 
 // Construct the Apogee SL-510-SS sensor object
 // The only parameter you should adjust is how many measurements you want to take (last parameter)
@@ -405,8 +400,8 @@ Variable* sl510rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
-float sl610k1 = 9.181;
-float sl610k2 = 1.018;
+float sl610k1 = 8.997;
+float sl610k2 = 1.039;
 
 // Construct the Apogee SL-610-SS sensor object
 // The only parameter you should adjust is how many measurements you want to take (last parameter)
@@ -636,198 +631,6 @@ void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
 
 /** End [working_functions] */
 
-
-// ==========================================================================
-//  Radio Communications
-// ==========================================================================
-/** Start [radio_communications] */
-
-/*
-The following section goes through the setup of using XBee S3B radio modules for
-networking multiple satellite stations together. If you do not wish to set up
-a radio network, simply change the "networking" variable to false and ignore the
-rest of the Radio Communications section.
-*/
-
-// Setting the XBee baud rate. Keep at 9600
-const int xbeeBaud = 9600;
-
-// This is where you decide if you will use radio networking or not in your implementation
-// If you will, set the boolean variable to true; if not, set it to false;
-const bool networking = true;
-
-/*This is the serial number of the XBee S3B module that will act as the central station
-that is interfacing with your Campbell Scientific datalogger. To properly program it into
-this sketch, it needs to be broken up into its component bytes. This just means taking two
-characters at a time from the serial address and putting those together as a hexidecimal.
-Hexidecimals are designated in Arduino with an "0x" to start followed by the two-character number.
-*/
-byte highAddress[] = {0x00, 0x13, 0xA2, 0x00, 0x42, 0x2F, 0xE2, 0x12};  // This
-                            // is the 64-bit destination address of the central XBee module
-							
-// The low address is not something we need to adjust, as we don't need that level of subcategorization
-// Nevertheless, a low address is needed for the modules to operate, so leave it as the default: FFFE
-byte lowAddress[] = {0xFF, 0xFE};  // 16-bit destination address using FF FE if the address is unknown
-
-// This is one of the two responses the satellite station can send back to the central station after the 
-// central station sends its initial contact message each logging interval
-char ready[] = "R";
-char error[] = "E";
-
-// Variable declarations that will help later
-uint32_t previousEpoch;  // A variable for tracking what the last time was when data was logged
-String dataToSend;  // A String object that will contain the final CSV message to be sent
-byte rx[64];  // Buffer (or a place to store received serial data) on the Mayfly for incoming messages from its attached XBee
-
-// This is a function that prints out over the main serial port (Serial0, not Serial1) whatever is in a buffer
-// It is mainly a debugging function for visually noting what bytes are in a buffer at a time when the function is called
-void serialPrintBuffer(byte buffer[], int bufferSize) {
-  for (int i = 0; i < bufferSize; i++) {  // for each byte in the buffer
-    Serial.print(buffer[i], HEX);  // print out that byte as a hexidecimal over the serial line
-    if (i == bufferSize - 1) {  // if it is the last byte
-      Serial.println();  // print a new line
-    } else {  // if it isn't the last byte
-      Serial.print(" ");  // then just add a space to help distinguish between bytes
-    }
-  }
-}
-
-/* 
-This function prints out a string message over the Serial0 line in the framing of what the XBee modules
-require. This is mainly a debugging function. This is only for transmit frame types (See XBee documentation).
-Each of the byte parameters are essential XBee framing parameters that the XBee requires for a transmit request.
-*/
-void serialPrintTransmit(char mess[], int messSize, byte frameID, byte destAddress64[], byte destAddress16[], byte broadcastRadius, byte options) {
-  Serial.print(0x7E, HEX);  // Print the starting delimeter
-  Serial.print(" ");
-  Serial.print(lengthMSB(messSize), HEX);  // Print the MSB
-  Serial.print(" ");
-  Serial.print(lengthLSB(messSize), HEX);  // Print the LSB
-  Serial.print(" ");
-  Serial.print(0x10, HEX);  // Print the frame type (0x10 frame type is a transmit request)
-  Serial.print(" ");
-  Serial.print(frameID, HEX);  // Print the frame ID
-  Serial.print(" ");
-  for (int i = 0; i < 8; i++) {  // For each byte in the address of the XBee you want to send the message to
-    Serial.print(destAddress64[i], HEX);  // Print the byte
-    Serial.print(" ");
-  }
-  for (int i = 0; i < 2; i++) {  // Print out the two low address bytes
-    Serial.print(destAddress16[i], HEX);
-    Serial.print(" ");
-  }
-  Serial.print(broadcastRadius, HEX);  // Print the broadcast radius
-  Serial.print(" ");
-  Serial.print(options, HEX);  // Print the options
-  Serial.print(" ");
-  for (int i = 0; i < messSize; i++) {  // For each byte in the message
-    Serial.print(mess[i], HEX);  // Print the byte
-    Serial.print(" ");
-  }
-  Serial.println(checksumString(mess, messSize, frameID, broadcastRadius, options), HEX);  // Print the checksum
-}
-
-// This function calculates the most signifcant byte of a message's size
-// It assumes that the message includes a null terminator, so makes sure to 
-// use sizeof(*string message*) function as the entry for size
-byte lengthMSB(int size) {
-  return byte((13 + size) / 255);
-}
-
-// Calculates the least significant byte. Follow directions of lengthMSB for sizing input
-byte lengthLSB(int size) {
-  return byte((13 + size) % 255);
-}
-
-/*
-Checksum of a transmit request frame whose payload is a string
-A checksum is a method of quality-control in XBee radio communication. The Mayfly will send a
-bunch of bytes that say its a transmit request along with a checksum byte at the end. The XBee
-module will do its own checksum on the frame and check it with what the Mayfly gave. If they match
-the XBee sends the message. A checksum calculation in this scenario works by adding up all the 
-bytes in the frame (not including the message and the checksum byte itself), calculating the remainder
-of the summed value and the largest hexidecimal number and finding the difference between that value and 
-the largest hexidecimal number. It's confusing, but it works. It makes more sense in the code.
-*/
-byte checksumString(char rfData[], int size, byte frameID, byte broadcastRadius, byte options) {
-  int sum;  // Initialize the variable storing the sum of the bytes
-  sum = 0;
-  sum += 0x10;  // Add the frame type byte (0x10 for transmit requests)
-  sum += frameID;
-  for (int i = 0; i <= sizeof(highAddress) - 1; i++) {
-    sum += highAddress[i];
-  }
-  for (int i = 0; i <= sizeof(lowAddress) - 1; i++) {
-    sum += lowAddress[i];
-  }
-  sum += options;
-  sum += broadcastRadius;
-  for (int i = 0; i < size - 1; i++) {
-    sum += byte(rfData[i]);
-  }
-  return byte(255 - (sum % 256));  // The 256 is because there are 256 total numbers (inclduing zero), but 255 is the highest possible number
-}
-
-// Checksum of a transmit request frame whose payload is a singular byte rather than a string message
-byte checksumByte(uint8_t byteMessage, byte frameID, byte broadcastRadius, byte options) {
-  uint8_t sum;
-  sum = 0;
-  sum += 0x10;
-  sum += frameID;
-  for (int i = 0; i <= sizeof(highAddress) - 1; i++) {
-    sum += highAddress[i];
-  }
-  for (int i = 0; i <= sizeof(lowAddress) - 1; i++) {
-    sum += lowAddress[i];
-  }
-  sum += options;
-  sum += broadcastRadius;
-  sum += byteMessage;
-  return 255 - (sum % 256);
-}
-
-/*
-Sends a transmit request frame to the XBee with a string payload over the Serial1 communication line
-frameID can be whatever hexidecimal byte you wish
-broadcastRadius should be 0x00 for the largest radius
-options should be left as 0x00 unless you want to do very specific, nuanced transmissions, such as encrypted payloads,
-trace routes, disabling route discoveries. If, for some reason, you wish to use these, consult the documentation on 
-transmit request frames for how to construct a byte (literally bit by bit) for the options field.
-*/  
-void transmitString(char message[], int messageSize, byte frameID, byte broadcastRadius, byte options) {
-  // Writing to Serial1 means sending a byte over Serial1 to whatever is connected on that line. If the XBee
-  // is attached to the Bee header on the Mayfly, then it will be the XBee
-  Serial1.write(0x7E);  // Starting delimeter never changes
-  Serial1.write(lengthMSB(messageSize));
-  Serial1.write(lengthLSB(messageSize));
-  Serial1.write(0x10);  // Frame type is always 0x10 for a transmit request
-  Serial1.write(frameID);
-  Serial1.write(highAddress, 8);
-  Serial1.write(lowAddress, 2);
-  Serial1.write(broadcastRadius);
-  Serial1.write(options);
-  Serial1.write(message);
-  Serial1.write(checksumString(message, messageSize, frameID, broadcastRadius, options));
-}
-
-// Sends a transmit request frame with a singular byte payload
-// This is nice for when numbers need to be sent rather than strings
-void transmitByte(uint8_t byteMessage, byte frameID, byte broadcastRadius, byte options) {
-  Serial1.write(0x7E);  // Starting delimeter
-  Serial.write(0x00);  // Most significant byte length (this is a fixed value when doing a transmit request with only one byte for the payload)
-  Serial.write(0x0F);  // Least significant byte length (this is a fixed value when doing a transmit request with only one byte for the payload)
-  Serial1.write(0x10);  // Frame type (0x10 is used to identify a transmit request)
-  Serial1.write(frameID);  // Frame ID set to 0x00 so we don't get a transmit status frame in the buffer
-  Serial1.write(highAddress, 8);  // 64-bit address
-  Serial1.write(lowAddress, 2);  // 16-bit address
-  Serial1.write(broadcastRadius);  // Broadcast radius
-  Serial1.write(options);  // Options
-  Serial1.write(byteMessage);
-  Serial1.write(byte(checksumByte(byteMessage, frameID, broadcastRadius, options)));
-}
-
-/** End [radio_communications] */
-
 // ==========================================================================
 //  Arduino Setup Function
 // ==========================================================================
@@ -842,21 +645,6 @@ void setup() {
   // Power relay setup
   pinMode(powerRelayPin, OUTPUT);
   digitalWrite(powerRelayPin, LOW);
-
-  // Setup XBee
-  if (networking) {
-	pinMode(xbeeRegulatorPin, OUTPUT);
-	pinMode(xbeeSleepPin, OUTPUT);
-	digitalWrite(xbeeRegulatorPin, HIGH);  // Supply power to the XBee regulator
-	Serial1.begin(xbeeBaud);  // Begin UART-1 communication
-	digitalWrite(xbeeSleepPin, LOW);  // Waking up the XBee momentarily to clear out anything that could potentially be in the buffer
-	memset(rx, 0x00, sizeof(rx));  // Clear out the buffer where we'll store incoming data from the XBee on the Mayfly
-	delay(100);
-	int count = Serial1.available();  // Count up the bytes waiting to come in
-	Serial1.readBytes(rx, count);  // Read in that many bytes
-	memset(rx, 0x00, sizeof(rx));  // Erase them
-	digitalWrite(xbeeSleepPin, HIGH);  // Put the XBee back to sleep
-  }
 
   // Print a start-up note to the main serial port
   // This is just for if you have your laptop connected while running this program
@@ -932,236 +720,7 @@ void loop() {
     digitalWrite(powerRelayPin, LOW);  // Let the relay know it is good to close the circuit by dropping the pin to low
     digitalWrite(22, LOW);  // Turn off switched power
   }
-  
-  // Check if the newest marked time from logging data is different from what we previously had
-  if (previousEpoch != dataLogger.markedLocalEpochTime) {  // If they are different
-    previousEpoch = dataLogger.markedLocalEpochTime;  // then update to the latest logging time
-  }
 
   dataLogger.logData();  // During logData, the marked time will update when a new measurement is taken
-  
-  /*
-  This is where radio communications will come into play.
-  We will first check if new data has been collected by verifying there is
-  a new "marked" from the Mayfly that does not match what we previously had on record.
-  We will then verify if you even want to do networking in the first place. This should
-  have been declared up in the Radio Communications section.
-  */
-  if (previousEpoch != dataLogger.markedLocalEpochTime && networking) {  // If conditions are right for radio communication
-    digitalWrite(redLED, HIGH);  // Turn on the red LED. This is just a nice visual aid when monitoring these loggers to let you know they have started radio communications
-    digitalWrite(xbeeSleepPin, LOW);  // Wake the XBee up
-    delay(100);
-    
-	// These variables will help housekeep
-    uint8_t varCount;
-    uint8_t varNum;
-
-    // Clear out the Mayfly's buffer upon wake up in case the XBee has sent any rogue or unanticipated messages upon power up
-    uint8_t wakeUpCount = Serial1.available();  // Count how many bytes are waiting to be read into the buffer
-    Serial1.readBytes(rx, wakeUpCount);  // Read the bytes into the buffer
-    memset(rx, 0x00, sizeof(rx));  // Clear out where we just stored those bytes by setting everything to zero
-
-    bool hostReady = false;  // Assume the host station (central station where all data is aggregated) is not ready to get data
-    bool heardNothing = false;  // Assume we have heard something from the XBee. This will change shortly if we really don't hear anything
-	
-    uint32_t starttime = dataLogger.getNowLocalEpoch();  // Start a timer
-
-    while (Serial1.available() == 0) {  // Stay in this loop until more bytes enter the buffer from the XBee
-      if (dataLogger.getNowLocalEpoch() - starttime > 600) {  // If we've waited for at least ten minutes (600 seconds)
-        heardNothing = true;  // then we haven't heard anything
-        break;  // Leave the loop
-      } 
-    }
-    delay(100);  // Give a chance for the full message to come through
-	
-    if (heardNothing) {  // If we didn't hear anything from the XBee
-      digitalWrite(redLED, LOW);  // Turn off the red LED
-      digitalWrite(xbeeSleepPin, HIGH);  // Put the XBee back to sleep
-    } else {  // If we did hear something from the XBee
-      int newCount = Serial1.available();  // Count how many bytes are in the buffer
-      Serial1.readBytes(rx, newCount);  // Read in all those bytes
-      if (rx[15] == 0x52) {  // If the message we received was 'R' (ASCII character for 0x52)
-        hostReady = true;  // Then the host station is ready to collect this station's data
-        transmitString(ready, sizeof(ready), 0x00, 0x00, 0x00);  // Let the host know we are ready
-      } else {  // If it wasn't an 'R' that came through, send an error message 'E'
-        transmitString(error, sizeof(error), 0x00, 0x00, 0x00);  // Let the host know there was an error
-      }
-	  
-      memset(rx, 0x00, sizeof(rx));  // Clear out the buffer for incoming messages
-	  
-      if (hostReady) {  // If the host station is ready for the data
-        greenredflash(10);  // Give a visual cue
-		
-        bool timeRequested = false;  // Assume a timestamp has not been requested by the host station
-        
-        uint32_t starttime = dataLogger.getNowLocalEpoch();  // Set a timer
-        while (Serial1.available() == 0) {  // Wait for a message from the XBee
-          if (dataLogger.getNowLocalEpoch() - starttime > 60) {  // If we wait more than a minute for a message
-            break;  // Leave the while loop
-          }
-        }
-		
-        delay(100);  // Give a chance for all the bytes to come in
-		
-        if (Serial1.available() != 0) {  // If something came through
-          Serial1.readBytes(rx, Serial1.available());  // Read the bytes in
-          if (rx[3] == 0x90 && rx[15] == 0x54) {  // Check if it was a receive packet (3rd byte is 0x90) and that the message is 'T' (0x54)
-            timeRequested = true;  // If so, a timestamp has been requested
-          }
-        }
-		
-        if (timeRequested) {  // If a timestamp was requested
-          String datetime = "";  // Create an empty String object for the datetime
-		  
-		      // Retrieve the datetime from the datalogger and store it in the String we just made
-          dataLogger.dtFromEpoch(dataLogger.markedLocalEpochTime).addToString(datetime);
-		  
-          char timestamp[datetime.length() + 1];  // Create a string variable that is compatible with transmit requests
-          datetime.toCharArray(timestamp, sizeof(timestamp));  // Turn the timestamp String object into a string of characters
-          transmitString(timestamp, sizeof(timestamp), 0x00, 0x00, 0x00);  // Send the timestamp to the host   
-        }
-		
-        memset(rx, 0x00, sizeof(rx));  // Clear out the buffer
-
-        bool varCountRequested = false;  // Assume the host station has not requested a variable count
-		
-        starttime = dataLogger.getNowLocalEpoch();  // Start a timer
-        while (Serial1.available() == 0) {  // Wait for a message
-          if (dataLogger.getNowLocalEpoch() - starttime > 60) {  // If we waited more than a minute
-            break;  // Then break the while loop
-          }
-        }
-		
-        delay(100);  // Give a chance for all bytes to come in if something was received
-		
-        if (Serial1.available() != 0 && timeRequested) {  // If something came through and we didn't miss the timestamp request
-          Serial1.readBytes(rx, Serial1.available());  // Read the bytes in
-          if (rx[3] == 0x90 && rx[15] == 0x56) {  // Check if it was a receive packet (3rd byte is 0x90) and that the message is 'V' (0x56)
-            varCountRequested = true;  // If so, the variable count has been requested
-          }
-        }
-		
-        if (varCountRequested) {  // If the variable count has been requested
-          // We will send that number
-          // Here I have elected to create the frame myself, as I had trouble implementing
-          // the transmitByte function. Further debugging could clean this up to just use
-          // that function rather than construct a frame ourselves
-
-		      // Start of checksum
-          int sum = 0;  // Sum for checksum at end of transmit request frame
-          sum += 0x10;
-          sum += 0x00;
-          for (int i = 0; i < 8; i++) {
-            sum += highAddress[i];
-          }
-          for (int i = 0; i < 2; i++) {
-            sum += lowAddress[i];
-          }
-          sum += 0x00;
-          sum += 0x00;
-          
-          varCount = dataLogger.getArrayVarCount();  // Get the variable count while doing the checksum
-
-          sum += varCount;
-          sum = 255 - (sum % 256);
-		      // End of checksum
-
-          Serial1.write(0x7E);  // Send the XBee the starting delimeter
-          Serial1.write(0x00);  // Send the XBee the message's MSB
-          Serial1.write(0x0F);  // Send the XBee the message's LSB
-          Serial1.write(0x10);  // Send the XBee the frame type (0x10 is transmit request)
-          Serial1.write(0x00);  // Send the XBee the frame ID
-          Serial1.write(highAddress, 8);  // Send the XBee the address of the message's final destination
-          Serial1.write(lowAddress, 2);  // Send the XBee the default low address settings
-          Serial1.write(0x00);  // Send the XBee the broadcast radius
-          Serial1.write(0x00);  // Send the XBee the options
-          Serial1.write(byte(varCount));  // Send the variable count
-          Serial1.write(byte(sum));  // Send the checksum
-        }
-		
-        memset(rx, 0x00, sizeof(rx));  // Clear out the buffer
-
-
-        bool allDataSent = false;  // Assume that not all the data has been sent
-		
-		    // While loop for sending all the data to the host station
-        while (!allDataSent) {  // While all the data has not been sent
-          memset(rx, 0x00, sizeof(rx));  // Clear the buffer
-          bool breakWhile = false;  // Assume that we are going to break out of this while loop, unless something changes
-		  
-          starttime = dataLogger.getNowLocalEpoch();  // Start a timer
-          while (Serial1.available() == 0) {  // Wait for a message
-            if (dataLogger.getNowLocalEpoch() - starttime > 60) {  // If we waited more than a minute
-              breakWhile = true;  // Flag that we want to break the larger while loop where we try to send all our data
-              break;  // Break the current while loop where we are just waiting for a message
-            }
-          }
-		  
-          delay(100);  // Give a chance for every byte to come in from the message
-		  
-          if (breakWhile) {  // If we want to break this while loop where we send the data
-            break;  // Break the overarching while loop where we send all the data, effectively ending all communication until the next logging interval
-          }
-		  
-		      // In this part, we will check which variable number the host station is interested in and supply the name of that variable
-          Serial1.readBytes(rx, Serial1.available());  // Move what was received into the buffer
-          if (rx[3] == 0x90 && rx[15] < varCount) {  // If the message was a receive packet and a number less than the varCount
-            delay(20);
-            varNum = rx[15];  // Record which variable number the host is interested in
-            memset(rx, 0x00, sizeof(rx));  // Clear the buffer
-            String varName = "";  // Create a String object to store the name of this variable number
-            varName += dataLogger.getVarCodeAtI(varNum);  // Retrieve the variable name
-            char name[varName.length() + 1];  // Create a string of characters to store this in
-            varName.toCharArray(name, sizeof(name));  // Store the String in the string
-            transmitString(name, sizeof(name), 0x00, 0x00, 0x00);  // Transmit the variable name to the host
-            memset(rx, 0x00, sizeof(rx));  // Clear the buffer
-          } else {  // If what was received is not a valid number request
-            break;  // Break the overarching while loop where we send all the data, effectively ending all communication until the next logging interval
-          }       
-
-          // In this section, we will supply the measurement of the current variable of interest upon request
-          starttime = dataLogger.getNowLocalEpoch();  // Start a timer
-          while (Serial1.available() == 0) {  // Wait for a message
-            if (dataLogger.getNowLocalEpoch() - starttime > 60) {  // If we waited for more than a minute
-              breakWhile = true;  // Mark that we want to stop communication by breaking the overarching while loop
-              break;  // Break this current while loop
-            }
-          }
-		  
-          if (breakWhile) {  // If we noted that we want to stop trying to send data
-            break;  // Break the overarching while loop where we send all the data, effectively ending all communication until the next logging interval
-          }
-		  
-          delay(100);  // Give a chance for all bytes to come in
-		  
-          Serial1.readBytes(rx, Serial1.available());  // Read in the bytes
-          if (rx[15] == 0x4E) {  // If the payload was an 'N'
-            delay(20);
-            String dataValue = "";  // Create a String object where the measurement can be stored
-            dataValue += dataLogger.getValueStringAtI(varNum);  // Grab the measurement and put it in the String
-            char val[dataValue.length() + 1];  // Create a string of characters that will actually send
-            dataValue.toCharArray(val, sizeof(val));  // Turn the String into a string
-            transmitString(val, sizeof(val), 0x00, 0x00, 0x00);  // Send the data value to the host
-            memset(rx, 0x00, sizeof(rx));  // Clear the buffer
-          }
-		  
-          if (varNum == varCount - 1) {  // If that was our last variable
-            allDataSent = true;  // Then all the data has been sent
-
-            // for some reason, it will not send the last variable measured until the XBee is powered off then powered on again, so this catches that
-			// some debugging is likely needed to fix this
-            digitalWrite(xbeeSleepPin, HIGH);  // Put the XBee to sleep
-            delay(100);  // Let its stomach settle
-            digitalWrite(xbeeSleepPin, LOW);  // Wake the XBee
-            delay(100);  // Let it make its last transmission
-          }
-        }
-      }
-    }
-	
-	// We are all done with radio communications
-    digitalWrite(xbeeSleepPin, HIGH);  // Put the XBee to sleep
-	digitalWrite(redLED, LOW);  // Turn off the red LED
-  }
 }
 /** End [loop] */
