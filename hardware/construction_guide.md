@@ -9,6 +9,21 @@ Campbell Scientific hardware, such as solar charge controllers, solar panels, gr
 
 This document will go over the construction of a mast that does not use Campbell Scientific hardware and how to assemble sensors and enclosures. If you choose to use a Campbell Scientific tripod, its setup is not discussed in this repository. You will however want to use this guide for all other construction for your station.
 
+#### Hardware and Tools Needed
+These hardware and tools are not explicitly called out in the hardware spreadsheets and are needed for the successful construction of a snow station.
+1. Auger
+2. USB-C cable with data line
+3. Shovel
+4. Sledge hammer or fence post pounder
+5. Level
+6. 1/2 inch wrench
+7. 7/16 inch wrench
+8. Phillips screw driver
+9. Flathead screw driver
+10. Drill with large selection of drill bits
+11. Hacksaw
+12. Label maker
+
 #### Low-cost Platform Setup
 
 1. Take an auger and drill/dig a hole at least 20 inches into the ground near where the mast will be placed but not so close the u-post will be driven into the sensors.
@@ -47,7 +62,7 @@ This document will go over the construction of a mast that does not use Campbell
 ![Loosen the turnbuckle and add the hook](construction_images/IMG_9147.JPG)
 21. Attach the S-hook end of the turnbuckle to the eye bolt of the bracket.
 ![Attach wire to the bracket](construction_images/IMG_9148.JPG)
-22. Stake down the ground end of the guy wire using a mallet and pullin the wire tight, but making sure to keep the mast level.
+22. Stake down the ground end of the guy wire using a mallet and pull the wire tight, but making sure to keep the mast level.
 ![Stake in guy wire](construction_images/IMG_9149.JPG)
 23. Repeat this process for all three wires.
 24. Tighten the turnbuckles to impart tension to the wires and level the mast. Note that this may be an interative process of realigning stakes, changing wire lengths, and loosening/tightening turnbuckles to create even and solid tension in all wires while keeping the mast level, and you may need to go back and change things a few times over as you narrow in on the correct dimensions and setup.
@@ -65,7 +80,7 @@ This document will go over the construction of a mast that does not use Campbell
 ![Attach the grounding cable to the mast](construction_images/IMG_9238.JPG)
 30. Bury the rod.
 ![Bury the grounding rod](construction_images/IMG_9241.JPG)
-31. Prep the enclosures that will be used. In these instructions, we will have an enclosure that will house the data logger, charge controller, and all other sensing peripherals; another enclosure will house a 35-Ah battery. You may elect to use larger batteries in different enclosures or to have smaller batteries in the same enclosure as the data logger. If you use a larger battery, such as the 100-Ah lithium iron phosphate batteries, the same principles can apply, but it is suggested that you do not locate the battery enclosure on the mast, but rather on the ground.
+31. Prep the enclosures that will be used. In these instructions, we will have an enclosure that will house the data logger, charge controller, and all other sensing peripherals; another enclosure will house the battery. You may elect to use larger batteries in different enclosures or to have smaller batteries in the same enclosure as the data logger. If you use a larger battery, such as the 100-Ah lithium iron phosphate batteries, the same principles can apply, but it is suggested that you do not locate the battery enclosure on the mast but rather on the ground.
 32. For a separate battery enclosure, drill four holes for U-bolts in the center of the enclosure. In this application, a 35-Ah battery is used, which fits better with a vertically oriented enclosure. Drill two holes on the side and place two cable glands. Note that you may also use one cable gland if you can get both wires that will be used through a single gland and tighten the gland all the way.
 ![Prep the battery enclosure](construction_images/IMG_9242.JPG)
 33. Mount the enclosure to the mast at an accessible height using the U-bolts that come with plates. The plates will help distribute the pressure caused by the U-bolts over the enclosure's plastic.
@@ -121,7 +136,7 @@ This document will go over the construction of a mast that does not use Campbell
 58. Mount the MaxBotix sensor to the crossarm by threading zipties through the enclosure holes found in the four corners and latches those onto the crossarm.
 ![Thread the zipties](construction_images/IMG_9202.JPG)
 ![Attach the enclosure to the crossarm](construction_images/IMG_9204.JPG)
-59. Make sure the zipties are tight to limit any movement of the sensor. If you are setting up a site on a slope, you will need to measure the angle of the slope and then apply that same angle to the sensor. Many smart phones have level apps included in them that measure how flat a surface is. Make this adjustment to the sensor before tightening the zipties down. The goal is to have the sensor measure a perpendicular distance to the ground surface. Record this angle as it will be used in the data logger code.
+59. Make sure the zipties are tight to limit any movement of the sensor. If you are setting up a site on a slope, you will need to measure the angle of the slope and then apply that same angle to the sensor. Many smart phones have level apps included in them that measure the angle of a surface. Make this adjustment to the sensor before tightening the zipties down. The goal is to have the sensor measure a perpendicular distance to the ground surface. Record this angle as it will be used in the data logger code.
 ![Tighten the zipties](construction_images/IMG_9205.JPG)
 60. Assemble the Apogee AM-130 radiometer mounts.
 61. Attach the free rod end to the AM-240 fixture using an allen wrench.
@@ -131,7 +146,7 @@ This document will go over the construction of a mast that does not use Campbell
 ![Leveled radiometer mount](construction_images/IMG_9212.JPG)
 64. Remove the bases to the radiometers that will go in this mount, whether that is the shortwave or longwave sensors. These bases are not compatible with these mounts, and bases are not necessary for them.
 ![Remove the radiometer bases](construction_images/IMG_9213.JPG)
-65. Slide them in to their respective slots, tightening them in with the philips screw at the front of the mount. Make sure the upward and downward sensors are in the approrpriate slots. Repeate the process for the other set of radiometers.
+65. Slide them in to their respective slots, tightening them in with the philips screw at the front of the mount. Make sure the upward and downward sensors are in the approrpriate slots. Adjust the radiometer mounts so that they also match the slope angle. The radiometers need to be perpendicular to the ground. Repeate the process for the other set of radiometers.
 ![Add the radiometers](construction_images/IMG_9214.JPG)
 66. Get the solar panel ready for mounting to the post. In this implementation, we use a 30-watt panel from SOLPERK, which requires additional work to mount compared to a Campbell Scientific panel. Prep the solar panel by removing the adjustable brace and drilling two holes for the U-bolt mount clamp in the center. Note that the solar panel is metal, and drilling will take extra time and care. Start with small holes and progressively work your way up to the desired size to facilitate drilling.
 ![Drill holes for U-bolt in solar panel brace](construction_images/IMG_9218.JPG)
