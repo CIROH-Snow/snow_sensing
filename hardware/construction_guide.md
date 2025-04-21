@@ -7,10 +7,7 @@ The second is to use the platform equipment listed in the instrumentation costs 
 You will save approximately $1000 by not just using the platform materials listed there, but also using other alternatives to  
 Campbell Scientific hardware, such as solar charge controllers, solar panels, grounding kits, etc. 
 
-This document will go over the construction of a mast that does not use Campbell Scientific hardware and how to assemble sensors and enclosures.
-
-It will also cover to construct a central station for aggregating data from multiple snow satellite stations on a Mayfly and communicating that data to  
-a Campbell Scientific CR800.
+This document will go over the construction of a mast that does not use Campbell Scientific hardware and how to assemble sensors and enclosures. If you choose to use a Campbell Scientific tripod, its setup is not discussed in this repository. You will however want to use this guide for all other construction for your station.
 
 #### Low-cost Platform Setup
 
