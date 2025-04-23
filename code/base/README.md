@@ -3,6 +3,7 @@
 This directory contains the code needed for telemetring data from a snow station that does not have cellular connection to a Hydrologic Information System (HIS). Here a base station (sometimes referred to as the "host" in some of the code in this repository) aggregates data from any number of snow stations that don't have cell service, named satellite stations from here on out. This is done by using 900 MHz spreadspectrum radios to get data from a satellite snow station where there is no cell service to a base station where there is. A base station could also be an existing weather station that has its own method of connecting to an HIS.
 
 The following graphic illustrates the role of a base station in getting data published to an HIS when a snow station is setup in an area without cell service.
+![satellite-base relationship](base_figures/satellite-base-his.png)
 
 Folder summaries
 - **[central_station](central_station)**: while there are two dataloggers physically located where the central station is (one Mayfly and one Campbell Scientific datalogger), this folder specifically contains just the Mayfly's code for aggregating data.
