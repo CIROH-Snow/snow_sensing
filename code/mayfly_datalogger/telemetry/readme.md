@@ -1,4 +1,4 @@
-For telemetering snow data from a snow station to a Hydrologic Information System (HIS), there are two scenarios to consider: where your station will be located has cellular service or it does not.
+For telemetering snow data from a snow station to a Hydrologic Information System (HIS), there are two possible scenarios: the location of your snow station has cellular service, or it does not.
 
 If the snow station is located in an area with cell service, and you wish to telemeter data, you will be using the lte_hydroserver sketch. This sketch is setup to make posts to HydroServer [HydroServer Link](https://hydroserver.geoglows.org/browse) which is a generalized HIS that anyone can post hydrologic data to.
 Other servers exist that the Mayfly is capable of posting to thanks to the development of source code by the Stroud Water Research Center, such as Monitor My Watershed [Monitor My Watershed Link](https://monitormywatershed.org/), ThingSpeak [ThingSpeak Link](https://thingspeak.mathworks.com/), DreamHost [DreamHost Link](https://www.dreamhost.com/), and Ubidiots [Ubidiots Link](https://ubidots.com/).
