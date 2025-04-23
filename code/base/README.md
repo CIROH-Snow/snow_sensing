@@ -11,7 +11,7 @@ There are three principal components outlined in the figure:
 The arrows indicate the flow of data, with blue arrows being wired connections and red arrows being wireless connections.
 The basic approach is that a Mayfly at the base station will aggregate data from all the satellite snow stations and push that data to a data logger that is already connected to an HIS. The 900 MHz Bees in the figure are the modems that help communicate data from a satellite station to a base station.
 
-The contents of this directory address the Mayfly and Internet-connected data logger components of the base station. The 900 MHz Bee used for this design is the [Digi XBee S3B](https://www.amazon.com/gp/product/B07G1XQ1BS/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1). Instructions on setting up the XBee for the base Mayfly is the same as the satellite Mayfly, whose instructions are found in step 2 of hardware setups [here](../mayfly_datalogger/README).
+The contents of this directory address the Mayfly and Internet-connected data logger components of the base station. The 900 MHz Bee used for this design is the [Digi XBee S3B](https://www.amazon.com/gp/product/B07G1XQ1BS/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1). Instructions on setting up the XBee for the base Mayfly is the same as the satellite Mayfly, whose instructions are found in step 2 of hardware setups [here](../mayfly_datalogger/README.md).
 
 Folder summaries
 - **[central_station](central_station)**: while there are two dataloggers physically located where the central station is (one Mayfly and one Campbell Scientific datalogger), this folder specifically contains just the Mayfly's code for aggregating data.
