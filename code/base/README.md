@@ -2,10 +2,12 @@
 
 This directory contains the code needed for telemetring data from a snow station that does not have cellular connection to a Hydrologic Information System (HIS). Here a base station (sometimes referred to as the "host" in some of the code in this repository) is a station that has cell service or some other method of connecting to an HIS that aggregates data from any number of snow stations that don't have cell service, named [satellite stations](../mayfly_datalogger/telemetry) from here on out and publishes their data to an HIS. This is done by using 900 MHz spreadspectrum radios to get data from a satellite snow station where there is no cell service to a base station where there is.
 
-The hardware and code used in setting up a telemetry network like this is designed to use mesh networking. Essentially this means that any station within the network will aid in sending data to its specified destination. The following figure from Digi illustrates this concept:
+The hardware and code used in setting up a telemetry network like this is designed to use mesh networking. Essentially this means that any station within the network will aid in sending data to its specified destination. The following GIF from Digi illustrates this concept:
 ![mesh_network_gif](base_figures/mesh_network.gif)
 
-The following figure illustrates the role of a base station in getting data published to an HIS when a snow station is setup in an area without cell service.
+In this figure, each node, except node B, represents a satellite snow station where snow data is measured and recorded. Node B is the Base station where all the data will go to be published to an HIS. In mesh networking, each satellite station can send its data to the base so long as there exist a chain of stations that can span the gap if distances are too large between a satellite and the base or if there are obstructions, such as trees or terrain. Also in mesh networking, if one station goes down that was previously helping to relay data to the base, the satellite stations will reroute. Note that if in your implementation your satellite station cannot communicate with the base, and you do not wish to install more satellite snow monitoring stations to help bridge the gap, you can build a repeater station which will just help relay data rather than make measurements. This is discussed below.
+
+Once the information reaches the base station, the base station publishes the data to an HIS. The following figure illustrates the role of a base station in getting data published to an HIS when a snow station is setup in an area without cell service and the various components involved.
 ![satellite-base relationship](base_figures/satellite-base-his.png)
 There are three principal components outlined in the figure:
 1. The satellite station, which is a snow station making measurements that cannot post the data to an HIS on its own for lack of cell serivce
@@ -16,7 +18,7 @@ The basic approach is that a Mayfly at the base station will aggregate data from
 
 The contents of this directory address the Mayfly and Internet-connected data logger components of the base station. The 900 MHz Bee used for this design is the [Digi XBee S3B](https://www.amazon.com/gp/product/B07G1XQ1BS/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1). Instructions on setting up the XBee for the base Mayfly is given below. Note that this is the same for the satellite Mayfly, which is discussed as step 5 in its README file found [here](../mayfly_datalogger/README.md).
 
-#### Hardware needed to successfully program the XBee for a base station Mayfly:
+#### Hardware needed to successfully program the XBee for a base station or repeater Mayfly:
 - Mayfly datalogger: [EnviroDIY Link](https://www.envirodiy.org/product/envirodiy-mayfly-data-logger/)
 - USB to USB-C cable (make sure it has a data line on it and that it isn't just a charging cable): [Amazon Link](https://www.amazon.com/Anker-2-Pack-Premium-Samsung-Galaxy/dp/B07DD5YHMH/ref=sr_1_1?crid=OCEUG0LMDYLP&dib=eyJ2IjoiMSJ9.IcOZhxxaDPccd7D_9PJSez4TC7ZeslNm1EJdKPeQneHBEF-uoIV7LasPMxWyuM_Vya40K-iyPyMg6v_H45wy6mzKXxt6s3OYqWP5zhy1B9J-1LUpHezs29_rckwloWXBiXYf8MJ05P_svLPunlYzUe7gQfveNh-Zn7VBKaGt_9iWLG-n9virw4ACfWX6lJk2vqfw9e2OuA637VG6T4SehBXUF63MhLmMbi_0Qzeq_wo.LhyREBSKszocFqOQPSyZ6cSP8CXedu0OlJd6lyo4osc&dib_tag=se&keywords=usb+to+usb+c+cable&qid=1731527951&sprefix=usb+to%2Caps%2C163&sr=8-1)
 - Sparkfun Bee explorer board: [SparkFun Link](https://www.sparkfun.com/products/11812)
