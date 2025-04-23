@@ -6,7 +6,7 @@ Before you proceed, you will need to download the Arduino Interactive Developmen
 
 There are multiple folders in this directory, each with different purposes and types of code inside them. They are as follows:
 - **[arduino_libraries](arduino_libraries)**: this folder contains all the source code you will need for programming your Mayfly (which is an Arduino board). There is no README for that folder, so how to use it is explained further down in this markdown file.
-- **[base](integrations)**: this folder contains code for telemetering collected data from snow stations without cellular service. It is meant to compliment the [satellite sketches](mayfly_datalogger/telemetry) found in the mayfly_datalogger->telemetry folder.
+- **[base](base)**: this folder contains code for telemetering collected data from snow stations without cellular service. It is meant to compliment the [satellite sketches](mayfly_datalogger/telemetry) found in the mayfly_datalogger->telemetry folder.
 - **[mayfly_datalogger](mayfly_datalogger)**: this folder contains the code needed for the deployment of a standalone or integrated snow station. It deals with the code for the Mayfly of the actual site where you are sampling measurements.
 - **[utilities](utilities)**: this folder contains useful Mayfly sketches that can assist in troubleshooting sensors, downloading data, or assuring you have the proper drivers for your computer
 
