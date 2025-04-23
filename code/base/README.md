@@ -19,45 +19,47 @@ The contents of this directory address the Mayfly and Internet-connected data lo
 - Sparkfun Bee explorer board: [SparkFun Link](https://www.sparkfun.com/products/11812)
 - USB to mini USB cable (or whatever the Sparkfun Bee expolorer board USB port is; likewise make sure it isn't just a charging cable but that it has data transfer capabillities): [Amazon Link](https://www.amazon.com/Amazon-Basics-Charging-Transfer-Gold-Plated/dp/B00NH11N5A/ref=sr_1_1?crid=1Z0FIFVVCXG0W&dib=eyJ2IjoiMSJ9.shJPkvHWsKPPj2XvYAPBmNL50UHskMqo16gwTKuFBExp4vatt4_0_judiSkXn9R6tbDUb6a3kQqJNT5YGJOsxUhNdQeKjHa2TSXLJMGJsOYR2U7iZSGto64mWcN8Ry-DeZc0ZJN7BWq3frLdTGhZROKR3tVtsDp0j_9M-VZgzCQyn5KyGpybJtvbnLpKkE27-dP30L9B274XFoM36szpTkp7nA3GOI8wVNV5Ls5fB40.ROudX9YX1I-bUxWiohZX6eGvnMZE8h9sToyxZ6urNi4&dib_tag=se&keywords=usb+to+mini+usb&qid=1731528058&sprefix=usb+to+mini+usb%2Caps%2C140&sr=8-1)
 
-  1. Download the XCTU software for interfacing with the XBee modules
-		1. Click on the link: https://www.digi.com/products/embedded-systems/digi-xbee/digi-xbee-tools/xctu
-		2. Click on the button: "Visit Support to Download XCTU"
-		3. Scroll down to "Product Resources"
-		4. Under "Resources and Utilities" select the XCTU link for your operating system and follow the instructions
-	2. You will want an explorer board from sparkfun in order to easily interface with XCTU (https://www.sparkfun.com/products/11812)
-		1. Note that there are other explorer boards you can get, but make sure you can obtain the necessary cables for powering and using serial communication
-	3. Attach your XBee S3B to the explorer making sure to match the board's geometry to the white outlines on the explorer
-	4. Attach the board to your computer. If you get a different explorer board, note that you may need to supply power externally, such as with a barrel jack and wall plug.
-	5. Open the XCTU software
-	6. In the top left, select the button showing a module with a magnifying glass over it to discover the radio module
-	7. Select the port the radio is connected to
-	8. Press Next
-	9. Make sure the following settings are set:
-		1. Baud Rate: 9600
-		2. Data Bits: 8
-		3. Parity: None
-		4. Stop Bits: 1
-		5. Flow Control: None
-	10. Press Finish
-	11. A list of discovered devices should appear. If this does not work, hit cancel and try to add the radio module in the home page by selecting the button with the + sign and using the same parameters
-	12. Select your device and press "Add selected devices"
-	13. You should be taken back to the home page where your device is listed on the left
-	14. Click on the module from that list (it should highlight orange when selecting it), avoiding the buttons on the right side
-	15. This will open up all the radio settings.
-	16. Under MAC/PHY settings, set Network ID (ID) to something significant to you that all radios will be on. Note that if two radios' network IDs do not match, they will not be able to communicate.
-	17. Under MAC/PHY settings, set Unicast Mac Retries (RR) to F
-	18. Under Network settings, set Mesh Unicast Retries (MR) to 5
-	19. Under Addressing settings, set the Node Identifier (NI) to something meaningful such as the name of the station the module will be placed on
-	20. Under Addressing settings, make sure that the Transmit Options (TO) is set to C0 (DigiMesh)
-	21. Under Serial Interfacing options, set API Enable (AP) to API Mode Without Escapes
-	22. Under Sleep Commands, set Sleep Mode (SM) to Async. Pin Sleep
-	23. Save these changes by pressing the "Write" button at the top
-	24. Your XBee is programmed, so clear it from the list on the left by clicking the module's "X" button
-	25. Unplug the cable from your computer or explorer before removing the XBee from the explorer
+#### Steps to program the XBee
+1. Download the XCTU software for interfacing with the XBee modules
+	1. Click on the link: https://www.digi.com/products/embedded-systems/digi-xbee/digi-xbee-tools/xctu
+	2. Click on the button: "Visit Support to Download XCTU"
+	3. Scroll down to "Product Resources"
+	4. Under "Resources and Utilities" select the XCTU link for your operating system and follow the instructions
+2. You will want an explorer board from sparkfun in order to easily interface with XCTU (https://www.sparkfun.com/products/11812)
+	1. Note that there are other explorer boards you can get, but make sure you can obtain the necessary cables for powering and using serial communication
+3. Attach your XBee S3B to the explorer making sure to match the board's geometry to the white outlines on the explorer
+4. Attach the board to your computer. If you get a different explorer board, note that you may need to supply power externally, such as with a barrel jack and wall plug.
+5. Open the XCTU software
+6. In the top left, select the button showing a module with a magnifying glass over it to discover the radio module
+7. Select the port the radio is connected to
+8. Press Next
+9. Make sure the following settings are set:
+	1. Baud Rate: 9600
+	2. Data Bits: 8
+	3. Parity: None
+	4. Stop Bits: 1
+	5. Flow Control: None
+10. Press Finish
+11. A list of discovered devices should appear. If this does not work, hit cancel and try to add the radio module in the home page by selecting the button with the + sign and using the same parameters
+12. Select your device and press "Add selected devices"
+13. You should be taken back to the home page where your device is listed on the left
+14. Click on the module from that list (it should highlight orange when selecting it), avoiding the buttons on the right side
+15. This will open up all the radio settings.
+16. Under MAC/PHY settings, set Network ID (ID) to something significant to you that all radios will be on. Note that if two radios' network IDs do not match, they will not be able to communicate.
+17. Under MAC/PHY settings, set Unicast Mac Retries (RR) to F
+18. Under Network settings, set Mesh Unicast Retries (MR) to 5
+19. Under Addressing settings, set the Node Identifier (NI) to something meaningful such as the name of the station the module will be placed on
+20. Under Addressing settings, make sure that the Transmit Options (TO) is set to C0 (DigiMesh)
+21. Under Serial Interfacing options, set API Enable (AP) to API Mode Without Escapes
+22. Under Sleep Commands, set Sleep Mode (SM) to Async. Pin Sleep
+23. Save these changes by pressing the "Write" button at the top
+24. Your XBee is programmed, so clear it from the list on the left by clicking the module's "X" button
+25. Unplug the cable from your computer or explorer before removing the XBee from the explorer
 
-Folder summaries
-- **[central_station](central_station)**: while there are two dataloggers physically located where the central station is (one Mayfly and one Campbell Scientific datalogger), this folder specifically contains just the Mayfly's code for aggregating data.
-- **[cr800](cr800)**: this folder contains the code for a Campbell Scientific CR800 that integrates with an existing network and receives data from the satellite stations through the central station's Mayfly serially. While we are using a CR800 datalogger for this station, several of Campbell Scientific's newer dataloggers could be used with similar code (e.g., CR6, CR1000, CR310, CR350, etc.).
-- **[repeater](repeater)**: this folder contains some simple Mayfly code for a repeater station if you need one. Note that a repeater station is not inherently necessary for a functioning network, but may be needed depending on distances between satellite stations and relative to the central station.
 
-Refer to step 5 of the Mayfly datalogger [readme file](https://github.com/CIROH-Snow/snow_sensing/tree/main/code/mayfly_datalogger) in this repository for setup instructions for XBee radio modules if you are using them.
+#### Folder summaries
+Folders in this directory are broken down into the components of the base station, mayfly and internet-connected data logger. An additonal folder is given titled "repeater". A repeater station is an intermediary station between satellite and base that helps to relay data from satellite to base in the case a direct connection cannot be established. Any number of repeater stations can be set up to help relay data from one location to another. The code for it is found in its folder.
+
+- **[internet-connected-datalogger](internet-connected-datalogger)**: This folder contains example code for two different data loggers connected to an HIS that give satellite snow station data to an HIS
+- **[mayfly](mayfly)**: This folder contains the code for the Mayfly that collects all the data from satellite snow stations and pushes that data to an Internet-connected data logger. The two examples given in this folder correspond to code in the [internet-connected-datalogger folder](internet-connected-datalogger).
+- **[repeater](repeater)**: This folder contains some simple Mayfly code for a repeater station if you need one. Note that a repeater station is not inherently necessary for a functioning network. 
