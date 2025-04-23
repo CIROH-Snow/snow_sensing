@@ -5,7 +5,7 @@ This directory contains the code needed for telemetring data from a snow station
 The following figure illustrates the role of a base station in getting data published to an HIS when a snow station is setup in an area without cell service.
 ![satellite-base relationship](base_figures/satellite-base-his.png)
 There are three principal components outlined in the figure:
-1. The satellite station, which is a snow station making measurements but that cannot post the data to an HIS on its own for lack of cell serivce
+1. The satellite station, which is a snow station making measurements that cannot post the data to an HIS on its own for lack of cell serivce
 2. The base station, which aggregates data from any number of satellite stations and is capable of posting to an HIS
 3. The data storage, which is the HIS that is accessed over the Internet
 The arrows indicate the flow of data, with blue arrows being wired connections and red arrows being wireless connections.
