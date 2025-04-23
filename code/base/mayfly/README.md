@@ -13,7 +13,9 @@ The Base Mayfly collects a timestamp for the most recent measurement and then re
 An "@" sign indicates the start of a new data point followed by the identifier for the following phenomena. An "=" sign indicates that the actual measurement is following, and then the data point is terminated by a ";".
 An example of this could be: @snowDepth=652;
 In this example, the Base Mayfly requested a varCode and received "snowDepth" and then it requested snowDepth's measurement, which was 652, as in 652 mm. All the data points for a satellite station's measurements can be "stacked" in this format.
+
 For example: @timestamp=2025-02-04 11:30:00-7;@snowDepth=652;@airTemp=1.4;
+
 This format is used to compile all the data into one string that can be easily parsed by any data logger over serial connection.
 
 The reason their are two different sketches is that the [Internet-connected data loggers](../internet-connected-datalogger) given in this repository's examples have different ways of parsing the data, and they don't necessarily require the same information to be able to post to their respective HIS.
