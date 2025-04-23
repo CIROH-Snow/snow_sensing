@@ -2,7 +2,7 @@
 Created by Braedon Dority
 File name: central_station.ino
 
-This file contains the code needed for operating a Mayfly at a "central" station that is connected to a LTE Mayfly 
+This file contains the code needed for operating a Mayfly at a "base" station that is connected to a LTE Mayfly 
 that is using the code found in the "integrations" directory of this repository. You will need a programmed XBee S3B
 in order to properly use this as well.
 
