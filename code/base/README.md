@@ -1,6 +1,9 @@
-### Integrations
+### Base Station and Telemetry for Sites Without Cellular Service
 
-This directory contains the code needed for telemetring data from a snow station that does not have cellular connection to a Hydrologic Information System (HIS). Here a base station (sometimes referred to as the "host" in some of the code in this repository) aggregates data from any number of snow stations that don't have cell service, named satellite stations from here on out. This is done by using 900 MHz spreadspectrum radios to get data from a satellite snow station where there is no cell service to a base station where there is. A base station could also be an existing weather station that has its own method of connecting to an HIS.
+This directory contains the code needed for telemetring data from a snow station that does not have cellular connection to a Hydrologic Information System (HIS). Here a base station (sometimes referred to as the "host" in some of the code in this repository) is a station that has cell service or some other method of connecting to an HIS that aggregates data from any number of snow stations that don't have cell service, named [satellite stations](../mayfly_datalogger/telemetry) from here on out and publishes their data to an HIS. This is done by using 900 MHz spreadspectrum radios to get data from a satellite snow station where there is no cell service to a base station where there is.
+
+The hardware and code used in setting up a telemetry network like this is designed to use mesh networking. Essentially this means that any station within the network will aid in sending data to its specified destination. The following figure from Digi illustrates this concept:
+![mesh_network_gif](base_figures/mesh_network.gif)
 
 The following figure illustrates the role of a base station in getting data published to an HIS when a snow station is setup in an area without cell service.
 ![satellite-base relationship](base_figures/satellite-base-his.png)
