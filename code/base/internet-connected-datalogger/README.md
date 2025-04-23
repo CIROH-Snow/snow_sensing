@@ -5,7 +5,7 @@ This assumes that data logger is already connected to a network you've set up on
 
 The following figures show an example of an implementation like this done at the Tony Grove Ranger Station in Logan Canyon in northern Utah. The Base Mayfly is connected to a CR800 that is part of the [Logan River Observatory's](https://uwrl.usu.edu/lro/) climate monitoring network.
 
-![LRO Base Station Example](../base_figures/cr800_base)
+![LRO Base Station Example](../base_figures/cr800_base.png)
 
 In the figure the Mayfly is at the bottom-right of the enclosure, and the CR800 is at the top-left.
 
