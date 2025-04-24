@@ -2,12 +2,8 @@
 
 This directory contains the code needed for telemetring data from a snow station that does not have cellular connection to a Hydrologic Information System (HIS). Here a base station (sometimes referred to as the "host" in some of the code in this repository) is a station that has cell service or some other method of connecting to an HIS that aggregates data from any number of snow stations that don't have cell service, named [satellite stations](../mayfly_datalogger/telemetry) from here on out, and publishes their data to an HIS. This is done by using 900 MHz spreadspectrum radios to get data from a satellite snow station where there is no cell service to a base station where there is some method of connecting to the Internet, whether through cell service or some other method.
 
-The hardware and code used in setting up a telemetry network like this is designed to use mesh networking. Essentially this means that any station within the network will aid in sending data to its specified destination. The following GIF from Digi illustrates this concept:
-![mesh_network_gif](base_figures/mesh_network.gif)
+The following figure illustrates the role of a base station in getting data published to an HIS when a snow station is setup in an area without cell service and the various components involved.
 
-In this figure, each node, except node B, represents a satellite snow station where snow data is measured and recorded. Node B is the Base station where all the data will go to be published to an HIS. In mesh networking, each satellite station can send its data to the base so long as there exist a chain of stations that can span the gap if distances are too large between a satellite and the base or if there are obstructions, such as trees or terrain. Also in mesh networking, if one station goes down that was previously helping to relay data to the base, the satellite stations will reroute. Note that if in your implementation your satellite station cannot communicate with the base, and you do not wish to install more satellite snow monitoring stations to help bridge the gap, you can build a repeater station which will just help relay data rather than make measurements. This is discussed below.
-
-Once the information reaches the base station, the base station publishes the data to an HIS. The following figure illustrates the role of a base station in getting data published to an HIS when a snow station is setup in an area without cell service and the various components involved.
 ![satellite-base relationship](base_figures/satellite-base-his.png)
 There are three principal components outlined in the figure:
 1. The satellite station, which is a snow station making measurements that cannot post the data to an HIS on its own for lack of cell serivce
@@ -15,6 +11,12 @@ There are three principal components outlined in the figure:
 3. The data storage, which is the HIS that is accessed over the Internet
 The arrows indicate the flow of data, with blue arrows being wired connections and red arrows being wireless connections.
 The basic approach is that a Mayfly at the base station will aggregate data from all the satellite snow stations and push that data to a data logger that is already connected to an HIS. The 900 MHz Bees in the figure are the modems that help communicate data from a satellite station to a base station.
+
+The hardware and code used in setting up a telemetry network like this is designed to use mesh networking. Essentially this means that any station within the network will aid in sending data to its specified destination. The following GIF from Digi illustrates this concept:
+
+![mesh_network_gif](base_figures/mesh_network.gif)
+
+In this figure, each node, except node B, represents a satellite snow station where snow data is measured and recorded. Node B is the Base station where all the data will go to be published to an HIS. In mesh networking, each satellite station can send its data to the base so long as there exist a chain of stations that can span the gap if distances are too large between a satellite and the base or if there are obstructions, such as trees or terrain. Also in mesh networking, if one station goes down that was previously helping to relay data to the base, the satellite stations will reroute. Note that if in your implementation your satellite station cannot communicate with the base, and you do not wish to install more satellite snow monitoring stations to help bridge the gap, you can build a repeater station which will just help relay data rather than make measurements. This is discussed below.
 
 The contents of this directory address the Mayfly and Internet-connected data logger components of the base station. The 900 MHz Bee used for this design is the [Digi XBee S3B](https://www.amazon.com/gp/product/B07G1XQ1BS/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1). Instructions on setting up the XBee for the base Mayfly is given below. Note that this is the same for the satellite Mayfly, which is discussed as step 5 in its README file found [here](../mayfly_datalogger/README.md).
 
