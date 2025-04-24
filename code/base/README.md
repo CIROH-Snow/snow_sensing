@@ -65,7 +65,7 @@ The contents of this directory address the Mayfly and Internet-connected data lo
 
 
 #### Folder summaries
-Folders in this directory are broken down into the components of the base station, mayfly and internet-connected data logger. An additonal folder is given titled "repeater". A repeater station is an intermediary station between satellite and base that helps to relay data from satellite to base in the case a direct connection cannot be established. Any number of repeater stations can be set up to help relay data from one location to another. The code for it is found in its folder.
+Folders in this directory are broken down into the components of the base station: the Mayfly and internet-connected data logger (which could be any data logger). An additonal folder is given titled "repeater". A repeater station is an intermediary station that helps to relay data from satellites to base in the case a direct connection cannot be established. Any number of repeater stations can be set up to help relay data from one location to another. The code for it is found in its folder.
 
 - **[internet-connected-datalogger](internet-connected-datalogger)**: This folder contains example code for two different data loggers connected to an HIS that give satellite snow station data to an HIS
 - **[mayfly](mayfly)**: This folder contains the code for the Mayfly that collects all the data from satellite snow stations and pushes that data to an Internet-connected data logger. The two examples given in this folder correspond to code in the [internet-connected-datalogger folder](internet-connected-datalogger).
