@@ -10,7 +10,7 @@ The following figures show an example of an implementation like this done at the
 
 ![LRO Base Station Example](../base_figures/cr800_base.png)
 
-In the figure the Mayfly is at the bottom-right of the enclosure, and the CR800 is at the top-left.
+In the figure the Mayfly is at the bottom-right of the enclosure, and the CR800 is at the top-right.
 
 ### Telemetering Data to HydroServer Using a Mayfly for the Internet-Connected Data Logger
 The other example given here is for using a Mayfly (that is separate from the Base Mayfly that aggregates data from every station) that has an [LTE Bee modem](https://www.envirodiy.org/product/envirodiy-lte-bee/) for publishing directly to [HydroServer](https://hydroserver.geoglows.org/browse). The following figure shows an example of how this would look, with a satellite snow station that sends its data to a Base Mayfly over 900 MHz spreadspectrum radio which then pushes that 
