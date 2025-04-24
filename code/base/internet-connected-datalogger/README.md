@@ -4,7 +4,7 @@ Two examples are given in this folder, and each has associated code for the [Sat
 
 ### Telemetering Data with Campbell Scientific
 The first is for receiving and parsing data into Campbell Scientific (CS) data logger tables using a CR800. We recognize that the CR800 is no longer being sold by Campbell Scientific, but the code here should be adaptable to any other CS data logger.
-This assumes that data logger is already connected to a network you've set up on CS LoggerNet. Make sure to use the [push_to_cr800](../mayfly/push_to_cr800) sketch for the Base Mayfly if this is how you will connect to CS HIS and the [satellite_varCode](../../mayfly_datalogger/telemetry/satellite_varCode) sketch for the satellite station Mayfly.
+This assumes that data logger is already connected to a network you've set up on CS LoggerNet. Make sure to use the [push_to_cr800](../mayfly/push_to_cr800) sketch for the Base Mayfly if this is how you will connect to CS HIS and the [satellite_varCode](../../mayfly_datalogger/telemetry/satellite_varCode) sketch for the satellite station Mayfly. You will also need to verify that the variable names the CRBasic code looks for matches all the varCode variables that will be measured on the satellite data loggers.
 
 The following figures show an example of an implementation like this done at the Tony Grove Ranger Station in Logan Canyon in northern Utah. The Base Mayfly is connected to a CR800 that is part of the [Logan River Observatory's](https://uwrl.usu.edu/lro/) climate monitoring network.
 
