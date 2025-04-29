@@ -1,4 +1,4 @@
-## Mayfly Datalogger Code
+## Mayfly Data Logger Code
 
 This folder contains the sketches will ultimately be uploaded to the Mayfly data logger that is used for making and recording snow measurements. There are two types of snow stations that you could deploy. There are stations that do not telemeter their data and stations that do.
 Stations that do not telemeter data simply make measurements and record those measurements to a microSD card attached to the Mayfly board. Stations that do telemeter data likewise record measurements to an attached microSD but also send that data either over 900 MHz spreadspectrum radio to another data logger that is connected to a Hydrologic Information System (HIS) or directly posts that data to an HIS if it has cellular service at the station.
