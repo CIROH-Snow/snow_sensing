@@ -28,8 +28,8 @@ These hardware and tools are not explicitly called out in the hardware spreadshe
 
 1. Take an auger and drill/dig a hole at least 20 inches into the ground near where the mast will be placed but not so close the u-post will be driven into the sensors.
 2. If you have not already programmed your Teros 12 sensors, you will need to do that now. Follow the instructions of step 4 in the Hardware Setup Steps in the Mayfly Datalogger Code ![markdown file](https://github.com/CIROH-Snow/snow_sensing/tree/main/code/mayfly_datalogger).
-3. Once the sensors are programmed, insert each sensor at their different depths: sensor 'c' at 20", sensor 'b' at 8 inches, and sensor 'a' at 2 inches.
-4. Cut about a 3-foot lenght of flexible aluminum conduit that you can run the sensor stereo jacks through and bury the hole.
+3. Once the sensors are programmed, insert each sensor at their different depths: sensor 'c' at 20 inches, sensor 'b' at 8 inches, and sensor 'a' at 2 inches.
+4. Cut about a 3-foot length of flexible aluminum conduit that you can run the sensor stereo jacks through and bury the hole.
 5. Take the U-post and begin inserting into the location of where the mast will go using a sledge hammer or a fence post pounder.
 ![Placing u-post](construction_images/IMG_9014.JPG)
 6. Before pounding the u-post in too far, take a level and make sure the post is being driven in vertically by checking that it is straight on all sides.
