@@ -4,7 +4,7 @@ This repository contains hardware and software designs for low(er) cost snow sen
 
 ## Getting Started
 
-Follow our guide for getting started to construct and program a snow sensing station. This guide will lead you through:
+Follow our [guide for getting started](docs/getting_started.md) to construct and program a snow sensing station. This guide will lead you through:
 * Purchasing components necessary for constructing a station
 * Setting up and wiring the hardware for a station
 * Programming your station for data collection and communication
