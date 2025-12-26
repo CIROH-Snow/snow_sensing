@@ -1,6 +1,6 @@
-### Soldering Guide
+# Soldering Guide
 
-This guide walks through the different soldering requirements of this project. It includes the additional analog-to-digital converters (ADCs) needed for making longwave radiation measurements and the MaxBotix sonar sensor.  
+This guide walks through the soldering requirements for components of the snow sensing station that are not already soldered together when you purchase them. It includes instructions for soldering the components of the additional analog-to-digital converters (ADCs) needed for making longwave radiation measurements and the MaxBotix sonar sensor.  
 An optional soldering jumper setting on the Mayfly is also discussed.
 
 Hardware and tools needed:
@@ -22,51 +22,76 @@ https://www.youtube.com/watch?v=3jAw41LRBxU
 https://www.youtube.com/watch?v=6rmErwU5E-k  
 
 
-##### Required Soldering
+## Required Soldering
 
-### Soldering the ADCs
+The following steps are covered in this guide. Links to the sections are provided here for convenience:
+
+1. [Soldering the ADCs](#1-soldering-the-adcs)
+2. [Soldering the Maxbotics Sensor Cable](#2-soldering-the-maxbotix-sensor-cable)
+3. [Optional Soldering](#3-optional-soldering)
+
+### 1. Soldering the ADCs
 1. Unpack both ADCs from Adafruit and their header pins.
+
 2. Using a pocket knife, cut the header pins in half so they are 6 across.
 ![Prepping the header pins](soldering_images/soldering1.jpg)
+
 3. Insert the longer end of the header pins into a breadboard straddling the center and one extra row on each side.
 ![Inserting the header pins into the breadboard](soldering_images/soldering2.jpg)
+
 4. Place the ADCs over the header pins
 ![Placing the ADCs on the header pins](soldering_images/soldering3.jpg)
+
 5. Solder both the ADCs' header pins
 ![Soldering the header pins](soldering_images/soldering4.jpg)
+
 6. Get out the solderable breadboard
 ![Solderable breadboard](soldering_images/soldering5.jpg)
-7. Place the ADCs in the solderable breadboard and flip it over
+
+7. Place the ADCs in the solderable prototyping breadboard as shown and flip it over
 ![Place ADCs in breadboard](soldering_images/soldering6.jpg)
+
 8. Solder the header pins to the solderable Breadboard
 ![Soldered ADC pins to breadboard](soldering_images/soldering7.jpg)
+
 9. Place the four 6-pin screw terminals so they line up with each of the pin headers on both ADCs. Make sure the gates face outwards.
 ![Placed screw terminals](soldering_images/soldering8.jpg)
+
 10. It is difficult to flip this over and keep everything in place, so take a piece of cardboard and lay it over the board with everything upright.
 ![Lay cardboard on board](soldering_images/soldering9.jpg)
 ![Placed cardboard](soldering_images/soldering10.jpg)
+
 11. Flip it over to reveal the underside of the breadboard and solder the pins
 ![Flipped over board](soldering_images/soldering11.jpg)
 ![Soldered screw terminal pins](soldering_images/soldering12.jpg)
 
-### Soldering the MaxBotix Sensor
+### 2. Soldering the MaxBotix Sensor Cable
+
 1. Strip the outer conduit of the PVC jacketed wire to expose all the individual wires inside.
+
 2. Take enough conduit off to provide a couple of inches of wiring and cut all the wires down to the outer conduit excluding the white, black, and red wires which will be used.
-3. Strip the red, black, and white wires and twist the ends.
+
+3. Strip the red, black, and white wires to expose approximately 0.25 inches of conductor wire and and twist the ends to ensure that they are not frayed.
+
 4. Stick the black wire in the MaxBotix hole farthest away from the hole with a square metal pad, then stick in the red, then the white. Solder these wires.
 ![Solder the MaxBotix](soldering_images/IMG_9191.JPG)
-**Note** that you may need to cut the header pins a small amount after soldering them to the board when you put it in the enclosure to mount it. The pins may be too long for the command strips to make contact between the board and the enclosure otherwise.
 
-##### Optional Soldering
+**NOTE:** You may need to cut the header pins a small amount after soldering them to the board when you put it in the enclosure to mount it. The pins may be too long for the command strips to make contact between the board and the enclosure otherwise.
 
-You may add some functionality to your Mayfly if you desire. The following steps will enable your Mayfly to turn on a white LED near the top of the board when power is supplied to the Bee header.  
-This is useful for visually verifying that any Bee modules being used are actually being powered. Note that this will still be on even if the module is asleep. This light comes on anytime pin 18 is driven high.  
-Putting the XBee to sleep does not mean that the socket is not still supplied with power, so the LED will still light up during those times if you make this adjustment.
+### 3. Optional Soldering
 
-1. Flip over your Mayfly to reveal the jumpers on the back.
+You may add some functionality to your Mayfly if you desire. The following steps will enable your Mayfly to turn on a white LED near the top of the board when power is supplied to the Bee header.  This is only useful if you are using XBee radio modules for adding telemetry to your snow sensing station. Completing this step is useful for visually verifying that any Bee modules being used are actually being powered. Note that this will still be on even if the radio module is in sleep mode. This light comes on any time pin 18 is driven high to supply power to the Bee module header.  
+
+**NOTE:** Putting the XBee to sleep in code does not mean that the Bee module socket is not still supplied with power, so the LED will still light up during those times if you make this adjustment.
+
+1. Flip over your Mayfly datalogger to reveal the jumpers on the back.
 ![Revealed jumpers](soldering_images/soldering13.jpg)
+
 2. Locate the SJ16 soldering area (LED7) on the back. It should be on the far right side and outline two small, metal pads.
-3. Solder the two pads together.
+
+3. Solder the two pads together with a very small amount of solder to connect them.
 ![Soldered pads](soldering_images/soldering14.jpg)
 
+That's it. Soldering of the components for your station should be complete. Use the following link to return the Getting Started Guide to continue the next step.
 
+[Back to the Getting Started Guide](../docs/getting_started.md)

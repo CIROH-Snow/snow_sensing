@@ -1,4 +1,4 @@
-## Deployment Platform
+# Deployment Platform
 
 Choosing a deployment platform is important as a first step because it dictates the components you will buy along with how the sensors are hardware are mounted to your deployment platform. We experimented with two deployment platforms:
 1. Campbell Scientific or other commercial instrumentation tripods or towers - e.g., the [Campbell Scientific CM106B](https://www.campbellsci.com/cm106b).
