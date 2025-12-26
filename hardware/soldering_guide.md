@@ -15,11 +15,13 @@ Hardware and tools needed:
 - A pocket knife
 - PVC Jacketed 22 Gauge 5-wire Power Wire: [Super Bright LEDs Link](https://www.superbrightleds.com/pvc-jacketed-22-gauge-wire-five-conductor-power-wire-22-awg-5-wire)
 
-**Note that there are inherent risks with soldering!** Make sure you learn proper technique and safety when soldering. Work in a well-ventilated area.  
+**Note that there are inherent risks with soldering!** Make sure you learn proper technique and safety when soldering. Work in a well-ventilated area. 
+
 Use a fume extractor to avoid breathing toxic gases, and wear safety glasses incase any solder splashes. **Also do not solder any live circuits.** 
+
 Here are some beginner soldering videos for reference:  
-https://www.youtube.com/watch?v=3jAw41LRBxU
-https://www.youtube.com/watch?v=6rmErwU5E-k  
+* [https://www.youtube.com/watch?v=3jAw41LRBxU](https://www.youtube.com/watch?v=3jAw41LRBxU)
+* [https://www.youtube.com/watch?v=6rmErwU5E-k](https://www.youtube.com/watch?v=6rmErwU5E-k)  
 
 
 ## Required Soldering
