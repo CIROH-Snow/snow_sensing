@@ -13,16 +13,16 @@ Follow our [guide for getting started](docs/getting_started.md) to construct and
 
 ## Repository Structure
 
-### Hardware
+### hardware
 
 This folder contains designs and specifications for sensors, dataloggers, communication peripherals, and components required for building a snow sensing station.
 
-### Code
+### code
 
 This folder contains the code used to operate the snow sensing stations, including data collection, data storage, and data communication. It also includes necessary libraries, guidance on programming XBee modules, helpful sketches, and more. 
 
 ## Funding and Acknowledgments
 
-Funding for this project was provided by the United States Geological Survey (USGS) awarded through the Cooperative Institute for Research to Operations in Hydrology (CIROH) via the NOAA Cooperative Agreement with The University of Alabama (NA22NWS4320003). Collaborators include Utah State University, University of Utah, and University of Vermont. Additional funding and support have been provided by the Utah Water Research laboratory at Utah State University.
+Funding for this project was provided by the United States Geological Survey (USGS) awarded through the Cooperative Institute for Research to Operations in Hydrology (CIROH) via the NOAA Cooperative Agreement with The University of Alabama (NA22NWS4320003). Collaborators include Utah State University, University of Utah, and University of Vermont. Additional funding and support have been provided by the Utah Water Research Laboratory (UWRL) at Utah State University.
 
 <img src="/assets/CIROH_logo.png" alt="CIROH Logo" width="15%"/>
