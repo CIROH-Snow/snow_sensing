@@ -1,10 +1,15 @@
 # Mayfly Datalogger Code
 
-This folder contains the Arduino sketches will ultimately be uploaded to the Mayfly datalogger that is used for making and recording snow measurements. There are two types of snow stations that you could deploy. There are stand-alone stations that do not telemeter their data and stations that have telemetry.
-Stations that do not telemeter data simply make measurements and record those measurements to a microSD card attached to the Mayfly board. Stations that do telemeter data likewise record measurements to an attached microSD card but also send that data either over 900 MHz spread spectrum radio to another data logger that is connected to a Hydrologic Information System (HIS) or directly posts that data to a HIS if it has cellular service at the station.
-Further instruction is found in each folder based on the approach you are planning on taking with your snow station.
+This folder contains the Arduino sketches that will ultimately be uploaded to the Mayfly datalogger that is used for making and recording snow measurements. There are two types of snow stations that you can deploy: 
 
-## Hardware needed to successfully program the Mayfly and soil sensors 
+1. Stand-alone stations that do not telemeter their data: These stations simply make measurements and record those measurements to a microSD card attached to the Mayfly datalogger board.
+2. Stations that have telemetry via either cellular or 900 MHz spread spectrum radio modules: These stations likewise record measurements to an attached microSD card but also send that data either over 900 MHz spread spectrum radio to another data logger that is connected to a Hydrologic Information System (HIS) or directly posts that data to a HIS if it has cellular service at the station.
+
+Further instruction is found in each sub-folder based on the approach you are planning on taking with your snow station. Regardless of which approach you choose, you need to follow the hardward configuration steps below to prepare your Mayfly datalogger and sensors for data collection.
+
+## Hardware needed to successfully program the Mayfly datalogger and sensors 
+
+The following hardware components are needed to successfuly configure and program your Mayfly datalogger and sensors:
 
 * Mayfly datalogger: [EnviroDIY Link](https://www.envirodiy.org/product/envirodiy-mayfly-data-logger/)
 * CR1220 battery: [DigiKey Link](https://www.digikey.com/en/products/detail/panasonic-bsg/CR1220/269740?s=N4IgTCBcDaIA4AYDMSC0A7AJiAugXyA)
@@ -16,9 +21,9 @@ Further instruction is found in each folder based on the approach you are planni
 * MicroSD card: [Amazon Link](https://www.amazon.com/PNY-Elite-X-microSDXC-Memory-3-Pack/dp/B08T6QSBPJ/ref=sxts_b2b_sx_reorder_acb_customer?content-id=amzn1.sym.f63a3b0b-3a29-4a8e-8430-073528fe007f%3Aamzn1.sym.f63a3b0b-3a29-4a8e-8430-073528fe007f&crid=3FKIWN7XO0G1T&cv_ct_cx=microsd&dib=eyJ2IjoiMSJ9.CDXdRBTTK5D7gOhcosDwDLRO1-udc6y3OmsZ_IS6n-M._me_VA9t2B5s1D-KL36yualKHhDRDZhm8OcrubA44I4&dib_tag=se&keywords=microsd&pd_rd_i=B08T6QSBPJ&pd_rd_r=899f26f9-a4e7-49c0-8751-6ac8cb32a7d3&pd_rd_w=V2sb6&pd_rd_wg=wIW2M&pf_rd_p=f63a3b0b-3a29-4a8e-8430-073528fe007f&pf_rd_r=2MNHMDSCGZH55X2MG5D5&qid=1731528178&sbo=RZvfv%2F%2FHxDF%2BO5021pAnSA%3D%3D&sprefix=microsd%2Caps%2C237&sr=1-1-9f062ed5-8905-4cb9-ad7c-6ce62808241a)
 * EnviroDIY microSD vertical card adapter (optional and comes with Mayfly datalogger purchase): [EnviroDIY Link](https://www.envirodiy.org/product/envirodiy-vertical-microsd-card-adapter-pack-of-5/)
 
-## Hardware Setup Steps
+## Datalogger and Sensor Hardware Configuration Steps
 
-**IMPORTANT: You need to complete the following steps to configure the hardware before you edit and upload the Arduino Mayfly sketch found in this folder for logging data.**   
+**IMPORTANT: You need to complete the following steps to configure the datalogger and sensor hardware before you edit and upload the Arduino Mayfly sketch found in this folder for logging data.** This guide also assumes that you have already completed the required soldering, wiring, and construction steps for setting up a station. If you have not done so already, you should consult our [guide for getting started](../../docs/getting_started.md).
 
 ### 1. Set the real-time clock (RTC) on the Mayfly datalogger
 
@@ -62,21 +67,20 @@ If you are using the Meter Teros 12 soil sensors, you will need to set their SDI
 
 These steps are described in the hardware wiring guide in the hardware section of this repository, but are included again here for double checking before final programming. Follow these steps to ensure that the switched power jumpers are set correctly on the Mayfly datalogger:
 
-	1. At the top of each grove port on the Mayfly, there is a little, black header with four pins that identifies how much voltage is supplied over the switched power to that grove terminal
-	2. The voltage supplied to each terminal is set by moving the jumper that connects one of the three outer pins to each headers' center pin
-	3. Using a very fine, sturdy point, such as a very small flathead screwdriver, carefully make the following adjustments:
-		1. Above the D5-6 grove terminal, move the jumper to 5v
-		2. Above one of the SDI-12 grove terminals (it does not matter which), move the jumper to 12v
-		3. Above the other SDI-12 grove terminal, move the jumper to 3v (it may already be there by default)
-		4. Above the D10-11 grove terminal, move the jumper to 5v
-		5. Above the Aux Analog grove terminals, move the jumper to 3v (it may already be there by default)
-7. Attach the MicroSD card
-	1. There are two options for attaching the MicroSD card. You may use the socket found on the left-hand side
-	2. You may also use the adapter that likely came with your purchase of the Mayfly. Simply insert the 8 prongs of this adapter into the 8-pin header above the SD socket, matching the white outline on the Mayfly
-8. There are some optional and some required soldering configurations that need to take place for setting up a station. Please consult the [soldering documentation](https://github.com/CIROH-Snow/snow_sensing/blob/main/hardware/soldering_guide.md) found in the "hardware" folder of this repository
-9. All you need is to assemble the mounting hardware and wire the station. Constructing the station and wiring can be an intensive process and is difficult to describe without visual aids. Consult the [construction](https://github.com/CIROH-Snow/snow_sensing/blob/main/hardware/construction_guide.md) and [wiring](https://github.com/CIROH-Snow/snow_sensing/blob/main/hardware/wiring_guide.md) guides found in the "hardware" folder of this repository.
+1. At the top of each grove port on the Mayfly, there is a little, black header with four pins that identifies how much voltage is supplied over the switched power to that grove terminal.
+2. The voltage supplied to each terminal is set by moving the jumper that connects one of the three outer pins to each headers' center pin.
+3. Using a very fine, sturdy point, such as a very small flathead screwdriver, carefully make the following adjustments:
+   * Above the D5-6 grove terminal, move the jumper to 5v.
+   * Above one of the SDI-12 grove terminals (it does not matter which), move the jumper to 12v.
+   * Above the other SDI-12 grove terminal, move the jumper to 3v (it may already be there by default).
+   * Above the D10-11 grove terminal, move the jumper to 5v.
+   * Above the Aux Analog grove terminals, move the jumper to 3v (it may already be there by default).
 
-### 6. Program XBee Radio Modules
+### 6. Attach the MicroSD card
+
+There are two options for attaching the MicroSD card. You may use the socket found on the left-hand side, or you may also use the adapter that likely came with your purchase of the Mayfly datalogger. Simply insert the 8 prongs of this adapter into the 8-pin header above the SD socket, matching the white outline on the Mayfly. Insert the MicroSD card into the slot and push down until it clicks.
+
+### 7. Program XBee Radio Modules (OPTIONAL)
 
 **NOTE: You need only follow these steps if you are adding telemetry to your snow sensing station.**
 
