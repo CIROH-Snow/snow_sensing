@@ -34,35 +34,47 @@ The following steps are covered in this guide. Links to the sections are provide
 1. Unpack both ADCs from Adafruit and their header pins.
 
 2. Using a pocket knife, cut the header pins in half so they are 6 across.
+
 ![Prepping the header pins](soldering_images/soldering1.jpg)
 
 3. Insert the longer end of the header pins into a breadboard straddling the center and one extra row on each side. The breadboard is simply for convenience and to hold the headers while you are soldering the headers in place.
+
 ![Inserting the header pins into the breadboard](soldering_images/soldering2.jpg)
 
 4. Place the ADCs over the header pins
+
 ![Placing the ADCs on the header pins](soldering_images/soldering3.jpg)
 
 5. Solder both the ADCs' header pins
+
 ![Soldering the header pins](soldering_images/soldering4.jpg)
 
 6. Get out the solderable breadboard
+
 ![Solderable breadboard](soldering_images/soldering5.jpg)
 
 7. Place the ADCs in the solderable prototyping breadboard as shown and flip it over
+
 ![Place ADCs in breadboard](soldering_images/soldering6.jpg)
 
 8. Solder the header pins to the solderable Breadboard
+
 ![Soldered ADC pins to breadboard](soldering_images/soldering7.jpg)
 
 9. Place the four 6-pin screw terminals so they line up with each of the pin headers on both ADCs. Make sure the gates face outwards.
+
 ![Placed screw terminals](soldering_images/soldering8.jpg)
 
 10. It is difficult to flip this over and keep everything in place, so take a piece of cardboard and lay it over the board with everything upright.
+
 ![Lay cardboard on board](soldering_images/soldering9.jpg)
+
 ![Placed cardboard](soldering_images/soldering10.jpg)
 
 11. Flip it over to reveal the underside of the breadboard and solder the pins
+
 ![Flipped over board](soldering_images/soldering11.jpg)
+
 ![Soldered screw terminal pins](soldering_images/soldering12.jpg)
 
 ### 2. Soldering the MaxBotix Sensor Cable
@@ -74,6 +86,7 @@ The following steps are covered in this guide. Links to the sections are provide
 3. Strip the red, black, and white wires to expose approximately 0.25 inches of conductor wire and and twist the ends to ensure that they are not frayed.
 
 4. Stick the black wire in the MaxBotix hole farthest away from the hole with a square metal pad, then stick in the red, then the white. Solder these wires.
+
 ![Solder the MaxBotix](soldering_images/IMG_9191.JPG)
 
 **NOTE:** You may need to cut the header pins a small amount after soldering them to the board when you put it in the enclosure to mount it. The pins may be too long for the command strips to make contact between the board and the enclosure otherwise.
@@ -85,11 +98,13 @@ You may add some functionality to your Mayfly if you desire. The following steps
 **NOTE:** Putting the XBee to sleep in code does not mean that the Bee module socket is not still supplied with power, so the LED will still light up during those times if you make this adjustment.
 
 1. Flip over your Mayfly datalogger to reveal the jumpers on the back.
+
 ![Revealed jumpers](soldering_images/soldering13.jpg)
 
 2. Locate the SJ16 soldering area (LED7) on the back. It should be on the far right side and outline two small, metal pads.
 
 3. Solder the two pads together with a very small amount of solder to connect them.
+
 ![Soldered pads](soldering_images/soldering14.jpg)
 
 That's it. Soldering of the components for your station should be complete. Use the following link to return the Getting Started Guide to continue the next step.
