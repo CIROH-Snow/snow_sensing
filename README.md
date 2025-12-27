@@ -25,4 +25,4 @@ This folder contains the code used to operate the snow sensing stations, includi
 
 Funding for this project was provided by the United States Geological Survey (USGS) awarded through the Cooperative Institute for Research to Operations in Hydrology (CIROH) via the NOAA Cooperative Agreement with The University of Alabama (NA22NWS4320003). Collaborators include Utah State University, University of Utah, and University of Vermont. Additional funding and support have been provided by the Utah Water Research Laboratory (UWRL) at Utah State University.
 
-<img src="/assets/CIROH_logo.png" alt="CIROH Logo" width="15%"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="/assets/UWRL_logo.png" alt="UWRL Logo" width="80%"/>
+<img src="/assets/CIROH_logo.png" alt="CIROH Logo" width="50%"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="/assets/UWRL_logo.png" alt="UWRL Logo" width="50%"/>
