@@ -9,8 +9,6 @@ Follow our [guide for getting started](docs/getting_started.md) to construct and
 * Setting up and wiring the hardware for a station
 * Programming your station for data collection and communication
 
-**NOTE:** Programming the snow stations is done after the hardware has been set up, so follow the hardware setup instructions before attempting to program your dataloggers. There are a couple of steps in the hardware setup that specifically tell you to program something (such as programming the soil sensors before burying them). In that case, the instructions will explicitly tell you where to find the code necessary and what steps to take before continuing the hardware setup.
-
 ## Repository Structure
 
 ### hardware
