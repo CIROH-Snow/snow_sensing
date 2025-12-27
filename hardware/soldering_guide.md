@@ -3,17 +3,15 @@
 This guide walks through the soldering requirements for components of the snow sensing station that are not already soldered together when you purchase them. It includes instructions for soldering the components of the additional analog-to-digital converters (ADCs) needed for making longwave radiation measurements and the MaxBotix sonar sensor.  
 An optional soldering jumper setting on the Mayfly is also discussed.
 
-Hardware and tools needed:
-- Mayfly: [EnviroDIY Link](https://www.envirodiy.org/product/envirodiy-mayfly-data-logger/)
-- Breadboard: [Amazon Link](https://www.amazon.com/DEYUE-breadboard-Set-Prototype-Board/dp/B07LFD4LT6/ref=sr_1_1?crid=1DC4JWMO8ZJJY&dib=eyJ2IjoiMSJ9.jxVij6GBiI3UZ-6NpQmxYSe8hSgXCBThtl8-kiWvP-3WAVR479ujpSnnPrGnp7cUmnWXDiOtQ4phR-50BL2i1UjIniLV-IZZxGL4TpbQyZl7HSLv0v_bglYhH4-nDi4q2dBM2irJQZsNjZVsp45ZvGQZ1NRpkMMow3avvtMa5poaJjae4h3RQHu-G7xMAbMuGD0mY7QKZCUvI0Gcgym9OSW0TxVPqP694VD83nkVXtyUkbFpnQXhNhmMdNVbv5c_Q-vrcdhK-c4uRXD58dI5sZfi3NQnlcHaACsX2HjXnJk.B3AS3S1rpTwwSBDJtb058ysVtnxTsyUSe-oGa_6XJyw&dib_tag=se&keywords=breadboard&qid=1731532125&s=electronics&sprefix=breadboar%2Celectronics%2C183&sr=1-1)
-- Solderable breadboard: [Amazon Link](https://www.amazon.com/gp/product/B07ZYNWJ1S/ref=ppx_yo_dt_b_asin_title_o02_s00?ie=UTF8&th=1)
-- Adafruit ADS1115 ADCs (2 needed): [Amazon Link](https://www.amazon.com/ADS1115-16-Bit-ADC-Programmable-Amplifier/dp/B00QIW4MGW/ref=sxts_b2b_sx_reorder_acb_customer?content-id=amzn1.sym.44ecadb3-1930-4ae5-8e7f-c0670e7d86ce%3Aamzn1.sym.44ecadb3-1930-4ae5-8e7f-c0670e7d86ce&crid=3GMWVOTWRU9K6&cv_ct_cx=adafruit+ads1115+16-bit+adc&keywords=adafruit+ads1115+16-bit+adc&pd_rd_i=B00QIW4MGW&pd_rd_r=79e2130c-1d1b-4efe-8e58-87c4f12a79ba&pd_rd_w=ZUUuH&pd_rd_wg=t5fWq&pf_rd_p=44ecadb3-1930-4ae5-8e7f-c0670e7d86ce&pf_rd_r=JP73B0DPN1ECZR4AK5XY&qid=1699428398&sbo=RZvfv%2F%2FHxDF%2BO5021pAnSA%3D%3D&sprefix=16+bit+adc+adafruit+ads%2Caps%2C122&sr=1-1-62d64017-76a9-4f2a-8002-d7ec97456eea)
-- 6-pin screw terminal block (4 needed): [Amazon Link](https://www.amazon.com/Augiimor-15PCS-2-54mm-Terminal-Connector/dp/B08B3SY1PG/ref=sr_1_1?crid=2JBVRDDLQGR9C&keywords=solderable%2Bscrew%2Bterminals%2B6-pin&qid=1699428828&sprefix=solderable%2Bscrew%2Bterminals%2B6-pin%2Caps%2C136&sr=8-1&th=1)
-- Soldering iron kit: [Amazon Link](https://www.amazon.com/Soldering-Interchangeable-Adjustable-Temperature-Enthusiast/dp/B087767KNW/ref=sr_1_1?crid=1253VSWW6H46N&dib=eyJ2IjoiMSJ9.MNB3HuUsZOjz1NSstYQ0xYsrWEda1XgfR9bXfx1rBtjHYwVSwosZi0MNnGQsMTKnHo7etRSOAA7Fe4ZqIHhFkaw8iXVm33USmlWOqAaOmSRhJJ-EI1PWY7Y7IsYyB_ReyrY1qpsnZfaFaLPyOvkLrG8PyCQ8mC7Os7bbMw6KX6Y9oEFKkKJGDrNK8zf69w52_OCrlFg9R4JveMzz1197Xk_cDlhl6bcsgED57q8vhjs.gK3HKVOENLHOZByK3H7otcsbs5yQRwmHR36ghGGssLE&dib_tag=se&keywords=soldering%2Biron%2Bkit&qid=1731532438&sprefix=solder%2Caps%2C186&sr=8-1&th=1)
-- Solder fume extractor: [Amazon Link](https://www.amazon.com/YIHUA-Extractor-Absorber-Tiltable-Soldering/dp/B0B4CB6KRW/ref=sr_1_1?dib=eyJ2IjoiMSJ9.nfZb-SxE9A3ZLDvZFrS9P3f2pguFB6soC_NoyBhH44ZWfXSyKNhnsDazsyKV3rkWxfUr1TMra-BXLt5ubo_GJIh-a7kCreDrc8hFH29_HS9y4ZDl5KFzHVFw81lWZpNeU2Dh023MpbDnDdeXYmOPhehh24v2OSccqHt3kT3pwKoESynoxTHFsERFNnj_1BZ0B3CHpBZG3mRCGZLl4Baq45s13vL1qv2GXuOPhlAJHxw.sH5dsSyoXdfDvirtIyiJwdXuWzr0Ma28fcy23hEHOis&dib_tag=se&keywords=charcoal%2Bsoldering%2Bvent&qid=1731533409&sr=8-1&th=1)
-- A small piece of cardboard
-- A pocket knife
-- PVC Jacketed 22 Gauge 5-wire Power Wire: [Super Bright LEDs Link](https://www.superbrightleds.com/pvc-jacketed-22-gauge-wire-five-conductor-power-wire-22-awg-5-wire)
+** Required Hardware and Tools
+
+The following hardware and tools are not explicitly called out in the hardware spreadsheets but are needed for the successful construction of a snow sensing station:
+
+* Breadboard: [Amazon Link](https://www.amazon.com/DEYUE-breadboard-Set-Prototype-Board/dp/B07LFD4LT6/ref=sr_1_1?crid=1DC4JWMO8ZJJY&dib=eyJ2IjoiMSJ9.jxVij6GBiI3UZ-6NpQmxYSe8hSgXCBThtl8-kiWvP-3WAVR479ujpSnnPrGnp7cUmnWXDiOtQ4phR-50BL2i1UjIniLV-IZZxGL4TpbQyZl7HSLv0v_bglYhH4-nDi4q2dBM2irJQZsNjZVsp45ZvGQZ1NRpkMMow3avvtMa5poaJjae4h3RQHu-G7xMAbMuGD0mY7QKZCUvI0Gcgym9OSW0TxVPqP694VD83nkVXtyUkbFpnQXhNhmMdNVbv5c_Q-vrcdhK-c4uRXD58dI5sZfi3NQnlcHaACsX2HjXnJk.B3AS3S1rpTwwSBDJtb058ysVtnxTsyUSe-oGa_6XJyw&dib_tag=se&keywords=breadboard&qid=1731532125&s=electronics&sprefix=breadboar%2Celectronics%2C183&sr=1-1)
+* Soldering iron kit: [Amazon Link](https://www.amazon.com/Soldering-Interchangeable-Adjustable-Temperature-Enthusiast/dp/B087767KNW/ref=sr_1_1?crid=1253VSWW6H46N&dib=eyJ2IjoiMSJ9.MNB3HuUsZOjz1NSstYQ0xYsrWEda1XgfR9bXfx1rBtjHYwVSwosZi0MNnGQsMTKnHo7etRSOAA7Fe4ZqIHhFkaw8iXVm33USmlWOqAaOmSRhJJ-EI1PWY7Y7IsYyB_ReyrY1qpsnZfaFaLPyOvkLrG8PyCQ8mC7Os7bbMw6KX6Y9oEFKkKJGDrNK8zf69w52_OCrlFg9R4JveMzz1197Xk_cDlhl6bcsgED57q8vhjs.gK3HKVOENLHOZByK3H7otcsbs5yQRwmHR36ghGGssLE&dib_tag=se&keywords=soldering%2Biron%2Bkit&qid=1731532438&sprefix=solder%2Caps%2C186&sr=8-1&th=1)
+* Solder fume extractor: [Amazon Link](https://www.amazon.com/YIHUA-Extractor-Absorber-Tiltable-Soldering/dp/B0B4CB6KRW/ref=sr_1_1?dib=eyJ2IjoiMSJ9.nfZb-SxE9A3ZLDvZFrS9P3f2pguFB6soC_NoyBhH44ZWfXSyKNhnsDazsyKV3rkWxfUr1TMra-BXLt5ubo_GJIh-a7kCreDrc8hFH29_HS9y4ZDl5KFzHVFw81lWZpNeU2Dh023MpbDnDdeXYmOPhehh24v2OSccqHt3kT3pwKoESynoxTHFsERFNnj_1BZ0B3CHpBZG3mRCGZLl4Baq45s13vL1qv2GXuOPhlAJHxw.sH5dsSyoXdfDvirtIyiJwdXuWzr0Ma28fcy23hEHOis&dib_tag=se&keywords=charcoal%2Bsoldering%2Bvent&qid=1731533409&sr=8-1&th=1)
+* A small piece of cardboard
+* A pocket knife
 
 **Note that there are inherent risks with soldering!** Make sure you learn proper technique and safety when soldering. Work in a well-ventilated area. 
 
@@ -38,7 +36,7 @@ The following steps are covered in this guide. Links to the sections are provide
 2. Using a pocket knife, cut the header pins in half so they are 6 across.
 ![Prepping the header pins](soldering_images/soldering1.jpg)
 
-3. Insert the longer end of the header pins into a breadboard straddling the center and one extra row on each side.
+3. Insert the longer end of the header pins into a breadboard straddling the center and one extra row on each side. The breadboard is simply for convenience and to hold the headers while you are soldering the headers in place.
 ![Inserting the header pins into the breadboard](soldering_images/soldering2.jpg)
 
 4. Place the ADCs over the header pins
