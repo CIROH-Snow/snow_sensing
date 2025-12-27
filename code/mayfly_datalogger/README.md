@@ -126,9 +126,11 @@ If you will be using the XBee S3B modules to develop a network of stations, you 
 
 Once your station is constructed and you have completed the above steps, you are ready to make adjustments to the Arduino sketch you would like to use. You will start with the Arduino sketches we have provided, make minor modifications to fit your deployed station, and then upload your final sketch to your Mayfly datalogger to collect data.
 
-**NOTE:** We recommend getting the sketch for the snow sensing station with no telemetry working before you move on to the station with telemetry.
+**NOTE:** We recommend getting the sketch for the snow sensing3 station with no telemetry working before you move on to the station with telemetry.
 
 Follow the instructions for each sketch before uploading.
 
 * [Snow sensing station with no telemetry](no-telemetry/README.md)
 * [Snow sensing station with telemetry](telemetry/README.md)
+
+* **NOTE:** The datalogger sketches with telemertry contain all of the code for measuring and logging data along with the code for telemetring the data to a HIS.
