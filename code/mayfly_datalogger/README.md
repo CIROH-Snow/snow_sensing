@@ -133,4 +133,4 @@ Follow the instructions for each sketch before uploading.
 * [Snow sensing station with no telemetry](no-telemetry/README.md)
 * [Snow sensing station with telemetry](telemetry/README.md)
 
-* **NOTE:** The datalogger sketches with telemertry contain all of the code for measuring and logging data along with the code for telemetring the data to a HIS.
+**NOTE:** The datalogger sketches with telemertry contain all of the code for measuring and logging data along with the code for telemetring the data to a HIS.
