@@ -2,12 +2,12 @@
 
 This folder contains two example Arduino sketches for a Base station Mayfly, which is in charge of aggregating all data from every satellite snow sensing station in a network and pushing that data to an Internet-connected datalogger. They are as follows:
 
-* **[push_to_CR800](push_to_CR800):** Use this sketch to push data from your Base Mayfly to a Campbell Scientific CR800 datalogger acting as the Internet-connected datalogger for your Base station. 
+* **[push_to_cr800](push_to_cr800):** Use this sketch to push data from your Base Mayfly to a Campbell Scientific CR800 datalogger acting as the Internet-connected datalogger for your Base station. 
 * **[push_to_mayfly_lte](push_to_mayfly_lte):** Use this sketch if you want to push data from your Base Mayfly to a separate Mayfly datalogger acting as the Internet-connected datalogger for your Base station.
 
 ![satellite-base-his](../base_figures/satellite-base-his.png)
 
-In both example sketches, the Base Mayfly follows a communication protocol with each Satellite Mayfly datalogger to collect all the necessary data from a snow sensing station. The Base mayfly then compiles the data into a structured string that is passed on to the Internet-connected datalogger at the Base station. This communication protocol is shown in the following figure.
+In both sketches, the Base Mayfly follows a communication protocol with each Satellite Mayfly datalogger to collect all the necessary data from a snow sensing station. The Base mayfly then compiles the data into a structured string that is passed on to the Internet-connected datalogger at the Base station. This communication protocol is shown in the following figure.
 
 ![satellite-base-comms-protocol](../base_figures/satellite-base-comms-protocol.png)
 
