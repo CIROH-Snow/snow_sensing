@@ -16,7 +16,7 @@ The steps for implementing code for your snow sensing station are as follows:
 1. [Install the Arduino Interactive Development Environment (IDE) using the directions below.](#1-install-the-arduino-interactive-development-environment-ide)
 2. [Copy the required Arduino libraries to your computer](#2-copy-the-required-arduino-libraries-to-your-computer)
 3. [Choose the Mayfly datalogger code you want to implement](#3-choose-the-mayfly-datalogger-code-you-want-to-implement)
-4. [Copy the correct sketch to your computer, open it in the Arduino IDE, compile it, and send it to your Mayfly datalogger]() 
+4. [Copy the correct sketch to your computer, open it in the Arduino IDE, compile it, and send it to your Mayfly datalogger](#4-copy-the-correct-sketch-to-your-computer) 
 5. [Troubleshoot your Implementation](#5-troubleshoot-your-implementation)
 
 ## 1. Install the Arduino Interactive Development Environment (IDE)
