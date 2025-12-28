@@ -7,6 +7,6 @@ This document provides a step-by-step overview of the process required to build 
 3. [Solder necessary components](../hardware/soldering_guide.md)
 4. [Construct your station](../hardware/construction_guide.md)
 5. [Wire your station and datalogger](../hardware/wiring_guide.md)
-6. [Program your station for field data collection](../code/mayfly_datalogger/README.md)
+6. [Program your station for field data collection](../code/README.md)
 
 **NOTE:** We recommend that you run through all of these steps prior to taking all of the components to the field for deployment. This will enable you to test your station prior to field deployement and will also make it much easier to troubleshoot any issues before going to the field. 
