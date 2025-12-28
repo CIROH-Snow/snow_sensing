@@ -1,3 +1,5 @@
-### Basic Snow Station
+# Code for a Basic Snow Sensing Station
 
-This folder contains the Arduino sketch necessary for logging data on a Mayfly for a low-cost snow station. All data will be stored on a connected microSD, and there will be no wireless transmission of that data.
+This folder contains the Arduino sketch necessary for logging data on a Mayfly datalogger for a low-cost snow sensing station. All data will be stored on a connected microSD card, and there will be no wireless transmission of that data.
+
+This is a basic snow sensing station with no telemetry.
