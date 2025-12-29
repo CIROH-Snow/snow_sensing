@@ -1,33 +1,43 @@
-/*
-Created by Braedon Dority
-File name: push_to_cr800.ino
-
-This file contains the code needed for operating a Mayfly at a "base" station that
-is connected to a Campbell Scientific CR800 datalogger that is using the code found 
-in the "internet-connected-datalogger" directory of this repository. You will need 
-a programmed XBee S3B in order to properly use this as well.
-
-The data communicated to the CR800 is framed as follows:
-
-@variableName=variableMeasurement;
-
-The CR800 looks for an @ to know the measurement being taken, such as snow depth, 
-timestamp, shortwave radiation, etc. The = tells the CR800 what the actual value 
-of the measurement was, such as 500 for the snow depth in mm.
-The ; notes the end of the measurement.
-Consecutive variable names and measurements can be tacked onto the String. The 
-CR800 will parse them upon reception. Once the String for a satellite station's 
-data is ready to be sent to the CR800, an ending variable is added called 
-"endofstation" and it is set to 1. "@endofstation=1;" The CR800 uses this to 
-know that there is no more data for the string that has just come through, and 
-that it can go ahead and call a table to log everything to.
-
-**WIRING**
-Mayfly TX0 -> CR800 ____
-Mayfly GND -> CR800 GND
-Buck converter RED -> CR800 SW12
-Buck converter BLACK -> CR800 GND
-*/
+/** ==============================================================================
+ * File name: push_to_cr800.ino
+ * Description: This file contains the code needed for operating a Mayfly at a 
+ * "base" station that is connected to a Campbell Scientific CR800 datalogger 
+ * that is using the code found in the "internet-connected-datalogger" directory 
+ * of this repository. You will need a programmed XBee S3B in order to properly 
+ * use this as well.
+ *  
+ * Author: Braedon Dority <braedon.dority@usu.edu>
+ *  
+ * Copyright (c) 2025 Utah State University
+ * 
+ * License: This example is published under the BSD-3 open source license.
+ *
+ * Build Environment: Arduino IDE Version 1.8.19
+ * Hardware Platform: EnviroDIY Mayfly Arduino Datalogger V1.1
+ *
+ * DISCLAIMER: THIS CODE IS PROVIDED "AS IS" - NO WARRANTY IS GIVEN.
+ * 
+ * The data communicated to the CR800 is framed as follows:
+ * 
+ * @variableName=variableMeasurement;
+ * 
+ * The CR800 looks for an @ to know the measurement being taken, such as snow depth, 
+ * timestamp, shortwave radiation, etc. The = tells the CR800 what the actual value 
+ * of the measurement was, such as 500 for the snow depth in mm.
+ * The ; notes the end of the measurement.
+ * Consecutive variable names and measurements can be tacked onto the String. The 
+ * CR800 will parse them upon reception. Once the String for a satellite station's 
+ * data is ready to be sent to the CR800, an ending variable is added called 
+ * "endofstation" and it is set to 1. "@endofstation=1;" The CR800 uses this to 
+ * know that there is no more data for the string that has just come through, and 
+ * that it can go ahead and call a table to log everything to.
+ * 
+ * **WIRING**
+ * Mayfly TX0 -> CR800 ____
+ * Mayfly GND -> CR800 GND
+ * Buck converter RED -> CR800 SW12
+ * Buck converter BLACK -> CR800 GND
+ * ==============================================================================*/ 
 
 // Needed for all Arduino sketches
 #include <Arduino.h>
