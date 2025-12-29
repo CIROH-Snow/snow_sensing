@@ -1,19 +1,17 @@
 // ==========================================================================
 //  Defines for TinyGSM
 // ==========================================================================
-/** Start [defines] */
 #ifndef TINY_GSM_RX_BUFFER
 #define TINY_GSM_RX_BUFFER 64
 #endif
 #ifndef TINY_GSM_YIELD_MS
 #define TINY_GSM_YIELD_MS 2
 #endif
-/** End [defines] */
+
 
 // ==========================================================================
 //  Include the libraries required for the data logger
 // ==========================================================================
-/** Start [includes] */
 // The Arduino library is needed for every Arduino program.
 #include <Arduino.h>
 
@@ -31,19 +29,26 @@
 
 AltSoftSerial mySerial(6, -1);
 
-/** End [includes] */
 
+// ==========================================================================
 // Set the input and output pins for the logger
+// ==========================================================================
 // NOTE:  Use -1 for pins that do not apply
-const int serialBaud = 9600;    // Baud rate for communication with RF data logger
-const int8_t  greenLED   = 8;       // Pin for the green LED (don't change)
-const int8_t  redLED     = 9;       // Pin for the red LED (don't change)
-const int8_t  buttonPin  = 21;      // Pin for debugging mode (ie, button pin, don't change)
-const int8_t  wakePin    = 31;  // MCU interrupt/alarm pin to wake from sleep (don't change)
+// Baud rate for communication with RF data logger
+const int serialBaud = 9600;
+// Pin for the green LED (don't change)   
+const int8_t  greenLED   = 8;
+// Pin for the red LED (don't change)
+const int8_t  redLED     = 9;
+// Pin for debugging mode (ie, button pin, don't change)
+const int8_t  buttonPin  = 21;
+// MCU interrupt/alarm pin to wake from sleep (don't change)
+const int8_t  wakePin    = 31;
+
+
 // ==========================================================================
 //  Wifi/Cellular Modem Options
 // ==========================================================================
-/** Start [sim_com_sim7080] */
 // For almost anything based on the SIMCom SIM7080G
 #include <modems/SIMComSIM7080.h>
 
@@ -74,7 +79,6 @@ SIMComSIM7080 modem7080(&modemSerial, modemVccPin, modemStatusPin,
                         modemSleepRqPin, apn);
 // Create an extra reference to the modem by a generic name
 SIMComSIM7080 modem = modem7080;
-/** End [sim_com_sim7080] */
 
 const int rxBufferRadioSize = 8000;
 char rxBufferRadio[rxBufferRadioSize];
@@ -90,12 +94,19 @@ void printLTEBuffer(Stream* stream) {
   stream->flush();
   for (int i = 0; i < txBufferLTEsize; i++) { txBufferLTE[i] = '\0'; }
 }
-// Server Information
-const char* serverHost = "lro.hydroserver.org";
+
+
+// ==========================================================================
+// Information for connecting to HydroServer
+// ==========================================================================
+// Set the base URL to your HydroServer instance. Playground set here for testing
+const char* serverHost = "playground.hydroserver.org";
 const int serverPort = 80;
 
-// User Information
-const char* base64Authorization = "YnJhZWRvbi5kb3JpdHlAdXN1LmVkdTpCYWxlYWRhczE4IQ==";  // https://www.base64encode.org/
+// Set User Information for authenticating with HydroServer - replace the string below
+// Set the string equal to the base64 encoding of your username and password
+// Get the encoded information using https://www.base64encode.org/
+const char* base64Authorization = "Enter_Encoded_Authentication_Information_Here";  
 
 // POST request headers
 const char* postHeader               = "POST /api/sensorthings/v1.1/CreateObservations HTTP/1.1";
@@ -150,9 +161,13 @@ String targetString = "@endofstation=1;";
 char incomingChar;
 char potentialChar;
 
+// ==========================================================================
+// Arduino setup function
+// ==========================================================================
 void setup() {
   timeToPublish = false;
   connectSuccess = false;
+  
    // Start the primary serial connection
   Serial.begin(serialBaud);
   Serial.println("Setting up AltSoftSerial");
@@ -168,28 +183,29 @@ void setup() {
                         // chip's ChipSelect (Mayfly v1.0 and later)
   modem.setModemLED(modemLEDPin);
 
-  /** Start [setup_sim7080] */
+  // Start the LTE modem
   modem.setModemWakeLevel(HIGH);   // ModuleFun Bee inverts the signal
   modem.setModemResetLevel(HIGH);  // ModuleFun Bee inverts the signal
-  modem.modemWake();  // NOTE:  This will also set up the modem
+  modem.modemWake();               // NOTE:  This will also set up the modem
   modem.gsmModem.setBaud(modemBaud);   // Make sure we're *NOT* auto-bauding!
   modem.gsmModem.setNetworkMode(38);   // set to LTE only
-                                        // 2 Automatic
-                                        // 13 GSM only
-                                        // 38 LTE only
-                                        // 51 GSM and LTE only
+                                       // 2 Automatic
+                                       // 13 GSM only
+                                       // 38 LTE only
+                                       // 51 GSM and LTE only
   modem.gsmModem.setPreferredMode(1);  // set to CAT-M
-                                        // 1 CAT-M
-                                        // 2 NB-IoT
-                                        // 3 CAT-M and NB-IoT
+                                       // 1 CAT-M
+                                       // 2 NB-IoT
+                                       // 3 CAT-M and NB-IoT
   
   modem.modemSleep();
-  /** End [setup_sim7080] */
 }
 
+
+// ==========================================================================
+// Arduino loop function
+// ==========================================================================
 void loop() {
-
-
   // If something has been sent serially from the RF data logger
   if (mySerial.available() > 0) {
     Serial.println("Serial data came through!");
@@ -211,7 +227,7 @@ void loop() {
         }
         incomingChar = '\0';
       }
-        //incomingChar = potentialChar;
+      //incomingChar = potentialChar;
       //data += incomingChar;
       //Serial.print("data: ");
       //Serial.println(data);
@@ -229,7 +245,6 @@ void loop() {
     //Serial.println();
     //Serial.print("mySerial.available(): ");
     //Serial.println(mySerial.available());
-    
     
     Serial.println("New data: ");
     Serial.println(data);
@@ -302,6 +317,7 @@ void loop() {
     Serial.println(rxBufferRadio);
     char jsonSizeBuffer[5] = "";
     char tempBuffer[37] = "";
+    
     /*
     In this section, a POST request is constructed within a buffer piece by piece.
     Before a new section is added to the buffer, we check to see if the buffer has room.
