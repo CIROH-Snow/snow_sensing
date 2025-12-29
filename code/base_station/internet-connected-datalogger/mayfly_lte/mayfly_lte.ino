@@ -122,9 +122,10 @@ void printLTEBuffer(Stream* stream) {
 const char* serverHost = "playground.hydroserver.org";
 const int serverPort = 80;
 
-// Set User Information for authenticating with HydroServer - replace the string below
-// Set the string equal to the base64 encoding of your username and password
-// Get the encoded information using https://www.base64encode.org/
+// Create your authentication information for HydroServer. Pass in a string
+// that is the Base64 encoding of your HydroServer account email and password
+// separated by a colon - i.e., "email@email.com:Password"
+// You can get this encoding at https://www.base64encode.org/
 const char* base64Authorization = "Enter_Encoded_Authentication_Information_Here";  
 
 // POST request headers
