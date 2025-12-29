@@ -1,21 +1,26 @@
 /*
 Created by Braedon Dority
-File name: central_station.ino
+File name: push_to_mayfly_lte.ino
 
-This file contains the code needed for operating a Mayfly at a "base" station that is connected to a LTE Mayfly 
-that is using the code found in the "integrations" directory of this repository. You will need a programmed XBee S3B
-in order to properly use this as well.
+This file contains the code needed for operating a Mayfly at a "base" station 
+that is connected to a LTE Mayfly that is using the code found in the 
+"internet_connected_dataloggers" directory of this repository. You will need 
+a programmed XBee S3B in order to properly use this as well.
 
 The data communicated to the LTE Mayfly is framed as follows:
+
 @variableUUID=variableMeasurement;
 
-The LTE Mayfly looks for an @ to know the UUID of the measurement being taken, such as snow depth, timestamp, shortwave radiation, etc.
-The = tells the LTE Mayfly what the actual value of the measurement was, such as 500 for the snow depth in mm.
-The ; notes the end of the measurement.
-Consecutive variable UUIDs and measurements can be tacked onto the String. The LTE Mayfly will parse them upon reception.
-Once the String for a satellite station's data is ready to be sent to the LTE Mayfly, an ending variable is added called "endofstation"
-and it is set to 1. "@endofstation=1;" The LTE Mayfly uses this to know that there is no more data for the string that has
-just come through, and that it can go ahead and call a table to log everything to.
+The LTE Mayfly looks for an @ to know the UUID of the measurement being taken, 
+such as snow depth, timestamp, shortwave radiation, etc. The = tells the LTE 
+Mayfly what the actual value of the measurement was, such as 500 for the snow 
+depth in mm. The ; notes the end of the measurement. Consecutive variable UUIDs 
+and measurements can be tacked onto the String. The LTE Mayfly will parse them 
+upon reception. Once the String for a satellite station's data is ready to be 
+sent to the LTE Mayfly, an ending variable is added called "endofstation"
+and it is set to 1. "@endofstation=1;" The LTE Mayfly uses this to know that 
+there is no more data for the string that has just come through, and that it 
+can go ahead and call a table to log everything to.
 
 **WIRING**
 Mayfly TX0 -> LTE Mayfly RX0
@@ -36,14 +41,13 @@ const int8_t redLED = 9;
 const int8_t greenLED = 8;
 
 
-
 // ==========================================================================
 //  Radio Communications
 // ==========================================================================
 /*
 This is the setup for a the central radio station with the XBee Pro S3B
 using the Digimesh protocol. In this context, satellite stations refer to
-the snow data collection stations surrounding a central data hub station 
+the snow data collection stations surrounding a central base station 
 where data is communicated from those sites via radio frequency.
 */
 
@@ -51,8 +55,8 @@ where data is communicated from those sites via radio frequency.
 #define xbeeRegulatorPin 18
 #define xbeeSleepPin 23 
 
-// This is a function created by the EnviroDIY team that flashes the spare green and red LEDs
-// It can be useful in troubleshooting as well as other things
+// This is a function created by the EnviroDIY team that flashes the spare 
+// green and red LEDs. It can be useful in troubleshooting as well as other things
 void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
     for (uint8_t i = 0; i < numFlash; i++) {
         digitalWrite(greenLED, HIGH);
@@ -124,9 +128,9 @@ int totalTries = 7;
 // Possible character messages to send to a satellite station
 // DO NOT CHANGE THESE
 // The satellite stations are listening for these specific messages
-char ready[] = "R";  // "Are you ready to start communicating?"
-char time[] = "T";  // "Could I get the timestamp?"
-char var[] = "V";  // "How many variables did you measure?"
+char ready[] = "R";   // "Are you ready to start communicating?"
+char time[] = "T";    // "Could I get the timestamp?"
+char var[] = "V";     // "How many variables did you measure?"
 char number[] = "N";  // "Can I get the measurement made for the variable number I just sent you?"
 
 // This is a place to store any information the XBee reads into the Mayfly's
@@ -236,9 +240,12 @@ void waitForReceive(uint32_t secondsWait) {
   delay(100);
 }
 
+
+// ==========================================================================
 // Arduino setup function that runs each time the Mayfly is powered on
 // This is not the same as waking up from a sleeping mode.
 // The setup function runs when there is a complete shut off and turn on.
+// ==========================================================================
 void setup() {
   // XBee setup that should be done each time the board powers on
   pinMode(xbeeRegulatorPin, OUTPUT);  // Make sure we control the power to the XBee 
@@ -261,29 +268,21 @@ void setup() {
   rtc.begin();
 
   // Set the baud (communication) rate between the Mayfly and the LTE Mayfly datalogger connected over UART-0
-  // Make sure this is compatible with what the LTE Mayfly datalogger is expecting (i.e. not too fast for it)
+  // Make sure this is compatible with what the LTE Mayfly datalogger is expecting (i.e., not too fast for it)
   Serial.begin(9600);
 
   // Assume that it is not time to log in setup
   timeToLog = false;
-  
-  // Don't think we need this
-  // Setting the starting value to an hour that cannot exist
-  //prevLogHour = 30;
 }
 
+
+// ==========================================================================
 // Arduino loop function that continuously runs unless the board shuts off
+// ==========================================================================
 void loop() {
   if (rtc.now().minute() == 1) {  // If the current minute is on the one
     timeToLog = true;  // then it's time to log and collect new data
   }
-  
-  // Don't think we need this
-  /*
-  if (rtc.now().hour() != prevLogHour && rtc.now().minute() > 1 && rtc.now().minute() < 8) {  // If the current hour is different than the previously logged hour and we fall in the window of when the satellite stations are listening for signals
-    timeToLog = true;  // then that's also a valid condition for collecting new data
-  }
-  */
 
   if (timeToLog) {  // If it's time to log
     // Don't think we need this
@@ -296,13 +295,6 @@ void loop() {
     memset(rx, 0x00, sizeof(rx));  // Make sure where we are going to store things is empty
     Serial1.readBytes(rx, Serial1.available());  // Read in everything in UART-1
     memset(rx, 0x00, sizeof(rx));  // Wipe it out
-
-    /*
-    // Set the dataSent boolean array to all falses to start out because no data has been sent
-    for (int i = 0; i < sizeof(dataSent); i++) {
-      dataSent[i] = false;
-    }
-    */ 
 
     // This boolean array helps keep track of which stations got to have their maximum attempts at communication
     // much like the dataSent array.
