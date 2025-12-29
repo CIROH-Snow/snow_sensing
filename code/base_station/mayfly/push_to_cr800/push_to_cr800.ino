@@ -1,21 +1,26 @@
 /*
 Created by Braedon Dority
-File name: central_station.ino
+File name: push_to_cr800.ino
 
-This file contains the code needed for operating a Mayfly at a "central" station that is connected to a CR800 
-that is using the code found in the "integrations" directory of this repository. You will need a programmed XBee S3B
-in order to properly use this as well.
+This file contains the code needed for operating a Mayfly at a "base" station that
+is connected to a Campbell Scientific CR800 datalogger that is using the code found 
+in the "internet-connected-datalogger" directory of this repository. You will need 
+a programmed XBee S3B in order to properly use this as well.
 
 The data communicated to the CR800 is framed as follows:
+
 @variableName=variableMeasurement;
 
-The CR800 looks for an @ to know the measurement being taken, such as snow depth, timestamp, shortwave radiation, etc.
-The = tells the CR800 what the actual value of the measurement was, such as 500 for the snow depth in mm.
+The CR800 looks for an @ to know the measurement being taken, such as snow depth, 
+timestamp, shortwave radiation, etc. The = tells the CR800 what the actual value 
+of the measurement was, such as 500 for the snow depth in mm.
 The ; notes the end of the measurement.
-Consecutive variable names and measurements can be tacked onto the String. The CR800 will parse them upon reception.
-Once the String for a satellite station's data is ready to be sent to the CR800, an ending variable is added called "endofstation"
-and it is set to 1. "@endofstation=1;" The cR800 uses this to know that there is no more data for the string that has
-just come through, and that it can go ahead and call a table to log everything to.
+Consecutive variable names and measurements can be tacked onto the String. The 
+CR800 will parse them upon reception. Once the String for a satellite station's 
+data is ready to be sent to the CR800, an ending variable is added called 
+"endofstation" and it is set to 1. "@endofstation=1;" The CR800 uses this to 
+know that there is no more data for the string that has just come through, and 
+that it can go ahead and call a table to log everything to.
 
 **WIRING**
 Mayfly TX0 -> CR800 ____
@@ -38,14 +43,13 @@ const int8_t redLED = 9;
 const int8_t greenLED = 8;
 
 
-
 // ==========================================================================
 //  Radio Communications
 // ==========================================================================
 /*
-This is the setup for a the central radio station with the XBee Pro S3B
+This is the setup for a the base station radio with the XBee Pro S3B
 using the Digimesh protocol. In this context, satellite stations refer to
-the snow data collection stations surrounding a central data hub station 
+the snow data collection stations surrounding a central base station 
 where data is communicated from those sites via radio frequency.
 */
 
@@ -53,8 +57,8 @@ where data is communicated from those sites via radio frequency.
 #define xbeeRegulatorPin 18
 #define xbeeSleepPin 23 
 
-// This is a function created by the EnviroDIY team that flashes the spare green and red LEDs
-// It can be useful in troubleshooting as well as other things
+// This is a function created by the EnviroDIY team that flashes the spare green 
+// and red LEDs. It can be useful in troubleshooting as well as other things
 void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
     for (uint8_t i = 0; i < numFlash; i++) {
         digitalWrite(greenLED, HIGH);
@@ -82,7 +86,7 @@ For example, if you have a satellite station that cannot directly talk to your c
 but it can talk to another satellite station that does have contact with the central station,
 then you do not want to get data from the in-between station first because it will power down
 after it's finished sending data, which will then no longer help communicate data from your far
-station to your central station. Collect the data from the farthest station first (i.e. most
+station to your central station. Collect the data from the farthest station first (i.e., most
 remote to least remote). 
 */
 String stationNames[numStations] = {"Roadside", "Marshes", "Conifers", "Aspens", "Sunny"};
@@ -102,7 +106,7 @@ byte satellites[numStations][sizeAddress] = {{0x00, 0x13, 0xA2, 0x00, 0x42, 0x2B
 // Each slot in the array corresponds to the stations listed in the stationNames array
 bool dataSent[numStations];
 
-// The final String that will be sent to the CS data logger over serial communication
+// The final String that will be sent to the CR800 data logger over serial communication
 String stringToSend;
 
 // The time to delay between transmiting a message and waiting for a response (in seconds).
@@ -120,15 +124,15 @@ bool timeToLog;
 // Variable used in the checksum function
 int sum;
 
-// The amount of times you want to try and make contact with a station before giving up
+// The number of times you want to try and make contact with a station before giving up
 int totalTries = 7;
 
 // Possible character messages to send to a satellite station
 // DO NOT CHANGE THESE
 // The satellite stations are listening for these specific messages
-char ready[] = "R";  // "Are you ready to start communicating?"
-char time[] = "T";  // "Could I get the timestamp?"
-char var[] = "V";  // "How many variables did you measure?"
+char ready[] = "R";   // "Are you ready to start communicating?"
+char time[] = "T";    // "Could I get the timestamp?"
+char var[] = "V";     // "How many variables did you measure?"
 char number[] = "N";  // "Can I get the measurement made for the variable number I just sent you?"
 
 // This is a place to store any information the XBee reads into the Mayfly's
@@ -186,7 +190,7 @@ byte checksum(char rfData[], int size, int stationIndex, byte frameID, byte broa
 }
 
 /*
-This functions pushes a transmit request to the XBee through the Mayfly's serial port.
+This function pushes a transmit request to the XBee through the Mayfly's serial port.
 The XBee then attempts to send the message to the station specified with the stationIndex parameter.
 The parameters are all the same for this as the checksum function (message[] and messageSize are rfData[] 
 and size respectively). I chose to have checksum be its own separate function so I could debug more easily 
@@ -238,9 +242,11 @@ void waitForReceive(uint32_t secondsWait) {
   delay(100);
 }
 
+// ==========================================================================
 // Arduino setup function that runs each time the Mayfly is powered on
 // This is not the same as waking up from a sleeping mode.
 // The setup function runs when there is a complete shut off and turn on.
+// ==========================================================================
 void setup() {
   // XBee setup that should be done each time the board powers on
   pinMode(xbeeRegulatorPin, OUTPUT);  // Make sure we control the power to the XBee 
@@ -269,27 +275,17 @@ void setup() {
   // Assume that it is not time to log in setup
   timeToLog = false;
   
-  // Don't think we need this
-  // Setting the starting value to an hour that cannot exist
-  //prevLogHour = 30;
 }
 
+// ==========================================================================
 // Arduino loop function that continuously runs unless the board shuts off
+// ==========================================================================
 void loop() {
   if (rtc.now().minute() == 1) {  // If the current minute is on the one
     timeToLog = true;  // then it's time to log and collect new data
   }
-  
-  // Don't think we need this
-  /*
-  if (rtc.now().hour() != prevLogHour && rtc.now().minute() > 1 && rtc.now().minute() < 8) {  // If the current hour is different than the previously logged hour and we fall in the window of when the satellite stations are listening for signals
-    timeToLog = true;  // then that's also a valid condition for collecting new data
-  }
-  */
 
   if (timeToLog) {  // If it's time to log
-    // Don't think we need this
-    //prevLogHour = rtc.now().hour(); // Set the previous logging hour to the current one since we are now logging
     digitalWrite(xbeeSleepPin, LOW);  // Wake the XBee up
     digitalWrite(redLED, HIGH);  // Turn on the red LED as a visually cue that radio communication has started
     delay(1000);  // Let the XBee's stomach settle
