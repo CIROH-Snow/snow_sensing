@@ -67,7 +67,7 @@
 // The name of this program file
 const char* sketchName = "no-telemetry.ino";
 
-// Assign an ID for your data. This becomes the prefix for the name of the 
+// Assign an ID for your datalogger. This becomes the prefix for the name of the 
 // data file on SD card. Normally use the name of the site at which the 
 // datalogger is installed. Make sure it is a string (in double quotations).
 const char* LoggerID = "sitename";
@@ -691,7 +691,8 @@ void loop() {
   */
   // Check if we are on the 45th minute (2700 seconds into the interval)
   if (dataLogger.getNowLocalEpoch() % (loggingInterval * 60) == 2400) {  
-    digitalWrite(22, HIGH);  // Power up the power relay (pin 22 is the Mayfly's switched power output)
+    // Power up the power relay (pin 22 is the Mayfly's switched power output)
+    digitalWrite(22, HIGH);  
     delay(1000);
     // Set the signal pin high (to close the circuit, the relay is waiting for a signal drop)
     digitalWrite(powerRelayPin, HIGH);  
