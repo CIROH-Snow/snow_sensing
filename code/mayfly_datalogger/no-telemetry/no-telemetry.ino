@@ -11,7 +11,7 @@
  * License: This example is published under the BSD-3 open source license.
  *
  * Build Environment: Arduino IDE Version 1.8.19
- * Hardware Platform: EnviroDIY Mayfly Arduino Datalogger
+ * Hardware Platform: EnviroDIY Mayfly Arduino Datalogger V1.1
  *
  * DISCLAIMER: THIS CODE IS PROVIDED "AS IS" - NO WARRANTY IS GIVEN.
  *
@@ -166,9 +166,9 @@ float calculateBatteryVoltage(void) {
 
 // The number of digits after the decimal place
 const uint8_t calculatedBatteryVoltageResolution = 2;
-// Variable name (this must be a value from http://vocabulary.odm2.org/variablename/)
+// Variable name (must be a value from http://vocabulary.odm2.org/variablename/)
 const char* calculatedBatteryVoltageName = "BatteryVoltage";
-// Variable units (this must be a value from http://vocabulary.odm2.org/units/)
+// Variable units (must be a value from http://vocabulary.odm2.org/units/)
 const char* calculatedBatteryVoltageUnit = "V";
 // A short code for the variable
 const char* calculatedBatteryVoltageCode = "MayflyBattVolt";
@@ -595,7 +595,7 @@ Logger dataLogger;
 // ==========================================================================
 // Working Functions
 // ==========================================================================
-// Flashes the LED's on the primary board
+// Flashes the LEDs on the primary board
 // The EnviroDIY community created this function. It can be useful for 
 // debugging, such as when you want to monitor the board while it runs, you 
 // can stick this function in where you want to check if the datalogger ever 
@@ -637,7 +637,7 @@ void setup() {
   Serial.print(F("Using ModularSensors Library version "));
   Serial.println(MODULAR_SENSORS_VERSION);
 
-  // Set up pins for the LED's
+  // Set up pins for the LEDs
   pinMode(greenLED, OUTPUT);
   digitalWrite(greenLED, LOW);
   pinMode(redLED, OUTPUT);
