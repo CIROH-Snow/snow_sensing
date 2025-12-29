@@ -1,31 +1,38 @@
-// This is the Mayfly sketch for the deployment of a snow station for the CIROH: Advaning Snow Observations project.
-
 /** =========================================================================
- * @file basic.ino
- * @brief Arduino code for the Advancing Snow Observations CIROH project
+ * Example: no-telemetry.ino
+ * Description: This is the base Mayfly sketch for the deployment of a snow 
+ *              sensing station with no telemetry.
  *
- * @author Braedon Dority <braedon.dority@usu.edu>
- * @author Jeff Horsburgh <jeff.horsburgh@usu.edu>
- * @copyright (c) 2017-2022 Utah Water Research Laboratory (UWRL)
- *            This example is published under the BSD-3 license.
+ * Author: Braedon Dority <braedon.dority@usu.edu>
+ * Author: Jeff Horsburgh <jeff.horsburgh@usu.edu>
+ * 
+ * Copyright (c) 2025 Utah State University
+ * 
+ * License: This example is published under the BSD-3 open source license.
  *
- * Build Environment: Visual Studios Code with PlatformIO
+ * Build Environment: Arduino IDE Version 1.8.19
  * Hardware Platform: EnviroDIY Mayfly Arduino Datalogger
  *
- * DISCLAIMER:
- * THIS CODE IS PROVIDED "AS IS" - NO WARRANTY IS GIVEN.
+ * DISCLAIMER: THIS CODE IS PROVIDED "AS IS" - NO WARRANTY IS GIVEN.
  *
- * ACKNOWLEDGEMENTS:
- * Thank you to the Stroud Water Research Center for developing the foundation
- * to this code. This sketch is based on the examples made from their modular
- * sensors library. The work of Sarah Damiano and Shannon Hicks made this
- * possible.
+ * ACKNOWLEDGEMENTS: Thank you to the Stroud Water Research Center for 
+ * developing the foundation to this code. This sketch is based on the 
+ * examples made from their modular sensors library. The work of Sarah 
+ * Damiano and Shannon Hicks made this possible.
+ * 
+ * NOTE ABOUT UUIDs IN THIS CODE: The EnviroDIY Modular Sensors library 
+ * assumes that you are interacting with the Monitor My Watershed website. 
+ * That website uses UUIDs to identify specific datastreams so that Mayfly 
+ * dataloggers can send data to the website using telemetry. Since this 
+ * sketch does not use telemetry, a placeholder UUID has been used in this 
+ * sketch anywhere the Modular Sensors library is expecting a UUID. You do
+ * not need to change those UUIDs. If you modify this code to add 
+ * additional or different sensors, you can use the same placeholder UUID.
  * ======================================================================= */
 
 // ==========================================================================
-//  Include the libraries required for the data logger
+// Include the libraries required for the datalogger
 // ==========================================================================
-/** Start [includes] */
 // The Arduino library is needed for every Arduino program.
 #include <Arduino.h>
 
@@ -44,115 +51,101 @@
 // We can create a serial port on one of the digital pins using this software
 #include <AltSoftSerial.h> 
 
-/** End [includes] */
 
 // ==========================================================================
-//  Defines for the Arduino IDE
-//  NOTE:  These are ONLY needed to compile with the Arduino IDE.
-//         If you use PlatformIO, you should set these build flags in your
-//         platformio.ini
+// Defines for the Arduino IDE
 // ==========================================================================
-/** Start [defines] */
-
-// This pin will interface the Adafruit power relay for the Apogee sensors' heaters with the Mayfly
-// Make sure your power relay's grove port is connected to the Mayfly's grove port that includes the
-// digital pin defined here
+// This pin will interface the Adafruit power relay for the Apogee sensors' 
+// heaters with the Mayfly. Make sure your power relay's grove port is 
+// connected to the Mayfly's grove port that includes the digital pin defined here
 #define powerRelayPin 10
-/** End [defines] */
+
 
 // ==========================================================================
-//  Data Logging Options
+// Data Logging Options
 // ==========================================================================
-/** Start [logging_options] */
 // The name of this program file
-const char* sketchName = "basic.ino";
+const char* sketchName = "no-telemetry.ino";
 
-// Logger ID, also becomes the prefix for the name of the data file on SD card
-// This can be found on the bottom of the Mayfly if the ink hasn't rubbed off.
-// Sometimes I just use the name I've given the site here instead of the serial number.
-// Make sure it is a string (in double quotations).
-const char* LoggerID = "roadside";
+// Assign an ID for your data. This becomes the prefix for the name of the 
+// data file on SD card. Normally use the name of the site at which the 
+// datalogger is installed. Make sure it is a string (in double quotations).
+const char* LoggerID = "sitename";
 
-// How frequently (in minutes) to log data
+// Set the frequency with which data will be logged (in minutes)
 const uint8_t loggingInterval = 60;
 
-// Your logger's timezone.
+// Set your datalogger's timezone as an integer offset from UTC time.
+// NOTE:  Daylight savings time will not be applied!  Please use standard time! 
 const int8_t timeZone = -7;  // Mountain Standard Time is -7
-// NOTE:  Daylight savings time will not be applied!  Please use standard time!
 
 // Set the input and output pins for the logger
 // NOTE:  Use -1 for pins that do not apply
-const int32_t serialBaud = 9600;  // Baud rate for debugging (this is what you'll set your serial monitor's baud rate to)
-const int8_t  greenLED   = 8;       // Pin for the green LED (don't change)
-const int8_t  redLED     = 9;       // Pin for the red LED (don't change)
-const int8_t  buttonPin  = 21;      // Pin for debugging mode (ie, button pin, don't change)
-const int8_t  wakePin    = 31;  // MCU interrupt/alarm pin to wake from sleep (don't change)
-
-// The following is just some information if you are using an older Mayfly version (0.x)
-// Mayfly 0.x D31 = A7
-// Set the wake pin to -1 if you do not want the main processor to sleep.
-// In a SAMD system where you are using the built-in rtc, set wakePin to 1
-
-
-const int8_t sdCardPwrPin   = -1;  // MCU SD card power pin (don't change)
-const int8_t sdCardSSPin    = 12;  // SD card chip select/slave select pin (don't change)
-const int8_t sensorPowerPin = 22;  // MCU pin controlling main sensor power
-								   // Pin 22 is switched power, which can be 3.3V, 5V, or 12V
-								   // depending on where you connect your sensors on the board
-								   // and if you adjust the jumper headers (see wiring instructions
-								   // in the GitHub repository in snow_sensing > hardware)
-/** End [logging_options] */
+// Baud rate for debugging (this is what you'll set your serial monitor's baud rate to)
+const int32_t serialBaud = 9600;
+// Pin for the green LED (Mayfly-specific - don't change)   
+const int8_t  greenLED   = 8;
+// Pin for the red LED (Mayfly-specific - don't change)      
+const int8_t  redLED     = 9;
+// Pin for debugging mode (ie, button pin, Mayfly-specific, don't change)    
+const int8_t  buttonPin  = 21;
+// MCU interrupt/alarm pin to wake from sleep (Mayfly-specific, don't change)
+const int8_t  wakePin    = 31;
+// MCU SD card power pin (don't change)
+const int8_t sdCardPwrPin   = -1;
+// SD card chip select/slave select pin (don't change)
+const int8_t sdCardSSPin    = 12;
+// MCU pin controlling main sensor power
+const int8_t sensorPowerPin = 22;
+// Pin 22 is switched power, which can be 3.3V, 5V, or 12V depending on where 
+// you connect your sensors on the board and if you adjust the jumper headers 
+// (see wiring instructions in the GitHub repository in snow_sensing > hardware)
 
 
 // ==========================================================================
-//  Using the Processor as a Sensor
+// Using the Processor as a Sensor
 // ==========================================================================
-// Generally do not adjust this section unless you are not using version 1.1 for your Mayfly
-/** Start [processor_sensor] */
+// Generally do not adjust this section unless you are NOT using Version 1.1 
+// of the Mayfly datalogger
 #include <sensors/ProcessorStats.h>
 
 // Create the main processor chip "sensor" - for general metadata
-const char*    mcuBoardVersion = "v1.1";  // If your board is a different version, change this value
+// If your Mayfly datalogger board is a different version, change this value
+const char*    mcuBoardVersion = "v1.1";  
 ProcessorStats mcuBoard(mcuBoardVersion);
-/** End [processor_sensor] */
 
 
 // ==========================================================================
-//  Maxim DS3231 RTC (Real Time Clock)
+// Maxim DS3231 RTC (Real Time Clock)
 // ==========================================================================
 // Do not change this section
-/** Start [ds3231] */
 #include <sensors/MaximDS3231.h>  // Includes wrapper functions for Maxim DS3231 RTC
 
 // Create a DS3231 sensor object, using this constructor function:
 MaximDS3231 ds3231(1);
-/** End [ds3231] */
 
 
+// The next few sections contain the declarations for each sensor. Pay 
+// attention to where edits need to be made. If there is a sensor you are not 
+// using, you can simply delete the corresponding section, but make sure to 
+// also delete its associated variables in the variable list found after these.
 
-
-
-// The next few sections contain the declarations for each sensor. Pay attention
-// to where edits need to be made. If there is a sensor you are not using, you can simply
-// delete the corresponding section, but make sure to also delete its associated variables
-// in the variable list found after these.
 
 // ==========================================================================
-//    Battery voltage
+// Battery voltage
 // ==========================================================================
 /*
-This is for measuring battery voltage using the Adafruit ADS1115 16-bit
-Analog-to-digital converters (ADCs). The ADCs can only read voltages within
-+/- 4.096 volts, so a voltage divider set up is needed. Please consult the wiring
-guide on the CIROH: Advancing Snow Observations GitHub page before including this
-measurement; otherwise, it is best to remove it
+ * This is for measuring battery voltage using the Adafruit ADS1115 16-bit
+ * Analog-to-digital converters (ADCs). The ADCs can only read voltages 
+ * within +/- 4.096 volts, so a voltage divider set up is needed. Please 
+ * consult the wiring guide on the GitHub page before including this 
+ * measurement; otherwise, it is best to remove it
 */
-
 # include <Adafruit_ADS1015.h>
 
 float calculateBatteryVoltage(void) {
   float res1 = 100;  // resistor value in kOhms that comes directly off the battery
-  float res2 = 22;  // resistor value in kOhms that connects directly into ground
+  float res2 = 22;   // resistor value in kOhms that connects directly into ground
   uint8_t i2cAddress = 0x49;  // Hexidecimal address of ADC that is taking the measurement
   uint8_t posBatChannel = 3;  // Channel on ADC the battery is connected to
   float inputVar1 = -9999;
@@ -179,40 +172,42 @@ const char* calculatedBatteryVoltageName = "BatteryVoltage";
 const char* calculatedBatteryVoltageUnit = "V";
 // A short code for the variable
 const char* calculatedBatteryVoltageCode = "MayflyBattVolt";
-// The (optional) universallly unique identifier
+// The (optional) universally unique identifier
 const char* calculatedBatteryVoltageUUID = "12345678-abcd-1234-ef00-1234567890ab";
 
 Variable* calculatedBatteryVoltage = new Variable(
-    calculateBatteryVoltage, calculatedBatteryVoltageResolution, calculatedBatteryVoltageName,
-    calculatedBatteryVoltageUnit, calculatedBatteryVoltageCode, calculatedBatteryVoltageUUID);
+  calculateBatteryVoltage, calculatedBatteryVoltageResolution, calculatedBatteryVoltageName,
+  calculatedBatteryVoltageUnit, calculatedBatteryVoltageCode, calculatedBatteryVoltageUUID);
 
-// That's the end of the code for the battery voltage
 
 // ==========================================================================
-//    MaxBotix sonar sensor for snow depth
+// MaxBotix sonar sensor for snow depth
 // ==========================================================================
 #include <sensors/MaxBotixSonar.h>
 
 // Tell the Mayfly what pin will have our homemade serial port on it
-AltSoftSerial sonarSerial(6, -1);  // The -1 indicates that no Tx wire is attached.
-								   // (We don't need to talk to the sensor, it just
-								   // needs to talk to us through a receiving pin [Rx]
-								   // on the board, pin 6).
+// We don't need to talk to the sensor, it just needs to talk to us through 
+// a receiving pin [Rx] on the board, pin 6.
+// The -1 indicates that no Tx wire is attached.
+AltSoftSerial sonarSerial(6, -1);  
 
 // Set the height of the sensor (in millimeters)
 const int32_t sonarHeight = 2787.65;
+
 // Set the slope angle in degrees
 const double slopeAngleDeg = 0;
 double slopeAngleRad = slopeAngleDeg * 3.14159 / 180;
 
-// There is no need to continuously run this sensor when it isn't taking a measurement,
-// so set the sensor's power pin to the switched pin which we already defined
+// There is no need to continuously run this sensor when it isn't taking a 
+// measurement. Set the sensor's power pin to the switched pin we 
+// already defined.
 const int8_t sonarPower = sensorPowerPin;
 
 // Trigger should be a *unique* negative number if unconnected
 const int8_t sonarTrigger = -1;
 
-// How many readings do you want to average? 
+// Set the number of measurements you want to average in the final 
+// recorded value 
 const uint8_t sonarNumReadings = 3;
 
 // Construct the sensor
@@ -220,7 +215,7 @@ MaxBotixSonar sonar(sonarSerial, sonarHeight, sonarPower, sonarTrigger, sonarNum
 
 // Each variable that we want to report needs to be "constructed" as well.
 // For this sensor it will include the range the sonar detected (in millimeters)
-// and the snow depth (calculated based on the sonar height and the range measured).
+// and the calculated snow depth (based on the sonar height and the range measured).
 
 // Sonar range variable construction
 Variable* sonarRange =
@@ -228,15 +223,19 @@ Variable* sonarRange =
 
 // This function calculates the depth of snow
 float calculateSnowDepth(void) {
-    float calculatedResult = -9999;  // This should be what you want your error values to equal
-    float inputVar1 = sonarHeight;  // The first variable input is the sonar height
-    float inputVar2 = sonarRange->getValue();  // The second variable input is the sonar range measured
-    // make sure both inputs are good
+    // Set a NoData value for reporting errors
+    float calculatedResult = -9999;
+    // The first variable input is the sonar height  
+    float inputVar1 = sonarHeight;  
+    // The second variable input is the sonar range measured
+    float inputVar2 = sonarRange->getValue();  
+    // Make sure both inputs are good
     // A reading of 5000 is an error for the sensor as well
-    // It may seem odd to check if the first input variable isn't -9999 because it is just the sonar height we entered,
-    // but for the sake of consistency it is included
+    // It may seem odd to check if the first input variable isn't -9999 because it is 
+    // just the sonar height we entered, but for the sake of consistency it is included
     if (inputVar1 != -9999 && inputVar2 != -9999 && inputVar2 != 5000) {
-      calculatedResult = (inputVar1 - inputVar2) / cos(slopeAngleRad);  // The snow depth is the height of the sensor minus the sonar's range measurement
+      // The snow depth is the height of the sensor minus the sonar's range measurement
+      calculatedResult = (inputVar1 - inputVar2) / cos(slopeAngleRad);  
     }
     return calculatedResult;
 }
@@ -245,9 +244,9 @@ float calculateSnowDepth(void) {
 
 // The number of digits after the decimal place
 const uint8_t calculatedSnowDepthResolution = 0;
-// Variable name (this must be a value from http://vocabulary.odm2.org/variablename/)
+// Variable name (must be a value from http://vocabulary.odm2.org/variablename/)
 const char* calculatedSnowDepthName = "Snow Depth";
-// Variable units (this must be a value from http://vocabulary.odm2.org/units/)
+// Variable units (must be a value from http://vocabulary.odm2.org/units/)
 const char* calculatedSnowDepthUnit = "mm";
 // A short code for the variable
 const char* calculatedSnowDepthCode = "snowDepth";
@@ -258,30 +257,24 @@ Variable* calculatedSnowDepth = new Variable(
     calculateSnowDepth, calculatedSnowDepthResolution, calculatedSnowDepthName,
     calculatedSnowDepthUnit, calculatedSnowDepthCode, calculatedSnowDepthUUID);
 
-// That's the end of the code for the MaxBotix sonar
-
-
-
-
-
-
 
 /* ** IMPORTANT ** 
-ApogeeSP510, ApogeeSP610, ApogeeSL510, and ApogeeSL610 modular sensors source codes
-only function on certain pins and certain hardware. Make sure you follow the wiring,
-or you may otherwise damage your sensors or hardware.
-
-Very brief wiring instructions are included in the sketch for reference, but make sure
-you wire according to the directions in the hardware folder of the GitHub repository.
-In this sketch, the hexidecimal (0x...) listed in parenthesis after a wiring instruction is
-the address of the ADC you need to connect to:
-0x48 on the Mayfly: pins noted with two As (AA0, AA1, etc.)
-0x49 ADDR jumpered to VIN
-0x4A ADDR jumpered to SDA
+ * ApogeeSP510, ApogeeSP610, ApogeeSL510, and ApogeeSL610 modular sensors source codes
+ * only function on certain pins and certain hardware. Make sure you follow the wiring,
+ * or you may damage your sensors or hardware.
+ *
+ * Very brief wiring instructions are included in the sketch for reference, but make sure
+ * you wire according to the directions in the hardware folder of the GitHub repository.
+ * In this sketch, the hexidecimal (0x...) listed in parenthesis after a wiring instruction is
+ * the address of the ADC you need to connect to:
+ * 0x48 on the Mayfly: pins noted with two As (AA0, AA1, etc.)
+ * 0x49 ADDR jumpered to VIN
+ * 0x4A ADDR jumpered to SDA
 */
 
+
 // ==========================================================================
-//    Apogee SP-510-SS for incoming shortwave radiation
+// Apogee SP-510-SS for incoming shortwave radiation
 // ==========================================================================
 // There is wiring listed in this section for both an SP-710 implementation, 
 // which has both the upward and downward pyranometers together, and the stand-
@@ -301,13 +294,14 @@ the address of the ADC you need to connect to:
   YELLOW  -> V12+ (POWER RELAY COM)
   BLUE    -> V12- (BATTERY GROUND)
   CLEAR   -> V12- (BATTERY GROUND)
-  
 */
 
+// Set the calibration factor for the SP-510
 float sp510calibFactor = 21.65;
 
 // Construct the Apogee SP-510-SS sensor object
-ApogeeSP510 sp510(-1, sp510calibFactor, 0x48, 3);  // The -1 indicates that there is no powering up necessary for measurement 
+// The -1 indicates that there is no powering up necessary for measurement
+ApogeeSP510 sp510(-1, sp510calibFactor, 0x48, 3);   
 
 // Construct the variable for the differential voltage measurement
 Variable* sp510volts =
@@ -319,7 +313,7 @@ Variable* sp510rad =
 
 
 // ==========================================================================
-//    Apogee SP-610-SS for outgoing shortwave radiation
+// Apogee SP-610-SS for outgoing shortwave radiation
 // ==========================================================================
 #include <sensors/ApogeeSP610.h>
 
@@ -336,6 +330,7 @@ Variable* sp510rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
+// Set the calibration factor for the SP-610
 float sp610calibFactor = 31.44;
 
 // Construct the Apogee SP-610-SS sensor object
@@ -348,10 +343,11 @@ Variable* sp610volts =
 // Construct the variable for the outgoing shortwave radiation
 Variable* sp610rad =
     new ApogeeSP610_OSWR(&sp610, "12345678-abcd-1234-ef00-1234567890ab");
+// End of code for the SP-610 sensor
 
 
 // ==========================================================================
-//    Apogee SL-510-SS for incoming longwave radiation
+// Apogee SL-510-SS for incoming longwave radiation
 // ==========================================================================
 #include <sensors/ApogeeSL510.h>
 
@@ -365,12 +361,15 @@ Variable* sp610rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
+// Set k1 and k2 factors for the SL-510
 float sl510k1 = 9.141;
 float sl510k2 = 1.020;
 
 // Construct the Apogee SL-510-SS sensor object
-// The only parameter you should adjust is how many measurements you want to take (last parameter)
-ApogeeSL510 sl510(sensorPowerPin, sl510k1, sl510k2, 1, 0x49, 0x4A, 3);  // Note that this sensor is not attached to the Mayfly's ADC pins (0x48)
+// The only parameter you should adjust is how many measurements you 
+// want to take (last parameter)
+// Note that this sensor is not attached to the Mayfly's ADC pins (0x48)
+ApogeeSL510 sl510(sensorPowerPin, sl510k1, sl510k2, 1, 0x49, 0x4A, 3);  
 
 // Construct the variable for the thermistor voltage
 Variable* sl510thermistorVolts =
@@ -386,7 +385,7 @@ Variable* sl510rad =
 
 
 // ==========================================================================
-//    Apogee SL-610-SS for incoming longwave radiation
+// Apogee SL-610-SS for incoming longwave radiation
 // ==========================================================================
 #include <sensors/ApogeeSL610.h>
 
@@ -400,12 +399,15 @@ Variable* sl510rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
+// Set the k1 and k2 factors for the SL-610
 float sl610k1 = 8.997;
 float sl610k2 = 1.039;
 
 // Construct the Apogee SL-610-SS sensor object
-// The only parameter you should adjust is how many measurements you want to take (last parameter)
-ApogeeSL610 sl610(sensorPowerPin, sl610k1, sl610k2, 2, 0x49, 0x4A, 3);  // Note that this sensor is not attached to the Mayfly's ADC pins (0x48)
+// The only parameter you should adjust is how many measurements you 
+// want to take (last parameter)
+// Note that this sensor is not attached to the Mayfly's ADC pins (0x48)
+ApogeeSL610 sl610(sensorPowerPin, sl610k1, sl610k2, 2, 0x49, 0x4A, 3);  
 
 // Construct the variable for the thermistor voltage
 Variable* sl610thermistorVolts =
@@ -421,13 +423,14 @@ Variable* sl610rad =
 
 
 // ==========================================================================
-//    METER Teros 12 Soil Moisture Sensors
+// METER Teros 12 Soil Moisture Sensors
 // ==========================================================================
 #include <sensors/MeterTeros12.h>
 
 // Set the addresses of each of the sensors
 // Make sure this matches what you programmed them to be
-// Change the addresses given in the single quotes ('') if you did not follow this same naming schema
+// Change the addresses given in the single quotes ('') if you did not follow 
+// this same naming schema
 char add1 = 'a';  // Address 1 at 2" depth
 char add2 = 'b';  // Address 2 at 8" depth
 char add3 = 'c';  // Address 3 at 20" depth
@@ -475,8 +478,9 @@ Variable* vwc3 =
 Variable* ec3 =
     new MeterTeros12_EC(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilEC_20in");
 
+
 // ==========================================================================
-//    Apogee ST-110-SS for Air Temperature
+// Apogee ST-110-SS for Air Temperature
 // ==========================================================================
 #include <sensors/ApogeeST110.h>
 
@@ -500,23 +504,13 @@ Variable* st110airTemp =
 
 
 // ==========================================================================
-//    Variable List
+// Variable List
 // ==========================================================================
-
-/*
-This list of variables is what the program will cycle through when determining what to collect.
-Note that I commented out two variables that are measurements from the Mayfly itself.
-I personally didn't see the utility in collecting these variables, but if you would like them
-you may remove the comment signage. Just note that the battery measurement is meaningless for
-the CIROH project implementation because we are not connnecting the battery through the Mayfly's
-LiPo ports. If you do decide to include these variables, make sure to uncomment the UUIDs in the 
-next list as well.
-*/
+// This list of variables is what the program will cycle through when 
+// determining what data to collect. 
 
 Variable* variableList[] = {
-    new ProcessorStats_SampleNumber(&mcuBoard),
-    //new ProcessorStats_FreeRam(&mcuBoard),
-    //new ProcessorStats_Battery(&mcuBoard), 
+    new ProcessorStats_SampleNumber(&mcuBoard), 
     new MaximDS3231_Temp(&ds3231),
     sp510volts,
     sp510rad,
@@ -547,17 +541,10 @@ Variable* variableList[] = {
     st110airTemp,
     sonarRange,
     calculatedSnowDepth,
-    //calculatedBatteryVoltage
-    // Additional sensor variables can be added here, by copying the syntax
-    //   for creating the variable pointer (FORM1) from the
-    //   `menu_a_la_carte.ino` example
-    // The example code snippets in the wiki are primarily FORM2.
 };
 
-const char* UUIDs[] = {
-    "12345678-abcd-1234-ef00-1234567890ab",
-    //"12345678-abcd-1234-ef00-1234567890ab",
-    //"12345678-abcd-1234-ef00-1234567890ab",
+//  The number of UUID's must match the number of variables!
+const char* UUIDs[] = {  // UUID array for device sensors
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
@@ -587,8 +574,7 @@ const char* UUIDs[] = {
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
-    //"12345678-abcd-1234-ef00-1234567890ab",
-    //  ... The number of UUID's must match the number of variables!
+    "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
 };
 
@@ -597,26 +583,23 @@ uint8_t variableCount = sizeof(variableList) / sizeof(variableList[0]);
 
 // Create the VariableArray object
 VariableArray varArray(variableCount, variableList);
-/** End [variable_arrays] */
 
 
 // ==========================================================================
-//  The Logger Object[s]
+// The Logger Object[s]
 // ==========================================================================
-/** Start [loggers] */
 // Create a logger instance
 Logger dataLogger;
-/** End [loggers] */
 
 
 // ==========================================================================
-//  Working Functions
+// Working Functions
 // ==========================================================================
-/** Start [working_functions] */
 // Flashes the LED's on the primary board
-// The EnviroDIY community created this function. It can be useful for debugging,
-// such as when you want to monitor the board while it runs, you can stick this function
-// in where you want to check if the datalogger ever made it to that section of the program
+// The EnviroDIY community created this function. It can be useful for 
+// debugging, such as when you want to monitor the board while it runs, you 
+// can stick this function in where you want to check if the datalogger ever 
+// made it to that section of the program
 void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
     for (uint8_t i = 0; i < numFlash; i++) {
         digitalWrite(greenLED, HIGH);
@@ -629,12 +612,10 @@ void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
     digitalWrite(redLED, LOW);
 }
 
-/** End [working_functions] */
 
 // ==========================================================================
-//  Arduino Setup Function
+// Arduino Setup Function
 // ==========================================================================
-/** Start [setup] */
 // This function always runs first after the Mayfly/Arduino is powered up,
 // and only runs once
 void setup() {
@@ -646,8 +627,8 @@ void setup() {
   pinMode(powerRelayPin, OUTPUT);
   digitalWrite(powerRelayPin, LOW);
 
-  // Print a start-up note to the main serial port
-  // This is just for if you have your laptop connected while running this program
+  // Print a start-up note to the main serial port. This is just for if you 
+  // have your laptop connected while running this program
   Serial.print(F("Now running "));
   Serial.print(sketchName);
   Serial.print(F(" on Logger "));
@@ -693,17 +674,13 @@ void setup() {
   // Begin the MaxBotix's serial communication
   sonarSerial.begin(9600);
 }
-/** End [setup] */
 
 
 // ==========================================================================
-//  Arduino Loop Function
+// Arduino Loop Function
 // ==========================================================================
-/** Start [loop] */
-
 // This function continuously runs until the Arduino/Mayfly is no longer powered
 void loop() {
-
   /*
   Check if it is time to power up the Apogee radiometer heaters
   You can change how long before the logging interval you turn them on by changing
@@ -712,15 +689,17 @@ void loop() {
   (45 min * 60 sec/min). If you want them to turn on at the 15-minute mark, for example,
   set it equal to 15 min * 60 sec/min = 900
   */
-  if (dataLogger.getNowLocalEpoch() % (loggingInterval * 60) == 2400) {  // Check if we are on the 45th minute (2700 seconds into the interval)
+  // Check if we are on the 45th minute (2700 seconds into the interval)
+  if (dataLogger.getNowLocalEpoch() % (loggingInterval * 60) == 2400) {  
     digitalWrite(22, HIGH);  // Power up the power relay (pin 22 is the Mayfly's switched power output)
     delay(1000);
-    digitalWrite(powerRelayPin, HIGH);  // Set the signal pin high (to close the circuit, the relay is waiting for a signal drop)
+    // Set the signal pin high (to close the circuit, the relay is waiting for a signal drop)
+    digitalWrite(powerRelayPin, HIGH);  
     delay(1000);
-    digitalWrite(powerRelayPin, LOW);  // Let the relay know it is good to close the circuit by dropping the pin to low
+    // Let the relay know it is good to close the circuit by dropping the pin to low
+    digitalWrite(powerRelayPin, LOW);  
     digitalWrite(22, LOW);  // Turn off switched power
   }
-
-  dataLogger.logData();  // During logData, the marked time will update when a new measurement is taken
+  // During logData, the marked time will update when a new measurement is taken
+  dataLogger.logData();  
 }
-/** End [loop] */
