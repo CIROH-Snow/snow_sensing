@@ -1,5 +1,3 @@
-// This is the Mayfly sketch for the deployment of a snow station for the CIROH: Advaning Snow Observations project.
-
 /** =========================================================================
  * Filename: test_lte.ino
  * Description: Simplified data logging code for testing lte data telemetry
