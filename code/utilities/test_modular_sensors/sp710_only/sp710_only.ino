@@ -1,7 +1,6 @@
 // ==========================================================================
 //  Include the libraries required for any data logger
 // ==========================================================================
-/** Start [includes] */
 // The Arduino library is needed for every Arduino program.
 #include <Arduino.h>
 
@@ -11,14 +10,12 @@
 
 // Include the main header for ModularSensors
 #include <ModularSensors.h>
-/** End [includes] */
 
 #include <Wire.h>
 
 // ==========================================================================
 //  Data Logging Options
 // ==========================================================================
-/** Start [logging_options] */
 // The name of this program file
 const char* sketchName = "sp710_only.ino";
 // Logger ID, also becomes the prefix for the name of the data file on SD card
@@ -42,28 +39,26 @@ const int8_t  wakePin    = 31;  // MCU interrupt/alarm pin to wake from sleep
 const int8_t sdCardPwrPin   = -1;  // MCU SD card power pin
 const int8_t sdCardSSPin    = 12;  // SD card chip select/slave select pin
 const int8_t sensorPowerPin = 22;  // MCU pin controlling main sensor power
-/** End [logging_options] */
+
 
 // ==========================================================================
 //  Using the Processor as a Sensor
 // ==========================================================================
-/** Start [processor_sensor] */
 #include <sensors/ProcessorStats.h>
 
 // Create the main processor chip "sensor" - for general metadata
 const char*    mcuBoardVersion = "v1.1";
 ProcessorStats mcuBoard(mcuBoardVersion);
-/** End [processor_sensor] */
+
 
 // ==========================================================================
 //  Maxim DS3231 RTC (Real Time Clock)
 // ==========================================================================
-/** Start [ds3231] */
 #include <sensors/MaximDS3231.h>  // Includes wrapper functions for Maxim DS3231 RTC
 
 // Create a DS3231 sensor object, using this constructor function:
 MaximDS3231 ds3231(1);
-/** End [ds3231] */
+
 
 // ** IMPORTANT ** 
 // ApogeeSP510, ApogeeSP610, ApogeeSL510, and ApogeeSL610 modular sensors source codes
@@ -115,12 +110,9 @@ Variable* variableList[] = {
     sp510rad,
     sp610volts,
     sp610rad
-    // Additional sensor variables can be added here, by copying the syntax
-    //   for creating the variable pointer (FORM1) from the
-    //   `menu_a_la_carte.ino` example
-    // The example code snippets in the wiki are primarily FORM2.
 };
 
+//  The number of UUID's must match the number of variables!
 const char* UUIDs[] = {
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
@@ -129,7 +121,6 @@ const char* UUIDs[] = {
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
-    //  ... The number of UUID's must match the number of variables!
     "12345678-abcd-1234-ef00-1234567890ab"
 };
 
@@ -138,21 +129,18 @@ uint8_t variableCount = sizeof(variableList) / sizeof(variableList[0]);
 
 // Create the VariableArray object
 VariableArray varArray(variableCount, variableList);
-/** End [variable_arrays] */
 
 
 // ==========================================================================
 //  The Logger Object[s]
 // ==========================================================================
-/** Start [loggers] */
 // Create a logger instance
 Logger dataLogger;
-/** End [loggers] */
+
 
 // ==========================================================================
 //  Working Functions
 // ==========================================================================
-/** Start [working_functions] */
 // Flashes the LED's on the primary board
 void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
     for (uint8_t i = 0; i < numFlash; i++) {
@@ -165,9 +153,8 @@ void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
     }
     digitalWrite(redLED, LOW);
 }
-/** End [working_functions] */
 
-/** Start [loop] */
+
 void setup() {
     // Start the primary serial connection
     Serial.begin(serialBaud);
@@ -216,10 +203,9 @@ void setup() {
     // Call the processor sleep
     dataLogger.systemSleep();
 }
-/** End [setup] */
+
 
 void loop() {
   // put your main code here, to run repeatedly:
   dataLogger.logData();
 }
-/** End [loop] */
