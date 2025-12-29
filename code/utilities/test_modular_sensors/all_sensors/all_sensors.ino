@@ -1,23 +1,22 @@
 /** =========================================================================
- * @file simple_logging.ino
- * @brief A simple data logging example.
+ * File Name: all_sensors.ino
+ * Description: A simple data logging example using all sensors.
  *
- * @author Sara Geleskie Damiano <sdamiano@stroudcenter.org>
- * @copyright (c) 2017-2022 Stroud Water Research Center (SWRC)
- *                          and the EnviroDIY Development Team
- *            This example is published under the BSD-3 license.
+ * Author: Braedon Dority <braedon.dority@usu.edu>
+ * 
+ * Copyright (c) 2025 Utah State University
+ * 
+ * License: This example is published under the BSD-3 license.
  *
- * Build Environment: Visual Studios Code with PlatformIO
- * Hardware Platform: EnviroDIY Mayfly Arduino Datalogger
+ * Build Environment: Arduino IDE 1.8.19
+ * Hardware Platform: EnviroDIY Mayfly Arduino Datalogger v1.1
  *
- * DISCLAIMER:
- * THIS CODE IS PROVIDED "AS IS" - NO WARRANTY IS GIVEN.
+ * DISCLAIMER: THIS CODE IS PROVIDED "AS IS" - NO WARRANTY IS GIVEN.
  * ======================================================================= */
 
 // ==========================================================================
 //  Include the libraries required for any data logger
 // ==========================================================================
-/** Start [includes] */
 // The Arduino library is needed for every Arduino program.
 #include <Arduino.h>
 
@@ -27,7 +26,6 @@
 
 // Include the main header for ModularSensors
 #include <ModularSensors.h>
-/** End [includes] */
 
 #include <Wire.h>
 
@@ -37,24 +35,18 @@ AltSoftSerial sonarSerial(6, -1);  // The -1 indicates that no Tx wire is attach
 
 // ==========================================================================
 //  Defines for the Arduino IDE
-//  NOTE:  These are ONLY needed to compile with the Arduino IDE.
-//         If you use PlatformIO, you should set these build flags in your
-//         platformio.ini
 // ==========================================================================
-/** Start [defines] */
 #define xbeeSleepPin 23
 #define xbeeRegulatorPin 18
-/** End [defines] */
 
 // ==========================================================================
-//  XBee Pro S3B Options
+// XBee Pro S3B Options
 // ==========================================================================
 const int xbeeBaud = 9600;
 
 // ==========================================================================
-//  Data Logging Options
+// Data Logging Options
 // ==========================================================================
-/** Start [logging_options] */
 // The name of this program file
 const char* sketchName = "all_sensors.ino";
 // Logger ID, also becomes the prefix for the name of the data file on SD card
@@ -78,34 +70,29 @@ const int8_t  wakePin    = 31;  // MCU interrupt/alarm pin to wake from sleep
 const int8_t sdCardPwrPin   = -1;  // MCU SD card power pin
 const int8_t sdCardSSPin    = 12;  // SD card chip select/slave select pin
 const int8_t sensorPowerPin = 22;  // MCU pin controlling main sensor power
-/** End [logging_options] */
 
 
 // ==========================================================================
-//  Using the Processor as a Sensor
+// Using the Processor as a Sensor
 // ==========================================================================
-/** Start [processor_sensor] */
 #include <sensors/ProcessorStats.h>
 
 // Create the main processor chip "sensor" - for general metadata
 const char*    mcuBoardVersion = "v1.1";
 ProcessorStats mcuBoard(mcuBoardVersion);
-/** End [processor_sensor] */
 
 
 // ==========================================================================
-//  Maxim DS3231 RTC (Real Time Clock)
+// Maxim DS3231 RTC (Real Time Clock)
 // ==========================================================================
-/** Start [ds3231] */
 #include <sensors/MaximDS3231.h>  // Includes wrapper functions for Maxim DS3231 RTC
 
 // Create a DS3231 sensor object, using this constructor function:
 MaximDS3231 ds3231(1);
-/** End [ds3231] */
 
 
 // ==========================================================================
-//    MaxBotix sonar sensor for snow depth
+// MaxBotix sonar sensor for snow depth
 // ==========================================================================
 #include <sensors/MaxBotixSonar.h>
 
@@ -171,7 +158,7 @@ Variable* sp510rad =
 
 
 // ==========================================================================
-//    Apogee SP-610-SS for outgoing shortwave radiation
+// Apogee SP-610-SS for outgoing shortwave radiation
 // ==========================================================================
 #include <sensors/ApogeeSP610.h>
 
@@ -190,7 +177,7 @@ Variable* sp610rad =
 
 
 // ==========================================================================
-//    Apogee SL-510-SS for incoming longwave radiation
+// Apogee SL-510-SS for incoming longwave radiation
 // ==========================================================================
 #include <sensors/ApogeeSL510.h>
 
@@ -203,7 +190,12 @@ Variable* sp610rad =
   RED     -> SW3
   CLEAR   -> GND
 */
-ApogeeSL510 sl510(sensorPowerPin, 1, 0x49, 50);  // Note that this sensor is not attached to the board ADC
+
+// Set k1 and k2 factors for the SL-510
+float sl510k1 = 9.141;
+float sl510k2 = 1.020;
+
+ApogeeSL510 sl510(sensorPowerPin, sl510k1, sl510k2, 1, 0x49, 50);  // Note that this sensor is not attached to the board ADC
 
 Variable* sl510thermistorVolts =
     new ApogeeSL510_Thermistor_Voltage(&sl510, "12345678-abcd-1234-ef00-1234567890ab");
@@ -216,7 +208,7 @@ Variable* sl510rad =
 
 
 // ==========================================================================
-//    Apogee SL-610-SS for incoming longwave radiation
+// Apogee SL-610-SS for incoming longwave radiation
 // ==========================================================================
 #include <sensors/ApogeeSL610.h>
 
@@ -229,7 +221,12 @@ Variable* sl510rad =
   RED     -> SW3
   CLEAR   -> GND
 */
-ApogeeSL610 sl610(sensorPowerPin, 1, 0x4A, 50);  // Note that this sensor is not attached to the board ADC
+
+// Set the k1 and k2 factors for the SL-610
+float sl610k1 = 8.997;
+float sl610k2 = 1.039;
+
+ApogeeSL610 sl610(sensorPowerPin, sl610k1, sl610k2, 1, 0x4A, 50);  // Note that this sensor is not attached to the board ADC
 
 Variable* sl610thermistorVolts =
     new ApogeeSL610_Thermistor_Voltage(&sl610, "12345678-abcd-1234-ef00-1234567890ab");
@@ -242,7 +239,7 @@ Variable* sl610rad =
 
 
 // ==========================================================================
-//    METER Teros 12 Soil Moisture Sensors
+// METER Teros 12 Soil Moisture Sensors
 // ==========================================================================
 #include <sensors/MeterTeros12.h>
 char add1 = 'a';  // Address 1 at depth XXXX
@@ -322,12 +319,9 @@ Variable* variableList[] = {
     soilEa3,
     vwc3,
     ec3
-    // Additional sensor variables can be added here, by copying the syntax
-    //   for creating the variable pointer (FORM1) from the
-    //   `menu_a_la_carte.ino` example
-    // The example code snippets in the wiki are primarily FORM2.
 };
 
+// The number of UUID's must match the number of variables!
 const char* UUIDs[] = {
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
@@ -359,7 +353,6 @@ const char* UUIDs[] = {
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
-    //  ... The number of UUID's must match the number of variables!
     "12345678-abcd-1234-ef00-1234567890ab",
 };
 
@@ -368,22 +361,18 @@ uint8_t variableCount = sizeof(variableList) / sizeof(variableList[0]);
 
 // Create the VariableArray object
 VariableArray varArray(variableCount, variableList);
-/** End [variable_arrays] */
 
 
 // ==========================================================================
-//  The Logger Object[s]
+// The Logger Object[s]
 // ==========================================================================
-/** Start [loggers] */
 // Create a logger instance
 Logger dataLogger;
-/** End [loggers] */
 
 
 // ==========================================================================
-//  Working Functions
+// Working Functions
 // ==========================================================================
-/** Start [working_functions] */
 // Flashes the LED's on the primary board
 void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
     for (uint8_t i = 0; i < numFlash; i++) {
@@ -396,13 +385,11 @@ void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
     }
     digitalWrite(redLED, LOW);
 }
-/** End [working_functions] */
 
 
 // ==========================================================================
-//  Arduino Setup Function
+// Arduino Setup Function
 // ==========================================================================
-/** Start [setup] */
 void setup() {
     // Start the primary serial connection
     Serial.begin(serialBaud);
@@ -461,51 +448,11 @@ void setup() {
 
     sonarSerial.begin(9600);
 }
-/** End [setup] */
 
 
 // ==========================================================================
-//  Arduino Loop Function
+// Arduino Loop Function
 // ==========================================================================
-/** Start [loop] */
-
 void loop() {
-  dataLogger.logData();
-  
-  /*
-  // This if-statement checks if the current time is two minutes before the logging interval.
-  // If it is, then the switched power will kick on.
-  // This is so the internal heaters of the thermopile sensors can clear the sensors of snow, frost, or water.
-  if (dataLogger.getNowLocalEpoch() % (loggingInterval * 60) == 780) {  // Check if the clock is on the 13-minute mark (2 minutes before the scanning interval)
-    digitalWrite(22, HIGH);  // Turn on switched power
-    while (dataLogger.getNowLocalEpoch() % (loggingInterval * 60) >= 780  && dataLogger.getNowLocalEpoch() % (loggingInterval * 60) < 890) {  // Stay in this while loop until ten seconds before the scanning interval should begin
-    }
-    digitalWrite(22, LOW);  // Turn off the switched power
-  }
-  */
-  
-  // Sending data over the XBee module
-  // Do this one minute after the logging interval
-  /*
-  if (dataLogger.getNowLocalEpoch() % (loggingInterval * 60) == 60) {
-    digitalWrite(xbeeSleepPin, LOW);  // Wake up the XBee
-    delay(100);
-    dataLogger.printSensorDataCSV(&Serial1);  // Send data over the XBee
-    delay(100);
-    digitalWrite(xbeeSleepPin, HIGH);  // Sleep the XBee
-    dataLogger.systemSleep();
-    delay(1000);
-  }
-  */
-  /*
-  digitalWrite(xbeeSleepPin, LOW);  // Wake up the XBee
-  delay(100);
-  dataLogger.printSensorDataCSV(&Serial1);  // Send data over XBee
-  delay(100);
-  digitalWrite(xbeeSleepPin, HIGH);  // Sleep the XBee
-  dataLogger.systemSleep();  // Sleep the system
-  delay(1000);
-  */
-  
+  dataLogger.logData();  
 }
-/** End [loop] */
