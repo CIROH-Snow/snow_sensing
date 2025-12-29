@@ -1,23 +1,22 @@
 /** =========================================================================
- * @file sl510_only.ino
- * @brief A simple data logging example for the SL-510-SS.
+ * Filename: sl510_only.ino
+ * Description: A simple data logging example for the SL-510-SS.
  *
- * @author Sara Geleskie Damiano <sdamiano@stroudcenter.org>
- * @copyright (c) 2017-2022 Stroud Water Research Center (SWRC)
- *                          and the EnviroDIY Development Team
- *            This example is published under the BSD-3 license.
+ * Author: Braedon Dority <braedon.dority@usu.edu>
+ * 
+ * Copyright (c) 2025 Utah State University
+ * 
+ * License: This example is published under the BSD-3 license.
  *
- * Build Environment: Visual Studios Code with PlatformIO
- * Hardware Platform: EnviroDIY Mayfly Arduino Datalogger
+ * Build Environment: Arduino IDE v1.8.19
+ * Hardware Platform: EnviroDIY Mayfly Arduino Datalogger v1.1
  *
- * DISCLAIMER:
- * THIS CODE IS PROVIDED "AS IS" - NO WARRANTY IS GIVEN.
+ * DISCLAIMER: THIS CODE IS PROVIDED "AS IS" - NO WARRANTY IS GIVEN.
  * ======================================================================= */
 
 // ==========================================================================
 //  Include the libraries required for any data logger
 // ==========================================================================
-/** Start [includes] */
 // The Arduino library is needed for every Arduino program.
 #include <Arduino.h>
 
@@ -27,24 +26,13 @@
 
 // Include the main header for ModularSensors
 #include <ModularSensors.h>
-/** End [includes] */
 
 #include <Wire.h>
 
-// ==========================================================================
-//  Defines for the Arduino IDE
-//  NOTE:  These are ONLY needed to compile with the Arduino IDE.
-//         If you use PlatformIO, you should set these build flags in your
-//         platformio.ini
-// ==========================================================================
-/** Start [defines] */
-
-/** End [defines] */
 
 // ==========================================================================
 //  Data Logging Options
 // ==========================================================================
-/** Start [logging_options] */
 // The name of this program file
 const char* sketchName = "sl510_only.ino";
 // Logger ID, also becomes the prefix for the name of the data file on SD card
@@ -68,30 +56,25 @@ const int8_t  wakePin    = 31;  // MCU interrupt/alarm pin to wake from sleep
 const int8_t sdCardPwrPin   = -1;  // MCU SD card power pin
 const int8_t sdCardSSPin    = 12;  // SD card chip select/slave select pin
 const int8_t sensorPowerPin = 22;  // MCU pin controlling main sensor power
-/** End [logging_options] */
 
 
 // ==========================================================================
 //  Using the Processor as a Sensor
 // ==========================================================================
-/** Start [processor_sensor] */
 #include <sensors/ProcessorStats.h>
 
 // Create the main processor chip "sensor" - for general metadata
 const char*    mcuBoardVersion = "v1.1";
 ProcessorStats mcuBoard(mcuBoardVersion);
-/** End [processor_sensor] */
 
 
 // ==========================================================================
 //  Maxim DS3231 RTC (Real Time Clock)
 // ==========================================================================
-/** Start [ds3231] */
 #include <sensors/MaximDS3231.h>  // Includes wrapper functions for Maxim DS3231 RTC
 
 // Create a DS3231 sensor object, using this constructor function:
 MaximDS3231 ds3231(1);
-/** End [ds3231] */
 
 
 // ==========================================================================
@@ -108,7 +91,12 @@ MaximDS3231 ds3231(1);
   RED     -> SW3
   CLEAR   -> GND
 */
-ApogeeSL510 sl510(sensorPowerPin, 1, 0x49, 50);  // Note that this sensor is not attached to the board ADC
+
+// Set k1 and k2 factors for the SL-510
+float sl510k1 = 9.141;
+float sl510k2 = 1.020;
+
+ApogeeSL510 sl510(sensorPowerPin, sl510k1, sl510k2, 1, 0x49, 50);  // Note that this sensor is not attached to the board ADC
 
 Variable* sl510thermistorVolts =
     new ApogeeSL510_Thermistor_Voltage(&sl510, "12345678-abcd-1234-ef00-1234567890ab");
@@ -128,12 +116,9 @@ Variable* variableList[] = {
     sl510thermistorVolts,
     sl510thermopileVolts,
     sl510rad
-    // Additional sensor variables can be added here, by copying the syntax
-    //   for creating the variable pointer (FORM1) from the
-    //   `menu_a_la_carte.ino` example
-    // The example code snippets in the wiki are primarily FORM2.
 };
 
+//  The number of UUID's must match the number of variables!
 const char* UUIDs[] = {
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
@@ -141,7 +126,6 @@ const char* UUIDs[] = {
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",    
-    //  ... The number of UUID's must match the number of variables!
     "12345678-abcd-1234-ef00-1234567890ab",
 };
 
@@ -150,22 +134,18 @@ uint8_t variableCount = sizeof(variableList) / sizeof(variableList[0]);
 
 // Create the VariableArray object
 VariableArray varArray(variableCount, variableList);
-/** End [variable_arrays] */
 
 
 // ==========================================================================
 //  The Logger Object[s]
 // ==========================================================================
-/** Start [loggers] */
 // Create a logger instance
 Logger dataLogger;
-/** End [loggers] */
 
 
 // ==========================================================================
 //  Working Functions
 // ==========================================================================
-/** Start [working_functions] */
 // Flashes the LED's on the primary board
 void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
     for (uint8_t i = 0; i < numFlash; i++) {
@@ -178,13 +158,11 @@ void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
     }
     digitalWrite(redLED, LOW);
 }
-/** End [working_functions] */
 
 
 // ==========================================================================
 //  Arduino Setup Function
 // ==========================================================================
-/** Start [setup] */
 void setup() {
     // Start the primary serial connection
     Serial.begin(serialBaud);
@@ -234,17 +212,12 @@ void setup() {
 
     // Call the processor sleep
     dataLogger.systemSleep();
-
 }
-/** End [setup] */
 
 
 // ==========================================================================
 //  Arduino Loop Function
 // ==========================================================================
-/** Start [loop] */
-
 void loop() {
   dataLogger.logData();
 }
-/** End [loop] */
