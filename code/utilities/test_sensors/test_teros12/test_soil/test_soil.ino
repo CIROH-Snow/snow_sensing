@@ -1,11 +1,8 @@
 /*
 SENSOR ERROR CODES
 The TEROS 11/12 has three error codes:
-•
 -9999 is output in place of the measured value if the sensor detects that the measurement function has been compromised and the subsequent measurement values have no meaning
-•
 -9992 is output in place of the measured value if the sensor detects corrupt or lost calibrations
-•
 -9991 is output in place of the measured value if the sensor detects insufficient voltage to perform the measurement
 */
 
