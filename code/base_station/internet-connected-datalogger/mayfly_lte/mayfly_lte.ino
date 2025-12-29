@@ -1,3 +1,22 @@
+/** =========================================================================
+ * File name: mayfly_lte.ino
+ * Description: This sketch was written to run on a Mayfly datalogger where
+ * that datalogger serves as the Internet-connected datalogger at a base
+ * station within a network of snow sensing stations using a 900 MHz spread
+ * spectrum radio network.
+ *  
+ * Author: Braedon Dority <braedon.dority@usu.edu>
+ * 
+ * Copyright (c) 2025 Utah State University
+ * 
+ * License: This example is published under the BSD-3 open source license.
+ *
+ * Build Environment: Arduino IDE Version 1.8.19
+ * Hardware Platform: EnviroDIY Mayfly Arduino Datalogger V1.1
+ *
+ * DISCLAIMER: THIS CODE IS PROVIDED "AS IS" - NO WARRANTY IS GIVEN.
+ * ========================================================================*/
+
 // ==========================================================================
 //  Defines for TinyGSM
 // ==========================================================================
