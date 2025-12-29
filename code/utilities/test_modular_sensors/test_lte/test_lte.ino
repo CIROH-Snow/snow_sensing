@@ -183,7 +183,8 @@ Logger dataLogger;
 //  Creating Data Publisher[s]
 // ==========================================================================
 // Create your authentication information for HydroServer. Pass in a string
-// that is the base 64 encoding of your HydroServer username and password. 
+// that is the Base64 encoding of your HydroServer account email and password
+// separated by a colon - i.e., "email@email.com:Password"
 // You can get this encoding at https://www.base64encode.org/
 const char* base64Authorization = "Your_Base_64_Encoded_Auth_Info_Here";  
 
