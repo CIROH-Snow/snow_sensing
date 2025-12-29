@@ -21,7 +21,8 @@ const char* HydroServerPublisher::postEndpoint           = "/api/sensorthings/v1
 const char* HydroServerPublisher::hydroServerHost        = "lro.hydroserver.org";
 const int   HydroServerPublisher::hydroServerPort        = 80;
 const char* HydroServerPublisher::acceptHeader           = "\r\nAccept: application/json";
-const char* HydroServerPublisher::authorizationHeader    = "\r\nAuthorization: Basic "
+const char* HydroServerPublisher::authorizationHeader    = "\r\nAuthorization: Basic ";
+const char* HydroServerPublisher::contentLengthHeader    = "\r\nContent-Length: ";
 const char* HydroServerPublisher::contentTypeHeader      = "\r\nContent-Type: application/json\r\n\r\n";
 
 // HTTP Post request body json tags
@@ -37,7 +38,7 @@ HydroServerPublisher::HydroServerPublisher() : dataPublisher() {}
 HydroServerPublisher::HydroServerPublisher(Logger& baseLogger, uint8_t sendEveryX,
                                        uint8_t sendOffset)
     : dataPublisher(baseLogger, sendEveryX, sendOffset) {}
-HydroServerYPublisher::HydroServerPublisher(Logger& baseLogger, Client* inClient,
+HydroServerPublisher::HydroServerPublisher(Logger& baseLogger, Client* inClient,
                                        uint8_t sendEveryX, uint8_t sendOffset)
     : dataPublisher(baseLogger, inClient, sendEveryX, sendOffset) {}
 HydroServerPublisher::HydroServerPublisher(Logger&     baseLogger,
@@ -62,7 +63,7 @@ void HydroServerPublisher::setAuthorization(const char* base64Authorization) {
 
 
 // Calculates how long the JSON will be
-uint16_t EnviroDIYPublisher::calculateJsonSize() {
+uint16_t HydroServerPublisher::calculateJsonSize() {
     uint16_t jsonLength = 1;   // [
     for (uint8_t i = 0; i < _baseLogger->getArrayVarCount(); i++) {
         jsonLength += 15;          // {"Datastream":{
@@ -72,7 +73,7 @@ uint16_t EnviroDIYPublisher::calculateJsonSize() {
         jsonLength += 3;           // "},
         jsonLength += 41;          // "components":["phenomenonTime","result"],
         jsonLength += 13;          // "dataArray":[
-        jsonLength += 23;          // ["*phenomenonTime*",
+        jsonLength += 29;          // ["*phenomenonTime*",
         jsonLength += _baseLogger->getValueStringAtI(i).length(); // *result*
         if (i == _baseLogger->getArrayVarCount() - 1) {
             jsonLength += 3;       // ]]}
@@ -107,7 +108,7 @@ void HydroServerPublisher::printSensorDataJSON(Stream* stream) {
             stream->print("]]}");
         }
         else {
-            stream->print("]]},")
+            stream->print("]]},");
         }
     }
     stream->print(']');
@@ -153,6 +154,8 @@ void HydroServerPublisher::begin(Logger&     baseLogger,
 int16_t HydroServerPublisher::publishData(Client* outClient) {
     // Create a buffer for the temporary portions of the request and response
     char     tempBuffer[37] = "";
+    char     jsonSizeBuffer[5] = "";
+    char     rxBuffer[3000];
     uint16_t did_respond    = 0;
 
     MS_DBG(F("Outgoing JSON size:"), calculateJsonSize());
@@ -185,10 +188,18 @@ int16_t HydroServerPublisher::publishData(Client* outClient) {
 
         if (bufferFree() < 26) printTxBuffer(outClient);
         snprintf(txBuffer + strlen(txBuffer),
-                 sizeof(txBuffer) - strlen(txBuffer), "%s",
-                 authorizationHeader);
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", authorizationHeader);
         snprintf(txBuffer + strlen(txBuffer),
                  sizeof(txBuffer) - strlen(txBuffer), "%s", _base64Authorization);
+
+        if (bufferFree() < 25) printTxBuffer(outClient);
+        snprintf(txBuffer + strlen(txBuffer),
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", contentLengthHeader);
+        
+        if (bufferFree() < 5) printTxBuffer(outClient);
+        itoa(calculateJsonSize(), jsonSizeBuffer, 10);
+        snprintf(txBuffer + strlen(txBuffer),
+                 sizeof(txBuffer) - strlen(txBuffer), "%s", jsonSizeBuffer);
 
         if (bufferFree() < 42) printTxBuffer(outClient);
         snprintf(txBuffer + strlen(txBuffer),
@@ -203,7 +214,7 @@ int16_t HydroServerPublisher::publishData(Client* outClient) {
 
             if (bufferFree() < 13) printTxBuffer(outClient);
             snprintf(txBuffer + strlen(txBuffer),
-                    sizeof(txBuffer) - strlen(txBuffer), "%s", dataStreamTag);
+                    sizeof(txBuffer) - strlen(txBuffer), "%s", datastreamTag);
 
             if (bufferFree() < 10) printTxBuffer(outClient);
             txBuffer[strlen(txBuffer)] = '{';
@@ -219,7 +230,13 @@ int16_t HydroServerPublisher::publishData(Client* outClient) {
                 sizeof(txBuffer) - strlen(txBuffer), "%s", tempBuffer);
 
             if (bufferFree() < 1) printTxBuffer(outClient);
-            txBuffer[strlen(txBuffer)] = "\"},";
+            txBuffer[strlen(txBuffer)] = '"';
+
+            if (bufferFree() < 1) printTxBuffer(outClient);
+            txBuffer[strlen(txBuffer)] = '}';
+
+            if (bufferFree() < 1) printTxBuffer(outClient);
+            txBuffer[strlen(txBuffer)] = ',';
 
             if (bufferFree() < 42) printTxBuffer(outClient);
             snprintf(txBuffer + strlen(txBuffer),
@@ -229,24 +246,39 @@ int16_t HydroServerPublisher::publishData(Client* outClient) {
             snprintf(txBuffer + strlen(txBuffer),
                 sizeof(txBuffer) - strlen(txBuffer), "%s", dataArrayTag);
 
-            if (bufferFree() < 3) printTxBuffer(outClient);
-            txBuffer[strlen(txBuffer)] = "[[\"";
+            if (bufferFree() < 1) printTxBuffer(outClient);
+            txBuffer[strlen(txBuffer)] = '[';
+
+            if (bufferFree() < 1) printTxBuffer(outClient);
+            txBuffer[strlen(txBuffer)] = '[';
+
+            if (bufferFree() < 1) printTxBuffer(outClient);
+            txBuffer[strlen(txBuffer)] = '"';
 
             if (bufferFree() < 37) printTxBuffer(outClient);
             Logger::formatDateTime_ISO8601(Logger::markedLocalEpochTime).toCharArray(tempBuffer, 37);
             snprintf(txBuffer + strlen(txBuffer),
                 sizeof(txBuffer) - strlen(txBuffer), "%s", tempBuffer);
 
-            if (bufferFree() < 2) printTxBuffer(outClient);
-            txBuffer[strlen(txBuffer)] = "\",";
+            if (bufferFree() < 1) printTxBuffer(outClient);
+            txBuffer[strlen(txBuffer)] = '"';
+
+            if (bufferFree() < 1) printTxBuffer(outClient);
+            txBuffer[strlen(txBuffer)] = ',';
 
             if (bufferFree() < 37) printTxBuffer(outClient);
             _baseLogger->getValueStringAtI(y).toCharArray(tempBuffer, 37);
             snprintf(txBuffer + strlen(txBuffer),
                 sizeof(txBuffer) - strlen(txBuffer), "%s", tempBuffer);
             
-            if (bufferFree() < 3) printTxBuffer(outClient);
-            txBuffer[strlen(txBuffer)] = "]]}";
+            if (bufferFree() < 1) printTxBuffer(outClient);
+            txBuffer[strlen(txBuffer)] = ']';
+
+            if (bufferFree() < 1) printTxBuffer(outClient);
+            txBuffer[strlen(txBuffer)] = ']';
+
+            if (bufferFree() < 1) printTxBuffer(outClient);
+            txBuffer[strlen(txBuffer)] = '}';
 
             // If this is not the last variable
             if (y != _baseLogger->getArrayVarCount() - 1) {
@@ -254,6 +286,9 @@ int16_t HydroServerPublisher::publishData(Client* outClient) {
                 txBuffer[strlen(txBuffer)] = ',';
             }
         }
+        //if (bufferFree() < 1) printTxBuffer(outClient);
+        //txBuffer[strlen(txBuffer)] = ',';
+
         if (bufferFree() < 1) printTxBuffer(outClient);
         txBuffer[strlen(txBuffer)] = ']';
 
@@ -262,14 +297,17 @@ int16_t HydroServerPublisher::publishData(Client* outClient) {
 
         // Wait 10 seconds for a response from the server
         uint32_t start = millis();
-        while ((millis() - start) < 10000L && outClient->available() < 12) {
-            delay(10);
-        }
+        while ((millis() - start) < 10000L) {
+                delay(10);
+            }
+        //while ((millis() - start) < 10000L && outClient->available() < 50) {  // 50 was 12
+        //    delay(10);
+        //}
 
         // Read only the first 12 characters of the response
         // We're only reading as far as the http code, anything beyond that
         // we don't care about.
-        did_respond = outClient->readBytes(tempBuffer, 12);
+        did_respond = outClient->readBytes(rxBuffer, 3000);
 
         // Close the TCP/IP connection
         MS_DBG(F("Stopping client"));
@@ -277,7 +315,7 @@ int16_t HydroServerPublisher::publishData(Client* outClient) {
         outClient->stop();
         MS_DBG(F("Client stopped after"), MS_PRINT_DEBUG_TIMER, F("ms"));
     } else {
-        PRINTOUT(F("\n -- Unable to Establish Connection to EnviroDIY Data "
+        PRINTOUT(F("\n -- Unable to Establish Connection to HydroServer Data "
                    "Portal --"));
     }
 
@@ -286,15 +324,21 @@ int16_t HydroServerPublisher::publishData(Client* outClient) {
     if (did_respond > 0) {
         char responseCode_char[4];
         for (uint8_t i = 0; i < 3; i++) {
-            responseCode_char[i] = tempBuffer[i + 9];
+            responseCode_char[i] = rxBuffer[i + 9];
         }
         responseCode = atoi(responseCode_char);
     } else {
         responseCode = 504;
     }
 
+
+
     PRINTOUT(F("-- Response Code --"));
     PRINTOUT(responseCode);
+    PRINTOUT(F("-- Full response --"));
+    bool rxMessageComplete = false;
+    PRINTOUT(rxBuffer);
+
 
     return responseCode;
 }

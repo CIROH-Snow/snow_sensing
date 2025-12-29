@@ -30,7 +30,7 @@
 #define SRC_PUBLISHERS_HYDROSERVERPUBLISHER_H_
 
 // Debugging Statement
-// #define MS_HYDROSERVERPUBLISHER_DEBUG
+#define MS_HYDROSERVERPUBLISHER_DEBUG
 
 #ifdef MS_HYDROSERVERPUBLISHER_DEBUG
 #define MS_DEBUGGING_STD "HydroServerPublisher"
@@ -229,10 +229,13 @@ class HydroServerPublisher : public dataPublisher {
     static const char* hydroServerHost;  ///< The host name
     static const int   hydroServerPort;  ///< The host port
     static const char* acceptHeader;    ///< The token header text
-    // static const char *cacheHeader;  ///< The cache header text
-    // static const char *connectionHeader;  ///< The keep alive header text
     static const char* authorizationHeader;  ///< The authorization header text
+    static const char* contentLengthHeader;
     static const char* contentTypeHeader;    ///< The content type header text
+    static const char* datastreamTag;
+    static const char* iotTag;
+    static const char* componentsTag;
+    static const char* dataArrayTag;
     /**@}*/
 
  private:
