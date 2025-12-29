@@ -89,10 +89,12 @@ int dataPublisher::bufferFree(void) {
 void dataPublisher::printTxBuffer(Stream* stream, bool addNewLine) {
 // Send the out buffer so far to the serial for debugging
 #if defined(STANDARD_SERIAL_OUTPUT)
+    MS_DBG(F("Writing to the serial monitor"));
     STANDARD_SERIAL_OUTPUT.write(txBuffer, strlen(txBuffer));
     if (addNewLine) { PRINTOUT('\n'); }
     STANDARD_SERIAL_OUTPUT.flush();
 #endif
+    MS_DBG(F("Writing to the client"));
     stream->write(txBuffer, strlen(txBuffer));
     if (addNewLine) { stream->print("\r\n"); }
     stream->flush();

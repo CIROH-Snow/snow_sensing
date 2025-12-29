@@ -15,7 +15,7 @@
 #define SRC_LOGGERBASE_H_
 
 // Debugging Statement
-// #define MS_LOGGERBASE_DEBUG
+#define MS_LOGGERBASE_DEBUG
 
 #ifdef MS_LOGGERBASE_DEBUG
 #define MS_DEBUGGING_STD "LoggerBase"

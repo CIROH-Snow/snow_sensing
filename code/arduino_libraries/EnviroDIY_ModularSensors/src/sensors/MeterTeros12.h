@@ -73,7 +73,7 @@
 #define SRC_SENSORS_METERTEROS12_H_
 
 // Debugging Statement
-// #define MS_MeterTeros12_DEBUG
+//#define MS_MeterTeros12_DEBUG
 
 #ifdef MS_METERTEROS12_DEBUG
 #define MS_DEBUGGING_STD "MeterTeros12"
@@ -132,7 +132,7 @@
 /**
  * @brief Decimals places in string representation; EA should have 1.
  */
-#define TEROS12_COUNT_RESOLUTION 1
+#define TEROS12_COUNT_RESOLUTION 0
 /// @brief Sensor variable number; EA is stored in sensorValues[0].
 #define TEROS12_COUNT_VAR_NUM 0
 /// @brief Variable name in

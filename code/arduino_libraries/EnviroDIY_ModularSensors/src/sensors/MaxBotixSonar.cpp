@@ -139,6 +139,16 @@ bool MaxBotixSonar::addSingleMeasurementResult(void) {
 
             delay(1000);
 
+            // Get through a bunch of readings as the sensor tends to get more precise the more readings it takes
+            for (int y = 0; y < 50; y++) {
+                if (_stream->available() > 3) {
+                    String trash = _stream->readStringUntil('\r');
+                }
+                
+                //_stream->read();
+                //_stream->parseInt();
+            }
+
             // Immediately ask for a result and let the stream timeout be our
             // "wait" for the measurement.
             result = static_cast<uint16_t>(_stream->parseInt());

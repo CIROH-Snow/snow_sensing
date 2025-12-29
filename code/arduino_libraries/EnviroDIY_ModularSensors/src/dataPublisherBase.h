@@ -21,7 +21,7 @@
 #define SRC_DATAPUBLISHERBASE_H_
 
 // Debugging Statement
-// #define MS_DATAPUBLISHERBASE_DEBUG
+#define MS_DATAPUBLISHERBASE_DEBUG
 
 #ifdef MS_DATAPUBLISHERBASE_DEBUG
 #define MS_DEBUGGING_STD "dataPublisherBase"
