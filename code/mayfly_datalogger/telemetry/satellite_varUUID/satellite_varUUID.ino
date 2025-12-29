@@ -1,31 +1,49 @@
-// This is the Mayfly sketch for the deployment of a snow station for the CIROH: Advaning Snow Observations project.
-
 /** =========================================================================
- * @file satellite_station.ino
- * @brief Arduino code for the Advancing Snow Observations CIROH project
+ * Example: satellite_varUUID.ino
+ * Description: This is the Mayfly sketch for the deployment of a satellite
+ *              snow sensing station using UUIDs.
  *
- * @author Braedon Dority <braedon.dority@usu.edu>
- * @author Jeff Horsburgh <jeff.horsburgh@usu.edu>
- * @copyright (c) 2017-2022 Utah Water Research Laboratory (UWRL)
- *            This example is published under the BSD-3 license.
+ * *
+ * Author: Braedon Dority <braedon.dority@usu.edu>
+ * Author: Jeff Horsburgh <jeff.horsburgh@usu.edu>
+ * 
+ * Copyright (c) 2025 Utah State University
+ * 
+ * License: This example is published under the BSD-3 open source license.
  *
- * Build Environment: Visual Studios Code with PlatformIO
- * Hardware Platform: EnviroDIY Mayfly Arduino Datalogger
+ * Build Environment: Arduino IDE Version 1.8.19
+ * Hardware Platform: EnviroDIY Mayfly Arduino Datalogger V1.1
  *
- * DISCLAIMER:
- * THIS CODE IS PROVIDED "AS IS" - NO WARRANTY IS GIVEN.
+ * DISCLAIMER: THIS CODE IS PROVIDED "AS IS" - NO WARRANTY IS GIVEN.
  *
- * ACKNOWLEDGEMENTS:
- * Thank you to the Stroud Water Research Center for developing the foundation
- * to this code. This sketch is based on the examples made from their modular
- * sensors library. The work of Sarah Damiano and Shannon Hicks made this
- * possible.
+ * ACKNOWLEDGEMENTS: Thank you to the Stroud Water Research Center for 
+ * developing the foundation to this code. This sketch is based on the 
+ * examples made from their modular sensors library. The work of Sarah 
+ * Damiano and Shannon Hicks made this possible.
+ * 
+ * NOTE ABOUT UUIDs IN THIS CODE: This example code uses a modified 
+ * version of the EnviroDIY Modular Sensors library. We added a 
+ * HydroServer publisher to the Modular Sensors library to enable this
+ * sketch to work with a base station that posts data to an instance of
+ * HydroServer using HTTP POST requests. A playground version of 
+ * HydroServer is available for development and testing at 
+ * https://playground.hydroserver.org. HydroServer uses UUIDs to identify 
+ * specific datastreams so that Mayfly dataloggers can send data directly 
+ * to HydroServer using telemetry. Each observed variable uses a unique 
+ * UUID that is assigned by HydroServer to identify its datastream (the 
+ * time series of data for that variable). To use this sketch, you need 
+ * to create a monitoring site in HydroServer and add a datastream to the 
+ * monitoring site for each variable measured by the snow sensing station. 
+ * HydroServer will assign UUIDs for each observed variable datastream. 
+ * You need to copy those UUIDs into this sketch. This example sketch uses 
+ * a placeholder UUID wherever a UUID from HydroServer is required. You 
+ * need to change those UUIDs to use the ones assigned by HydroServer for 
+ * your datastreams.
  * ======================================================================= */
 
 // ==========================================================================
-//  Include the libraries required for the data logger
+// Include the libraries required for the data logger
 // ==========================================================================
-/** Start [includes] */
 // The Arduino library is needed for every Arduino program.
 #include <Arduino.h>
 
@@ -44,115 +62,102 @@
 // We can create a serial port on one of the digital pins using this software
 #include <AltSoftSerial.h> 
 
-/** End [includes] */
 
 // ==========================================================================
-//  Defines for the Arduino IDE
-//  NOTE:  These are ONLY needed to compile with the Arduino IDE.
-//         If you use PlatformIO, you should set these build flags in your
-//         platformio.ini
+// Defines for the Arduino IDE
 // ==========================================================================
-/** Start [defines] */
 // We need to tell the Mayfly where the XBee's asyncronous sleep pin is connected to it
 #define xbeeSleepPin 23
 
 // The pin that controls power supply to the XBee modules
 #define xbeeRegulatorPin 18
 
-// This pin will interface the Adafruit power relay for the Apogee sensors' heaters with the Mayfly
-// Make sure your power relay's grove port is connected to the Mayfly's grove port that includes the
-// digital pin defined here
+// This pin will interface the Adafruit power relay for the Apogee sensors' 
+// heaters with the Mayfly. Make sure your power relay's grove port is 
+// connected to the Mayfly's grove port that includes the digital pin defined here
 #define powerRelayPin 10
-/** End [defines] */
+
 
 // ==========================================================================
-//  Data Logging Options
+// Data Logging Options
 // ==========================================================================
-/** Start [logging_options] */
 // The name of this program file
-const char* sketchName = "satellite_station.ino";
+const char* sketchName = "satellite_varUUID.ino";
 
-// Logger ID, also becomes the prefix for the name of the data file on SD card
-// This can be found on the bottom of the Mayfly if the ink hasn't rubbed off.
-// Sometimes I just use the name I've given the site here instead of the serial number.
-// Make sure it is a string (in double quotations).
-const char* LoggerID = "conifers";
+// Assign an ID for your datalogger. This becomes the prefix for the name of the 
+// data file on SD card. Normally use the name of the site at which the 
+// datalogger is installed. Make sure it is a string (in double quotations).
+const char* LoggerID = "sitename";
 
-// How frequently (in minutes) to log data
+// Set the frequency with which data will be logged (in minutes)
 const uint8_t loggingInterval = 60;
 
-// Your logger's timezone.
+// Set your datalogger's timezone as an integer offset from UTC time.
+// NOTE:  Daylight savings time will not be applied!  Please use standard time! 
 const int8_t timeZone = -7;  // Mountain Standard Time is -7
-// NOTE:  Daylight savings time will not be applied!  Please use standard time!
 
 // Set the input and output pins for the logger
 // NOTE:  Use -1 for pins that do not apply
-const int32_t serialBaud = 9600;  // Baud rate for debugging (this is what you'll set your serial monitor's baud rate to)
-const int8_t  greenLED   = 8;       // Pin for the green LED (don't change)
-const int8_t  redLED     = 9;       // Pin for the red LED (don't change)
-const int8_t  buttonPin  = 21;      // Pin for debugging mode (ie, button pin, don't change)
-const int8_t  wakePin    = 31;  // MCU interrupt/alarm pin to wake from sleep (don't change)
-
-// The following is just some information if you are using an older Mayfly version (0.x)
-// Mayfly 0.x D31 = A7
-// Set the wake pin to -1 if you do not want the main processor to sleep.
-// In a SAMD system where you are using the built-in rtc, set wakePin to 1
-
-
-const int8_t sdCardPwrPin   = -1;  // MCU SD card power pin (don't change)
-const int8_t sdCardSSPin    = 12;  // SD card chip select/slave select pin (don't change)
-const int8_t sensorPowerPin = 22;  // MCU pin controlling main sensor power
-								   // Pin 22 is switched power, which can be 3.3V, 5V, or 12V
-								   // depending on where you connect your sensors on the board
-								   // and if you adjust the jumper headers (see wiring instructions
-								   // in the GitHub repository in snow_sensing > hardware)
-/** End [logging_options] */
+// Baud rate for debugging (this is what you'll set your serial monitor's baud rate to)
+const int32_t serialBaud = 9600;
+// Pin for the green LED (don't change)
+const int8_t  greenLED   = 8;
+// Pin for the red LED (don't change)
+const int8_t  redLED     = 9;
+// Pin for debugging mode (ie, button pin, don't change)
+const int8_t  buttonPin  = 21;
+// MCU interrupt/alarm pin to wake from sleep (don't change)
+const int8_t  wakePin    = 31;
+// MCU SD card power pin (don't change)
+const int8_t sdCardPwrPin   = -1;
+// SD card chip select/slave select pin (don't change)
+const int8_t sdCardSSPin    = 12;
+// MCU pin controlling main sensor power
+const int8_t sensorPowerPin = 22;
+// Pin 22 is switched power, which can be 3.3V, 5V, or 12V depending on where 
+// you connect your sensors on the board and if you adjust the jumper headers 
+// (see wiring instructions in the GitHub repository in snow_sensing > hardware)
 
 
 // ==========================================================================
-//  Using the Processor as a Sensor
+// Using the Processor as a Sensor
 // ==========================================================================
-// Generally do not adjust this section unless you are not using version 1.1 for your Mayfly
-/** Start [processor_sensor] */
+// Generally do not adjust this section unless you are NOT using Version 1.1 
+// of the Mayfly datalogger
 #include <sensors/ProcessorStats.h>
 
 // Create the main processor chip "sensor" - for general metadata
-const char*    mcuBoardVersion = "v1.1";  // If your board is a different version, change this value
+// If your board is a different version, change this value
+const char*    mcuBoardVersion = "v1.1";
 ProcessorStats mcuBoard(mcuBoardVersion);
-/** End [processor_sensor] */
 
 
 // ==========================================================================
-//  Maxim DS3231 RTC (Real Time Clock)
+// Maxim DS3231 RTC (Real Time Clock)
 // ==========================================================================
 // Do not change this section
-/** Start [ds3231] */
 #include <sensors/MaximDS3231.h>  // Includes wrapper functions for Maxim DS3231 RTC
 
 // Create a DS3231 sensor object, using this constructor function:
 MaximDS3231 ds3231(1);
-/** End [ds3231] */
 
 
+// The next few sections contain the declarations for each sensor. Pay 
+// attention to where edits need to be made. If there is a sensor you are not 
+// using, you can simply delete the corresponding section, but make sure to 
+// also delete its associated variables in the variable list found after these.
 
-
-
-// The next few sections contain the declarations for each sensor. Pay attention
-// to where edits need to be made. If there is a sensor you are not using, you can simply
-// delete the corresponding section, but make sure to also delete its associated variables
-// in the variable list found after these.
 
 // ==========================================================================
-//    Battery voltage
+// Battery voltage
 // ==========================================================================
 /*
-This is for measuring battery voltage using the Adafruit ADS1115 16-bit
-Analog-to-digital converters (ADCs). The ADCs can only read voltages within
-+/- 4.096 volts, so a voltage divider set up is needed. Please consult the wiring
-guide on the CIROH: Advancing Snow Observations GitHub page before including this
-measurement; otherwise, it is best to remove it
+ * This is for measuring battery voltage using the Adafruit ADS1115 16-bit
+ * Analog-to-digital converters (ADCs). The ADCs can only read voltages 
+ * within +/- 4.096 volts, so a voltage divider set up is needed. Please 
+ * consult the wiring guide on the GitHub page before including this 
+ * measurement; otherwise, it is best to remove it
 */
-
 # include <Adafruit_ADS1015.h>
 
 float calculateBatteryVoltage(void) {
@@ -178,9 +183,9 @@ float calculateBatteryVoltage(void) {
 
 // The number of digits after the decimal place
 const uint8_t calculatedBatteryVoltageResolution = 2;
-// Variable name (this must be a value from http://vocabulary.odm2.org/variablename/)
+// Variable name (must be a value from http://vocabulary.odm2.org/variablename/)
 const char* calculatedBatteryVoltageName = "BatteryVoltage";
-// Variable units (this must be a value from http://vocabulary.odm2.org/units/)
+// Variable units (must be a value from http://vocabulary.odm2.org/units/)
 const char* calculatedBatteryVoltageUnit = "V";
 // A short code for the variable
 const char* calculatedBatteryVoltageCode = "MayflyBattVolt";
@@ -191,10 +196,8 @@ Variable* calculatedBatteryVoltage = new Variable(
     calculateBatteryVoltage, calculatedBatteryVoltageResolution, calculatedBatteryVoltageName,
     calculatedBatteryVoltageUnit, calculatedBatteryVoltageCode, calculatedBatteryVoltageUUID);
 
-// That's the end of the code for the battery voltage
-
 // ==========================================================================
-//    MaxBotix sonar sensor for snow depth
+// MaxBotix sonar sensor for snow depth
 // ==========================================================================
 #include <sensors/MaxBotixSonar.h>
 
@@ -233,15 +236,19 @@ Variable* sonarRange =
 
 // This function calculates the depth of snow
 float calculateSnowDepth(void) {
-    float calculatedResult = -9999;  // This should be what you want your error values to equal
-    float inputVar1 = sonarHeight;  // The first variable input is the sonar height
-    float inputVar2 = sonarRange->getValue();  // The second variable input is the sonar range measured
-    // make sure both inputs are good
+    // Set a NoData value for reporting errors
+    float calculatedResult = -9999;
+    // The first variable input is the sonar height
+    float inputVar1 = sonarHeight;
+    // The second variable input is the sonar range measured
+    float inputVar2 = sonarRange->getValue();
+    // Make sure both inputs are good
     // A reading of 5000 is an error for the sensor as well
-    // It may seem odd to check if the first input variable isn't -9999 because it is just the sonar height we entered,
-    // but for the sake of consistency it is included
+    // It may seem odd to check if the first input variable isn't -9999 because it is 
+    // just the sonar height we entered, but for the sake of consistency it is included
     if (inputVar1 != -9999 && inputVar2 != -9999 && inputVar2 != 5000) {
-      calculatedResult = (inputVar1 - inputVar2) / cos(slopeAngleRad);  // The snow depth is the height of the sensor minus the sonar's range measurement
+      // The snow depth is the height of the sensor minus the sonar's range measurement
+      calculatedResult = (inputVar1 - inputVar2) / cos(slopeAngleRad);  
     }
     return calculatedResult;
 }
@@ -250,9 +257,9 @@ float calculateSnowDepth(void) {
 
 // The number of digits after the decimal place
 const uint8_t calculatedSnowDepthResolution = 0;
-// Variable name (this must be a value from http://vocabulary.odm2.org/variablename/)
+// Variable name (must be a value from http://vocabulary.odm2.org/variablename/)
 const char* calculatedSnowDepthName = "Snow Depth";
-// Variable units (this must be a value from http://vocabulary.odm2.org/units/)
+// Variable units (must be a value from http://vocabulary.odm2.org/units/)
 const char* calculatedSnowDepthUnit = "mm";
 // A short code for the variable
 const char* calculatedSnowDepthCode = "snowDepth";
@@ -262,13 +269,6 @@ const char* calculatedSnowDepthUUID = "12345678-abcd-1234-ef00-1234567890ab";
 Variable* calculatedSnowDepth = new Variable(
     calculateSnowDepth, calculatedSnowDepthResolution, calculatedSnowDepthName,
     calculatedSnowDepthUnit, calculatedSnowDepthCode, calculatedSnowDepthUUID);
-
-// That's the end of the code for the MaxBotix sonar
-
-
-
-
-
 
 
 /* ** IMPORTANT ** 
@@ -285,8 +285,9 @@ the address of the ADC you need to connect to:
 0x4A ADDR jumpered to SDA
 */
 
+
 // ==========================================================================
-//    Apogee SP-510-SS for incoming shortwave radiation
+// Apogee SP-510-SS for incoming shortwave radiation
 // ==========================================================================
 // There is wiring listed in this section for both an SP-710 implementation, 
 // which has both the upward and downward pyranometers together, and the stand-
@@ -306,13 +307,14 @@ the address of the ADC you need to connect to:
   YELLOW  -> V12+ (POWER RELAY COM)
   BLUE    -> V12- (BATTERY GROUND)
   CLEAR   -> V12- (BATTERY GROUND)
-  
 */
 
+// Set the calibration factor for the SP-510
 float sp510calibFactor = 21.89;
 
 // Construct the Apogee SP-510-SS sensor object
-ApogeeSP510 sp510(-1, sp510calibFactor, 0x48, 3);  // The -1 indicates that there is no powering up necessary for measurement 
+// The -1 indicates that there is no powering up necessary for measurement 
+ApogeeSP510 sp510(-1, sp510calibFactor, 0x48, 3);
 
 // Construct the variable for the differential voltage measurement
 Variable* sp510volts =
@@ -324,7 +326,7 @@ Variable* sp510rad =
 
 
 // ==========================================================================
-//    Apogee SP-610-SS for outgoing shortwave radiation
+// Apogee SP-610-SS for outgoing shortwave radiation
 // ==========================================================================
 #include <sensors/ApogeeSP610.h>
 
@@ -341,6 +343,7 @@ Variable* sp510rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
+// Set the calibration factor for the SP-610
 float sp610calibFactor = 31.90;
 
 // Construct the Apogee SP-610-SS sensor object
@@ -356,7 +359,7 @@ Variable* sp610rad =
 
 
 // ==========================================================================
-//    Apogee SL-510-SS for incoming longwave radiation
+// Apogee SL-510-SS for incoming longwave radiation
 // ==========================================================================
 #include <sensors/ApogeeSL510.h>
 
@@ -370,12 +373,15 @@ Variable* sp610rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
+// Set k1 and k2 factors for the SL-510
 float sl510k1 = 9.229;
 float sl510k2 = 1.044;
 
 // Construct the Apogee SL-510-SS sensor object
-// The only parameter you should adjust is how many measurements you want to take (last parameter)
-ApogeeSL510 sl510(sensorPowerPin, sl510k1, sl510k2, 1, 0x49, 0x4A, 3);  // Note that this sensor is not attached to the Mayfly's ADC pins (0x48)
+// The only parameter you should adjust is how many measurements you 
+// want to take (last parameter)
+// Note that this sensor is not attached to the Mayfly's ADC pins (0x48)
+ApogeeSL510 sl510(sensorPowerPin, sl510k1, sl510k2, 1, 0x49, 0x4A, 3);
 
 // Construct the variable for the thermistor voltage
 Variable* sl510thermistorVolts =
@@ -391,7 +397,7 @@ Variable* sl510rad =
 
 
 // ==========================================================================
-//    Apogee SL-610-SS for incoming longwave radiation
+// Apogee SL-610-SS for incoming longwave radiation
 // ==========================================================================
 #include <sensors/ApogeeSL610.h>
 
@@ -405,12 +411,15 @@ Variable* sl510rad =
   CLEAR   -> V12- (BATTERY GROUND)
 */
 
+// Set the k1 and k2 factors for the SL-610
 float sl610k1 = 9.181;
 float sl610k2 = 1.018;
 
 // Construct the Apogee SL-610-SS sensor object
-// The only parameter you should adjust is how many measurements you want to take (last parameter)
-ApogeeSL610 sl610(sensorPowerPin, sl610k1, sl610k2, 2, 0x49, 0x4A, 3);  // Note that this sensor is not attached to the Mayfly's ADC pins (0x48)
+// The only parameter you should adjust is how many measurements you 
+// want to take (last parameter)
+// Note that this sensor is not attached to the Mayfly's ADC pins (0x48)
+ApogeeSL610 sl610(sensorPowerPin, sl610k1, sl610k2, 2, 0x49, 0x4A, 3);
 
 // Construct the variable for the thermistor voltage
 Variable* sl610thermistorVolts =
@@ -426,13 +435,14 @@ Variable* sl610rad =
 
 
 // ==========================================================================
-//    METER Teros 12 Soil Moisture Sensors
+// METER Teros 12 Soil Moisture Sensors
 // ==========================================================================
 #include <sensors/MeterTeros12.h>
 
 // Set the addresses of each of the sensors
 // Make sure this matches what you programmed them to be
-// Change the addresses given in the single quotes ('') if you did not follow this same naming schema
+// Change the addresses given in the single quotes ('') if you did not follow 
+// this same naming schema
 char add1 = 'a';  // Address 1 at 2" depth
 char add2 = 'b';  // Address 2 at 8" depth
 char add3 = 'c';  // Address 3 at 20" depth
@@ -481,7 +491,7 @@ Variable* ec3 =
     new MeterTeros12_EC(&probe3, "12345678-abcd-1234-ef00-1234567890ab", "soilEC_20in");
 
 // ==========================================================================
-//    Apogee ST-110-SS for Air Temperature
+// Apogee ST-110-SS for Air Temperature
 // ==========================================================================
 #include <sensors/ApogeeST110.h>
 
@@ -507,21 +517,11 @@ Variable* st110airTemp =
 // ==========================================================================
 //    Variable List
 // ==========================================================================
-
-/*
-This list of variables is what the program will cycle through when determining what to collect.
-Note that I commented out two variables that are measurements from the Mayfly itself.
-I personally didn't see the utility in collecting these variables, but if you would like them
-you may remove the comment signage. Just note that the battery measurement is meaningless for
-the CIROH project implementation because we are not connnecting the battery through the Mayfly's
-LiPo ports. If you do decide to include these variables, make sure to uncomment the UUIDs in the 
-next list as well.
-*/
+// This list of variables is what the program will cycle through when 
+// determining what data to collect.
 
 Variable* variableList[] = {
     new ProcessorStats_SampleNumber(&mcuBoard),
-    //new ProcessorStats_FreeRam(&mcuBoard),
-    //new ProcessorStats_Battery(&mcuBoard), 
     new MaximDS3231_Temp(&ds3231),
     sp510volts,
     sp510rad,
@@ -552,17 +552,11 @@ Variable* variableList[] = {
     st110airTemp,
     sonarRange,
     calculatedSnowDepth,
-    //calculatedBatteryVoltage
-    // Additional sensor variables can be added here, by copying the syntax
-    //   for creating the variable pointer (FORM1) from the
-    //   `menu_a_la_carte.ino` example
-    // The example code snippets in the wiki are primarily FORM2.
 };
 
+//  The number of UUID's must match the number of variables!
 const char* UUIDs[] = {
     "12345678-abcd-1234-ef00-1234567890ab",
-    //"12345678-abcd-1234-ef00-1234567890ab",
-    //"12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
@@ -592,8 +586,6 @@ const char* UUIDs[] = {
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
     "12345678-abcd-1234-ef00-1234567890ab",
-    //"12345678-abcd-1234-ef00-1234567890ab",
-    //  ... The number of UUID's must match the number of variables!
     "12345678-abcd-1234-ef00-1234567890ab",
 };
 
@@ -602,26 +594,23 @@ uint8_t variableCount = sizeof(variableList) / sizeof(variableList[0]);
 
 // Create the VariableArray object
 VariableArray varArray(variableCount, variableList);
-/** End [variable_arrays] */
 
 
 // ==========================================================================
-//  The Logger Object[s]
+// The Logger Object[s]
 // ==========================================================================
-/** Start [loggers] */
 // Create a logger instance
 Logger dataLogger;
-/** End [loggers] */
 
 
 // ==========================================================================
-//  Working Functions
+// Working Functions
 // ==========================================================================
-/** Start [working_functions] */
-// Flashes the LED's on the primary board
-// The EnviroDIY community created this function. It can be useful for debugging,
-// such as when you want to monitor the board while it runs, you can stick this function
-// in where you want to check if the datalogger ever made it to that section of the program
+// Flashes the LEDs on the primary board
+// The EnviroDIY community created this function. It can be useful for 
+// debugging, such as when you want to monitor the board while it runs, you 
+// can stick this function in where you want to check if the datalogger ever 
+// made it to that section of the program
 void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
     for (uint8_t i = 0; i < numFlash; i++) {
         digitalWrite(greenLED, HIGH);
@@ -634,14 +623,10 @@ void greenredflash(uint8_t numFlash = 4, uint8_t rate = 75) {
     digitalWrite(redLED, LOW);
 }
 
-/** End [working_functions] */
-
 
 // ==========================================================================
-//  Radio Communications
+// Radio Communications
 // ==========================================================================
-/** Start [radio_communications] */
-
 /*
 The following section goes through the setup of using XBee S3B radio modules for
 networking multiple satellite stations together. If you do not wish to set up
@@ -656,18 +641,20 @@ const int xbeeBaud = 9600;
 // If you will, set the boolean variable to true; if not, set it to false;
 const bool networking = true;
 
-/*This is the serial number of the XBee S3B module that will act as the central station
-that is interfacing with your Campbell Scientific datalogger. To properly program it into
-this sketch, it needs to be broken up into its component bytes. This just means taking two
-characters at a time from the serial address and putting those together as a hexidecimal.
-Hexidecimals are designated in Arduino with an "0x" to start followed by the two-character number.
+/*This is the serial number of the XBee S3B module that will act as the base station
+ * that is interfacing with your Internet-connected datalogger. To properly program it into
+ * this sketch, it needs to be broken up into its component bytes. This just means taking two
+ * characters at a time from the serial address and putting those together as a hexidecimal.
+ * Hexidecimals are designated in Arduino with an "0x" to start followed by the two-character
+ * number.
 */
-byte highAddress[] = {0x00, 0x13, 0xA2, 0x00, 0x42, 0x2F, 0xE2, 0x12};  // This
-                            // is the 64-bit destination address of the central XBee module
+// This is the 64-bit address of the base station destination XBee module
+byte highAddress[] = {0x00, 0x13, 0xA2, 0x00, 0x42, 0x2F, 0xE2, 0x12};  
 							
 // The low address is not something we need to adjust, as we don't need that level of subcategorization
 // Nevertheless, a low address is needed for the modules to operate, so leave it as the default: FFFE
-byte lowAddress[] = {0xFF, 0xFE};  // 16-bit destination address using FF FE if the address is unknown
+// 16-bit destination address using FF FE if the address is unknown
+byte lowAddress[] = {0xFF, 0xFE};
 
 // This is one of the two responses the satellite station can send back to the central station after the 
 // central station sends its initial contact message each logging interval
@@ -826,12 +813,10 @@ void transmitByte(uint8_t byteMessage, byte frameID, byte broadcastRadius, byte 
   Serial1.write(byte(checksumByte(byteMessage, frameID, broadcastRadius, options)));
 }
 
-/** End [radio_communications] */
 
 // ==========================================================================
-//  Arduino Setup Function
+// Arduino Setup Function
 // ==========================================================================
-/** Start [setup] */
 // This function always runs first after the Mayfly/Arduino is powered up,
 // and only runs once
 void setup() {
@@ -845,17 +830,25 @@ void setup() {
 
   // Setup XBee
   if (networking) {
-	pinMode(xbeeRegulatorPin, OUTPUT);
-	pinMode(xbeeSleepPin, OUTPUT);
-	digitalWrite(xbeeRegulatorPin, HIGH);  // Supply power to the XBee regulator
-	Serial1.begin(xbeeBaud);  // Begin UART-1 communication
-	digitalWrite(xbeeSleepPin, LOW);  // Waking up the XBee momentarily to clear out anything that could potentially be in the buffer
-	memset(rx, 0x00, sizeof(rx));  // Clear out the buffer where we'll store incoming data from the XBee on the Mayfly
-	delay(100);
-	int count = Serial1.available();  // Count up the bytes waiting to come in
-	Serial1.readBytes(rx, count);  // Read in that many bytes
-	memset(rx, 0x00, sizeof(rx));  // Erase them
-	digitalWrite(xbeeSleepPin, HIGH);  // Put the XBee back to sleep
+    pinMode(xbeeRegulatorPin, OUTPUT);
+	  pinMode(xbeeSleepPin, OUTPUT);
+    // Supply power to the XBee regulator
+	  digitalWrite(xbeeRegulatorPin, HIGH);
+    // Begin UART-1 communication
+	  Serial1.begin(xbeeBaud);
+    // Waking up the XBee momentarily to clear out anything that could potentially be in the buffer
+	  digitalWrite(xbeeSleepPin, LOW);
+    // Clear out the buffer where we'll store incoming data from the XBee on the Mayfly
+	  memset(rx, 0x00, sizeof(rx));
+	  delay(100);
+    // Count up the bytes waiting to come in
+	  int count = Serial1.available();
+    // Read in that many bytes
+	  Serial1.readBytes(rx, count);
+    // Erase them  
+	  memset(rx, 0x00, sizeof(rx));
+    // Put the XBee back to sleep
+	  digitalWrite(xbeeSleepPin, HIGH);
   }
 
   // Print a start-up note to the main serial port
@@ -868,7 +861,7 @@ void setup() {
   Serial.print(F("Using ModularSensors Library version "));
   Serial.println(MODULAR_SENSORS_VERSION);
 
-  // Set up pins for the LED's
+  // Set up pins for the LEDs
   pinMode(greenLED, OUTPUT);
   digitalWrite(greenLED, LOW);
   pinMode(redLED, OUTPUT);
@@ -905,17 +898,13 @@ void setup() {
   // Begin the MaxBotix's serial communication
   sonarSerial.begin(9600);
 }
-/** End [setup] */
 
 
 // ==========================================================================
-//  Arduino Loop Function
+// Arduino Loop Function
 // ==========================================================================
-/** Start [loop] */
-
 // This function continuously runs until the Arduino/Mayfly is no longer powered
 void loop() {
-
   /*
   Check if it is time to power up the Apogee radiometer heaters
   You can change how long before the logging interval you turn them on by changing
@@ -924,12 +913,16 @@ void loop() {
   (45 min * 60 sec/min). If you want them to turn on at the 15-minute mark, for example,
   set it equal to 15 min * 60 sec/min = 900
   */
-  if (dataLogger.getNowLocalEpoch() % (loggingInterval * 60) == 2400) {  // Check if we are on the 45th minute (2700 seconds into the interval)
-    digitalWrite(22, HIGH);  // Power up the power relay (pin 22 is the Mayfly's switched power output)
+  // Check if we are on the 45th minute (2700 seconds into the interval)
+  if (dataLogger.getNowLocalEpoch() % (loggingInterval * 60) == 2400) {  
+    // Power up the power relay (pin 22 is the Mayfly's switched power output)
+    digitalWrite(22, HIGH);  
     delay(1000);
-    digitalWrite(powerRelayPin, HIGH);  // Set the signal pin high (to close the circuit, the relay is waiting for a signal drop)
+    // Set the signal pin high (to close the circuit, the relay is waiting for a signal drop)
+    digitalWrite(powerRelayPin, HIGH);
     delay(1000);
-    digitalWrite(powerRelayPin, LOW);  // Let the relay know it is good to close the circuit by dropping the pin to low
+    // Let the relay know it is good to close the circuit by dropping the pin to low
+    digitalWrite(powerRelayPin, LOW);
     digitalWrite(22, LOW);  // Turn off switched power
   }
   
@@ -937,8 +930,8 @@ void loop() {
   if (previousEpoch != dataLogger.markedLocalEpochTime) {  // If they are different
     previousEpoch = dataLogger.markedLocalEpochTime;  // then update to the latest logging time
   }
-
-  dataLogger.logData();  // During logData, the marked time will update when a new measurement is taken
+  // During logData, the marked time will update when a new measurement is taken
+  dataLogger.logData();  
   
   /*
   This is where radio communications will come into play.
@@ -947,27 +940,40 @@ void loop() {
   We will then verify if you even want to do networking in the first place. This should
   have been declared up in the Radio Communications section.
   */
-  if (previousEpoch != dataLogger.markedLocalEpochTime && networking) {  // If conditions are right for radio communication
-    digitalWrite(redLED, HIGH);  // Turn on the red LED. This is just a nice visual aid when monitoring these loggers to let you know they have started radio communications
+  // If conditions are right for radio communication
+  if (previousEpoch != dataLogger.markedLocalEpochTime && networking) {  
+    // Turn on the red LED. This is just a nice visual aid when monitoring
+    // these loggers to let you know they have started radio communications
+    digitalWrite(redLED, HIGH);
     digitalWrite(xbeeSleepPin, LOW);  // Wake the XBee up
     delay(100);
     
-	// These variables will help housekeep
+	  // These variables will help housekeep
     uint8_t varCount;
     uint8_t varNum;
 
-    // Clear out the Mayfly's buffer upon wake up in case the XBee has sent any rogue or unanticipated messages upon power up
-    uint8_t wakeUpCount = Serial1.available();  // Count how many bytes are waiting to be read into the buffer
-    Serial1.readBytes(rx, wakeUpCount);  // Read the bytes into the buffer
-    memset(rx, 0x00, sizeof(rx));  // Clear out where we just stored those bytes by setting everything to zero
+    // Clear out the Mayfly's buffer upon wake up in case the XBee has sent 
+    // any rogue or unanticipated messages upon power up
+    // Count how many bytes are waiting to be read into the buffer
+    uint8_t wakeUpCount = Serial1.available();
+    // Read the bytes into the buffer
+    Serial1.readBytes(rx, wakeUpCount);
+    // Clear out where we just stored those bytes by setting everything to zero
+    memset(rx, 0x00, sizeof(rx));  
 
-    bool hostReady = false;  // Assume the host station (central station where all data is aggregated) is not ready to get data
-    bool heardNothing = false;  // Assume we have heard something from the XBee. This will change shortly if we really don't hear anything
+    // Assume the host station (central station where all data is aggregated) 
+    // is not ready to get data
+    bool hostReady = false;
+    // Assume we have heard something from the XBee. This will change shortly
+    // if we really don't hear anything
+    bool heardNothing = false;  
 	
     uint32_t starttime = dataLogger.getNowLocalEpoch();  // Start a timer
 
-    while (Serial1.available() == 0) {  // Stay in this loop until more bytes enter the buffer from the XBee
-      if (dataLogger.getNowLocalEpoch() - starttime > 600) {  // If we've waited for at least ten minutes (600 seconds)
+    // Stay in this loop until more bytes enter the buffer from the XBee
+    while (Serial1.available() == 0) {
+      // If we've waited for at least ten minutes (600 seconds)
+      if (dataLogger.getNowLocalEpoch() - starttime > 600) {  
         heardNothing = true;  // then we haven't heard anything
         break;  // Leave the loop
       } 
@@ -991,12 +997,15 @@ void loop() {
 	  
       if (hostReady) {  // If the host station is ready for the data
         greenredflash(10);  // Give a visual cue
-		
-        bool timeRequested = false;  // Assume a timestamp has not been requested by the host station
+
+        // Assume a timestamp has not been requested by the host station
+        bool timeRequested = false;  
         
         uint32_t starttime = dataLogger.getNowLocalEpoch();  // Set a timer
-        while (Serial1.available() == 0) {  // Wait for a message from the XBee
-          if (dataLogger.getNowLocalEpoch() - starttime > 60) {  // If we wait more than a minute for a message
+        // Wait for a message from the XBee
+        while (Serial1.available() == 0) {
+          // If we wait more than a minute for a message
+          if (dataLogger.getNowLocalEpoch() - starttime > 60) {
             break;  // Leave the while loop
           }
         }
@@ -1005,7 +1014,8 @@ void loop() {
 		
         if (Serial1.available() != 0) {  // If something came through
           Serial1.readBytes(rx, Serial1.available());  // Read the bytes in
-          if (rx[3] == 0x90 && rx[15] == 0x54) {  // Check if it was a receive packet (3rd byte is 0x90) and that the message is 'T' (0x54)
+          // Check if it was a receive packet (3rd byte is 0x90) and that the message is 'T' (0x54)
+          if (rx[3] == 0x90 && rx[15] == 0x54) {
             timeRequested = true;  // If so, a timestamp has been requested
           }
         }
@@ -1015,28 +1025,35 @@ void loop() {
 		  
 		      // Retrieve the datetime from the datalogger and store it in the String we just made
           dataLogger.dtFromEpoch(dataLogger.markedLocalEpochTime).addToString(datetime);
-		  
-          char timestamp[datetime.length() + 1];  // Create a string variable that is compatible with transmit requests
-          datetime.toCharArray(timestamp, sizeof(timestamp));  // Turn the timestamp String object into a string of characters
-          transmitString(timestamp, sizeof(timestamp), 0x00, 0x00, 0x00);  // Send the timestamp to the host   
+
+          // Create a string variable that is compatible with transmit requests
+          char timestamp[datetime.length() + 1];
+          // Turn the timestamp String object into a string of characters
+          datetime.toCharArray(timestamp, sizeof(timestamp));
+          // Send the timestamp to the host
+          transmitString(timestamp, sizeof(timestamp), 0x00, 0x00, 0x00);   
         }
 		
         memset(rx, 0x00, sizeof(rx));  // Clear out the buffer
 
-        bool varCountRequested = false;  // Assume the host station has not requested a variable count
+        // Assume the host station has not requested a variable count
+        bool varCountRequested = false;
 		
         starttime = dataLogger.getNowLocalEpoch();  // Start a timer
         while (Serial1.available() == 0) {  // Wait for a message
-          if (dataLogger.getNowLocalEpoch() - starttime > 60) {  // If we waited more than a minute
+          // If we waited more than a minute
+          if (dataLogger.getNowLocalEpoch() - starttime > 60) {  
             break;  // Then break the while loop
           }
         }
 		
         delay(100);  // Give a chance for all bytes to come in if something was received
-		
-        if (Serial1.available() != 0 && timeRequested) {  // If something came through and we didn't miss the timestamp request
+
+        // If something came through and we didn't miss the timestamp request
+        if (Serial1.available() != 0 && timeRequested) {  
           Serial1.readBytes(rx, Serial1.available());  // Read the bytes in
-          if (rx[3] == 0x90 && rx[15] == 0x56) {  // Check if it was a receive packet (3rd byte is 0x90) and that the message is 'V' (0x56)
+          // Check if it was a receive packet (3rd byte is 0x90) and that the message is 'V' (0x56)
+          if (rx[3] == 0x90 && rx[15] == 0x56) {
             varCountRequested = true;  // If so, the variable count has been requested
           }
         }
@@ -1060,7 +1077,8 @@ void loop() {
           sum += 0x00;
           sum += 0x00;
           
-          varCount = dataLogger.getArrayVarCount();  // Get the variable count while doing the checksum
+          // Get the variable count while doing the checksum
+          varCount = dataLogger.getArrayVarCount();  
 
           sum += varCount;
           sum = 255 - (sum % 256);
@@ -1081,7 +1099,6 @@ void loop() {
 		
         memset(rx, 0x00, sizeof(rx));  // Clear out the buffer
 
-
         bool allDataSent = false;  // Assume that not all the data has been sent
 		
 		    // While loop for sending all the data to the host station
@@ -1092,7 +1109,8 @@ void loop() {
           starttime = dataLogger.getNowLocalEpoch();  // Start a timer
           while (Serial1.available() == 0) {  // Wait for a message
             if (dataLogger.getNowLocalEpoch() - starttime > 60) {  // If we waited more than a minute
-              breakWhile = true;  // Flag that we want to break the larger while loop where we try to send all our data
+              // Flag that we want to break the larger while loop where we try to send all our data
+              breakWhile = true;  
               break;  // Break the current while loop where we are just waiting for a message
             }
           }
@@ -1100,12 +1118,16 @@ void loop() {
           delay(100);  // Give a chance for every byte to come in from the message
 		  
           if (breakWhile) {  // If we want to break this while loop where we send the data
-            break;  // Break the overarching while loop where we send all the data, effectively ending all communication until the next logging interval
+            // Break the overarching while loop where we send all the data, effectively ending all
+            // communication until the next logging interval
+            break;  
           }
 		  
-		      // In this part, we will check which variable number the host station is interested in and supply the name of that variable
+		      // In this part, we will check which variable number the host station is interested in 
+		      // and supply the name of that variable
           Serial1.readBytes(rx, Serial1.available());  // Move what was received into the buffer
-          if (rx[3] == 0x90 && rx[15] < varCount) {  // If the message was a receive packet and a number less than the varCount
+          // If the message was a receive packet and a number less than the varCount
+          if (rx[3] == 0x90 && rx[15] < varCount) {
             delay(20);
             varNum = rx[15];  // Record which variable number the host is interested in
             memset(rx, 0x00, sizeof(rx));  // Clear the buffer
@@ -1116,7 +1138,9 @@ void loop() {
             transmitString(uuid, sizeof(uuid), 0x00, 0x00, 0x00);  // Transmit the variable name to the host
             memset(rx, 0x00, sizeof(rx));  // Clear the buffer
           } else {  // If what was received is not a valid number request
-            break;  // Break the overarching while loop where we send all the data, effectively ending all communication until the next logging interval
+            // Break the overarching while loop where we send all the data, effectively ending
+            // all communication until the next logging interval
+            break;  
           }       
 
           // In this section, we will supply the measurement of the current variable of interest upon request
@@ -1129,7 +1153,9 @@ void loop() {
           }
 		  
           if (breakWhile) {  // If we noted that we want to stop trying to send data
-            break;  // Break the overarching while loop where we send all the data, effectively ending all communication until the next logging interval
+            // Break the overarching while loop where we send all the data, effectively ending
+            // all communication until the next logging interval
+            break;  
           }
 		  
           delay(100);  // Give a chance for all bytes to come in
@@ -1148,8 +1174,9 @@ void loop() {
           if (varNum == varCount - 1) {  // If that was our last variable
             allDataSent = true;  // Then all the data has been sent
 
-            // for some reason, it will not send the last variable measured until the XBee is powered off then powered on again, so this catches that
-			// some debugging is likely needed to fix this
+            // for some reason, it will not send the last variable measured until the XBee is 
+            // powered off then powered on again, so this catches that
+			      // some debugging is likely needed to fix this
             digitalWrite(xbeeSleepPin, HIGH);  // Put the XBee to sleep
             delay(100);  // Let its stomach settle
             digitalWrite(xbeeSleepPin, LOW);  // Wake the XBee
@@ -1164,4 +1191,3 @@ void loop() {
 	digitalWrite(redLED, LOW);  // Turn off the red LED
   }
 }
-/** End [loop] */

@@ -1,5 +1,5 @@
 /** =========================================================================
- * Example: satellite_station.ino
+ * Example: satellite_varCode.ino
  * Description: This is the Mayfly sketch for the deployment of a satellite
  *              snow sensing station using variable codes.
  *
@@ -19,6 +19,15 @@
  * developing the foundation to this code. This sketch is based on the 
  * examples made from their modular sensors library. The work of Sarah 
  * Damiano and Shannon Hicks made this possible.
+ * 
+ * NOTE ABOUT UUIDs IN THIS CODE: The EnviroDIY Modular Sensors library 
+ * assumes that you are interacting with the Monitor My Watershed website. 
+ * That website uses UUIDs to identify specific datastreams so that Mayfly 
+ * dataloggers can send data to the website using telemetry. Since this 
+ * sketch uses variable codes, a placeholder UUID has been used in this 
+ * sketch anywhere the Modular Sensors library is expecting a UUID. You do
+ * not need to change those UUIDs. If you modify this code to add 
+ * additional or different sensors, you can use the same placeholder UUID.
  * ======================================================================= */
 
 // ==========================================================================
@@ -845,7 +854,7 @@ void setup() {
   Serial.print(F("Using ModularSensors Library version "));
   Serial.println(MODULAR_SENSORS_VERSION);
 
-  // Set up pins for the LED's
+  // Set up pins for the LEDs
   pinMode(greenLED, OUTPUT);
   digitalWrite(greenLED, LOW);
   pinMode(redLED, OUTPUT);
@@ -1082,7 +1091,6 @@ void loop() {
         }
 		
         memset(rx, 0x00, sizeof(rx));  // Clear out the buffer
-
 
         bool allDataSent = false;  // Assume that not all the data has been sent
 		
